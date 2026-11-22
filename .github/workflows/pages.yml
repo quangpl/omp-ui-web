@@ -19,7 +19,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Stage static files
-        run: mkdir _site && cp -r index.html assets _site/
+        # Cache-bust CSS/JS per deploy so returning visitors never mix new HTML with cached assets.
+        run: |
+          mkdir _site && cp -r index.html assets _site/
+          sed -i "s#assets/styles.css\"#assets/styles.css?v=${GITHUB_SHA::7}\"#; s#assets/main.js\"#assets/main.js?v=${GITHUB_SHA::7}\"#" _site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
