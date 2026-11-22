@@ -22,6 +22,6 @@ Commit `assets/styles.css` after changing `index.html` or `src/input.css`; the p
 
 ## Deploy
 
-`.github/workflows/pages.yml` publishes `index.html` and `assets/` to GitHub Pages on every push to `main`. In the repo, set **Settings > Pages > Source** to **GitHub Actions**. The site is then at `https://quangpl.github.io/omp-ui-web/` (the Open Graph image URLs in `index.html` assume this; change them if you use a custom domain).
+`.github/workflows/pages.yml` publishes `index.html` and `assets/` to GitHub Pages on every push to `main`. In the repo, set **Settings > Pages > Source** to **GitHub Actions**. The site is served at https://omp-ui.quang.asia (the `CNAME` file sets the custom domain; DNS has a CNAME record for `omp-ui` pointing to `quangpl.github.io`).
 
 Screenshots in `assets/` come from `docs/images` in the OMP-UI repo.
