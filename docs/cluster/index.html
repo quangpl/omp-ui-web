@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cluster mode · OMP-UI docs</title>
+  <meta name="description" content="Cluster mode spreads card agents over several machines. One omp-ui server is the primary: it keeps the database, serves the UI, runs the agent queue and dispatc">
+  <meta name="theme-color" content="#09090b">
+  <link rel="canonical" href="https://omp-ui.quang.asia/docs/cluster/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="OMP-UI">
+  <meta property="og:title" content="Cluster mode · OMP-UI docs">
+  <meta property="og:description" content="Cluster mode spreads card agents over several machines. One omp-ui server is the primary: it keeps the database, serves the UI, runs the agent queue and dispatc">
+  <meta property="og:url" content="https://omp-ui.quang.asia/docs/cluster/">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="apple-touch-icon" href="../../assets/icon.png">
+  <link rel="preload" href="../../assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../../assets/fonts/geist-mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/styles.css">
+</head>
+<body class="bg-bg font-sans text-fg antialiased selection:bg-acc selection:text-acc-ink doc-body">
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:bg-acc focus:px-4 focus:py-2 focus:text-acc-ink">Skip to content</a>
+  <header class="doc-top">
+    <a href="../../" class="doc-brand"><img src="../../assets/logo.svg" alt="" width="24" height="24">OMP-UI</a>
+    <nav aria-label="Primary" class="doc-top-links">
+      <a href="../" aria-current="page">Docs</a>
+      <a href="https://github.com/quangpl/omp-ui" rel="noopener">GitHub <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+    </nav>
+  </header>
+  <div class="doc-shell">
+    <aside class="doc-side">
+      <details class="doc-mobile"><summary>Documentation</summary><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="../">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="../advanced/">Advanced</a></li><li><a href="../cluster/" aria-current="page">Cluster mode</a></li><li><a href="../task-cleanup/">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="../api/">REST API</a></li><li><a href="../changelog/">Changelog</a></li></ul>
+  </nav></details>
+      <div class="doc-desktop"><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="../">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="../advanced/">Advanced</a></li><li><a href="../cluster/" aria-current="page">Cluster mode</a></li><li><a href="../task-cleanup/">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="../api/">REST API</a></li><li><a href="../changelog/">Changelog</a></li></ul>
+  </nav></div>
+    </aside>
+    <main id="main" class="doc-main">
+      <div class="doc-crumb"><span>§ 03&nbsp;&nbsp;Guides</span><i aria-hidden="true"></i><a href="../task-cleanup/">Task cleanup →</a></div>
+      <h1>Cluster mode</h1>
+      <p class="doc-lead">Cluster mode spreads card agents over several machines. One omp-ui server is the <strong>primary</strong>: it keeps
+the database, serves the UI, runs the agent queue and dispatches runs. Every other machine is a
+<strong>replica node</strong>: it runs cards for the primary, keeps a replicated copy of the primary&#39;s state, and
+takes over as primary when the primary goes down. Cluster mode is opt-in; a server that never enables
+it (<code>standalone</code>) behaves exactly as before.</p>
+      <div class="doc-grid">
+        <article class="doc-prose">
+
+<h2 id="setting-it-up"><a class="anchor" href="#setting-it-up" aria-label="Link to section">#</a>Setting it up</h2>
+<ol>
+<li><p>On the machine that should coordinate, open <strong>Settings → Cluster</strong> and turn on <strong>Enable cluster
+mode</strong>. This server becomes the primary and gets a join token.</p>
+</li>
+<li><p>Copy the join command shown there and run it on each machine you want to add:</p>
+<pre><code class="language-sh">curl -fsSL http://&lt;primary&gt;:3000/api/v1/cluster/join | sh -s -- &lt;token&gt;
+</code></pre>
+<p>Once the node has joined it keeps running in the background (log <code>~/.omp-ui-node/omp-ui-node.log</code>,
+pid file next to it) and the command exits with a summary; if the node does not become ready it
+is stopped again and the command shows the error and the end of the log. Add <code>--service</code> to install
+it as a systemd user service instead (starts on boot, restarts on failure), or <code>--foreground</code> to keep
+it attached to the terminal. Output is colored on a terminal (<code>NO_COLOR=1</code> turns that off); package
+manager and download output goes to <code>~/.omp-ui-node/join.log</code>.</p>
+</li>
+</ol>
+<p>The command makes a bare machine ready in one go (only <code>curl</code> or <code>wget</code> must exist to run it). It
+prints each step and stops with a clear message when something cannot be fixed:</p>
+<ol>
+<li>checks the OS and CPU (Linux or macOS; glibc — Alpine/musl is not supported) and whether it has
+root rights (root, or <code>sudo</code> without a password);</li>
+<li>installs missing system packages in one call with the system package manager (apt, dnf, yum,
+zypper, pacman; Homebrew on macOS): <code>tar</code>, <code>gzip</code>, <code>ca-certificates</code> and <code>git</code>;</li>
+<li>checks that the primary answers and has cluster mode on;</li>
+<li>installs Node.js with <code>npm</code>/<code>npx</code>/<code>corepack</code> (the official build of the primary&#39;s Node version,
+or the primary&#39;s own Node binary when nodejs.org is unreachable) and enables <code>pnpm</code>/<code>yarn</code> shims;</li>
+<li>downloads the primary&#39;s omp binary (checksum-verified) where the node&#39;s server runs it from;</li>
+<li>installs the primary&#39;s omp-ui build, writes the node&#39;s settings (mode 600) and starts it;</li>
+<li>waits until the node has joined and is connected to the primary, then reports what it installed —
+or shows the node&#39;s log. Every 15 s it prints the node&#39;s role and link state (<code>replica, connecting</code>) and, in the background and <code>--service</code> modes, the node&#39;s latest <code>[cluster]</code> log line.</li>
+</ol>
+<p>Running the join command again on a machine that already is a node makes it a replica of the
+primary named in the command, whatever it was before: a stale replica takes the new token and
+address, and a node left as primary by a failover steps down (its database is backed up to
+<code>DATA_DIR/cluster/backups/</code> first). A plain restart of the node never joins again.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Needed on the node</th>
+<th>Where it comes from</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>git, tar, gzip, CA certificates</td>
+<td>installed by the join command with root rights</td>
+</tr>
+<tr>
+<td>Node.js, npm, npx, pnpm/yarn (corepack)</td>
+<td>nodejs.org (the primary&#39;s version), else the primary&#39;s Node binary</td>
+</tr>
+<tr>
+<td>omp-ui</td>
+<td>the primary&#39;s build (<code>/api/v1/cluster/bundle</code>)</td>
+</tr>
+<tr>
+<td>omp</td>
+<td>the primary&#39;s omp binary (same OS/architecture), verified by SHA-256, on the node&#39;s <code>PATH</code></td>
+</tr>
+<tr>
+<td>omp configuration, credentials, skills, extensions, rules, MCP servers</td>
+<td>a copy of the primary&#39;s omp agent dir (<code>~/.omp/agent</code>), refreshed before every run</td>
+</tr>
+<tr>
+<td>AI provider keys and MCP secrets</td>
+<td>passed with every run (Settings → AI Providers on the primary)</td>
+</tr>
+<tr>
+<td>git identity and HTTPS credentials, GitHub/GitLab/npm tokens, <code>.npmrc</code></td>
+<td>the primary&#39;s auth pack (below)</td>
+</tr>
+<tr>
+<td>omp-ui sign-ins</td>
+<td>replicated users and session secret: the primary&#39;s accounts work on the node</td>
+</tr>
+<tr>
+<td>Project files, card files, omp sessions</td>
+<td>synced before the run, changes streamed back while it runs</td>
+</tr>
+</tbody></table></div>
+<p><strong>Auth pack.</strong> The primary bundles what agents need to authenticate and ships it over the encrypted
+channel into the node&#39;s <code>DATA_DIR/cluster/auth</code> (mode 700, files 600; the node&#39;s own home directory
+is never touched): a git config with the primary&#39;s <code>user.name</code>/<code>user.email</code> (after the node&#39;s own
+<code>~/.gitconfig</code>, which stays in effect) and a credential store holding the primary&#39;s
+<code>~/.git-credentials</code> plus its GitHub token (from <code>GH_TOKEN</code>/<code>GITHUB_TOKEN</code> or <code>gh auth token</code>), and a
+copy of <code>~/.npmrc</code>. Agents on the node get <code>GIT_CONFIG_GLOBAL</code>, <code>NPM_CONFIG_USERCONFIG</code>, <code>GH_TOKEN</code>/
+<code>GITHUB_TOKEN</code>, <code>GITLAB_TOKEN</code>/<code>GL_TOKEN</code> and <code>NPM_TOKEN</code> accordingly, so commits carry the same author
+as on the primary and HTTPS pushes and private packages work. SSH private keys are never copied: git
+over SSH on a node uses the node&#39;s own keys.</p>
+<p>Language runtimes other than Node.js and tools such as Docker are not installed: add them on the node
+when your projects need them.</p>
+<p>Environment variables of the join script: <code>OMP_UI_NODE_DIR</code> (default <code>~/.omp-ui-node</code>),
+<code>OMP_UI_PORT</code> (the node&#39;s web port, default 3000), <code>OMP_UI_CLUSTER_PORT</code> (cluster port, default 7790).</p>
+<p>A server that already runs omp-ui can join from <strong>Settings → Cluster → Join a cluster</strong> (primary URL +
+token, <strong>Test connection</strong>, <strong>Join</strong>). Its own boards and data are replaced by the primary&#39;s (the
+database is backed up to <code>DATA_DIR/cluster/backups/</code> first) and it restarts as a replica.</p>
+<h2 id="how-runs-are-distributed"><a class="anchor" href="#how-runs-are-distributed" aria-label="Link to section">#</a>How runs are distributed</h2>
+<p>The primary&#39;s queue limit becomes the cluster&#39;s: its own limit (when <strong>Run cards on this machine too</strong>
+is on) plus the slots of every online node that can run omp and takes new cards. A node&#39;s slots follow
+the same rule as a standalone server&#39;s limit (<code>maxConcurrentAgents</code>: <code>auto</code> from its cores and free
+memory, or the fixed number per node).</p>
+<p>Nodes come first, so the primary keeps its headroom for coordinating the cluster: a card goes to a
+node with a free slot, and the primary takes cards only when no node has one. Among the nodes, each
+card goes to the one that is least busy once it takes the card — the share of its agent slots in use
+plus terms for its CPU load per core and its memory use — so nodes fill in proportion to their
+capacity. The node that ran the card&#39;s previous run only wins a tie.</p>
+<p>A node gets no new cards (its running cards keep running) while:</p>
+<ul>
+<li>its last status report is older than 15 s (3 missed reports), it fails the primary&#39;s health checks,
+or it is being restarted;</li>
+<li>its resource guard holds (memory or CPU at or above the <code>OMP_UI_MEMORY_HOLD_PCT</code> /
+<code>OMP_UI_CPU_HOLD_PCT</code> set on that node) or the load guard trips. Every node runs its own resource
+guard and reports its holds with its status; for a node of an older version that does not, the
+primary applies its own memory hold % to the memory use the node reports.</li>
+</ul>
+<p>When neither a node nor the primary (held by its own guard, or <strong>Run cards on this machine too</strong> off)
+can take a card, it stays queued and starts as soon as a slot frees or a node is available again.</p>
+<p>A remote run is executed exactly like a local one: the primary keeps the whole run logic (prompt,
+run guards, comments, database) and only the <code>omp</code> process runs on the node.
+omp&#39;s RPC stream is relayed over the cluster channel; files are synced in both directions:</p>
+<ul>
+<li>before omp starts, the node&#39;s copy of the run&#39;s folders (project folders, card and board files,
+session dir) is brought up to date — only changed files are sent;</li>
+<li>while the agent works, changed files are pushed back every few seconds, and always before the agent
+finishes, so the primary sees the same files as after a local run.</li>
+</ul>
+<p>Cards that run on the same node at once share that node&#39;s copy of a folder they both use (the
+project folder), just
+like two local runs share a folder: a second card never resets files the first one is changing.</p>
+<p>The relay is light: on a loopback measurement an omp message takes about 0.1 ms longer per round trip
+than over a local pipe, and file transfers run at well over 100 MiB/s, so a node&#39;s network link, not
+the protocol, sets the pace.</p>
+<p>The UI shows where each card runs: while a card runs, its board card, its details and every agent on
+the Visualize page (control room, factory floor, worksites) name the machine; a card&#39;s
+run report and details say which machine ran it.</p>
+<h2 id="failures-and-failover"><a class="anchor" href="#failures-and-failover" aria-label="Link to section">#</a>Failures and failover</h2>
+<ul>
+<li><strong>A node goes offline</strong>: the primary marks it offline and posts a notice. Its runs wait 30 s for the
+node to come back (the node keeps omp running and buffers its output, so a short network blip loses
+nothing); after that the run fails with &quot;…; rescheduled&quot; and the card is queued again (no automatic
+retry is used), so it resumes its omp session on whichever machine is free, the same node included
+once it is back.</li>
+<li><strong>The primary goes down</strong>: replicas notice the lost connection. After <strong>failover timeout</strong> seconds
+(Settings → Cluster, default 20) they hold an election: the reachable replica with the freshest
+replicated state is promoted. It becomes the primary under a higher <em>term</em>, resumes interrupted cards
+from the replicated database and session files, and announces itself to the other nodes, which
+follow it. Notices about every step appear in the UI of each node.</li>
+<li><strong>The original primary comes back</strong> (failback): the machine that enabled cluster mode is the
+cluster&#39;s <em>home primary</em>. When it returns it first rejoins as a replica of the interim primary (its
+own database is backed up; changes it made while cut off are not merged) and receives the current
+state. Once it has stayed connected for 30 s and caught up, the interim primary starts no new runs,
+lets running ones finish (up to 2 minutes), ships a final snapshot and hands control back: the home
+primary is promoted under a new term and the interim primary becomes a replica again. Cards still
+running at the handover are resumed by the home primary. Any other returning primary simply stays a
+replica of the current primary.</li>
+<li><strong>Two primaries</strong> (the interim primary and the original one restarted while the other was down):
+whichever starts second probes the members; it steps down to a primary of a higher term, or tells a
+primary of a lower term to step down. Failback then hands control back to the home primary.</li>
+<li><strong>Reconnecting</strong>: a replica retries the primary every 1 s, doubling up to 10 s, and logs each failed
+attempt with its reason (<code>[cluster] connecting to the primary failed (attempt 3): …; retrying in 4 s</code>), at most once a minute while the reason stays the same. The link state (<code>connected</code>,
+<code>connecting</code>, <code>electing</code>) is also on the public <code>GET /api/v1/cluster/info</code>.</li>
+<li><strong>Auto-restart</strong> (a replica stays cut off): every replica runs a disconnect watchdog that checks
+its link every 5 s. Once it has had no session with its primary for <strong>Restart after</strong> seconds
+(Settings → Cluster on the primary, group <strong>Replica auto-restart</strong>; default 300, 60–86400, never
+less than the failover timeout + 60 s) it restarts its server through <code>bin/supervisor.mjs</code> (exit
+code 75), which starts it again to connect from a fresh process. Every further restart in a row
+without a session doubles the wait, up to 1 hour unless the setting is longer; the count is kept in
+<code>node.json</code> (<code>autoRestarts</code>) and a session resets it. The clock runs apart from the failover: the
+election always comes first, and following another primary after it does not reset the clock —
+only a session does. The restarted server reports why to the primary, which posts &quot;Node X was
+restarted on its machine (auto-restart: no connection to the primary p1 for 5 min (last error: …))
+and is back online&quot; (the server writes the reason to the file named by <code>OMP_UI_RESTART_REASON_FILE</code>
+in a private 0700 temp dir per supervisor; the supervisor passes it on as <code>OMP_UI_RESTART_REASON</code>).
+A node running without the supervisor (nodes started by the join command run under it) never exits:
+it posts one warning notice per disconnect episode and keeps reconnecting. The watchdog also starts
+a connect loop that has stopped again (one notice, then with backoff). The switch and the wait
+default to the server&#39;s <code>OMP_UI_CLUSTER_AUTO_RESTART</code> (<code>true</code>/<code>1</code>/<code>yes</code>/<code>on</code>, <code>false</code>/<code>0</code>/<code>no</code>/
+<code>off</code>) and <code>OMP_UI_CLUSTER_RESTART_AFTER_SEC</code>. This is apart from the primary&#39;s auto-healing, which
+asks an unhealthy node to restart.</li>
+<li><strong>Restoring a replica by hand</strong>: Settings → Cluster on a replica has <strong>Reconnect</strong> (connect to the
+primary now, the retry backoff starts over) and <strong>Restart node</strong> (restart the server through the
+supervisor; refused on a node without it). The primary&#39;s notice then names &quot;restore requested by an
+admin&quot;. Both are <code>POST /api/v1/cluster/restore</code> (admin) with <code>{ restart: false | true }</code>.</li>
+</ul>
+<p>Replication is asynchronous: the database is shipped every 15 s when it changed, project and card
+files every 60 s. A promotion can therefore lose up to that much work; interrupted cards are resumed.
+With only two machines a network split cannot be told apart from a crash: both sides may act as
+primary until they see each other again, when the lower term steps down.</p>
+<h2 id="security"><a class="anchor" href="#security" aria-label="Link to section">#</a>Security</h2>
+<ul>
+<li>Nodes authenticate with the join token through a mutual HMAC-SHA256 challenge (the token itself is
+never sent, and a node also checks that the primary knows the token). Every message after that is
+encrypted with AES-256-GCM using per-direction keys derived from the token and both sides&#39; nonces,
+so AI provider keys and credentials never cross the network in clear text, even over plain HTTP.</li>
+<li>Rotating the token (Settings → Cluster) keeps connected nodes in and locks out everyone else.</li>
+<li>Changes a node sends back can only touch the folders of its own runs. Paths are validated, symlinks
+must stay inside their folder, and git configuration, hooks and repository pointers (<code>.git/config</code>,
+<code>config.worktree</code>, <code>commondir</code>, <code>.git/hooks/</code>, worktree <code>.git</code> files) are never accepted from a node.</li>
+<li>Replicas get the primary&#39;s <code>AUTH_SECRET</code> and credentials key (file or <code>CREDENTIALS_KEY</code>), so sessions
+and saved secrets keep working after a promotion; agents never see either. <code>node.json</code> and copied
+keys are written with mode 0600.</li>
+<li>A replica accepts no changes except sign-in and cluster actions; everything else answers 409 and
+names the primary.</li>
+<li>The join script, the app bundle and the Node/omp binaries are public downloads (they contain no
+secrets: <code>.env</code> files and the data dir are never bundled); joining requires the token.</li>
+</ul>
+<h2 id="ports"><a class="anchor" href="#ports" aria-label="Link to section">#</a>Ports</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>PORT</code> (3000)</td>
+<td>web UI and API; the join script downloads from it</td>
+</tr>
+<tr>
+<td><code>OMP_UI_CLUSTER_PORT</code> (7790)</td>
+<td>cluster channel (TCP), on every node</td>
+</tr>
+</tbody></table></div>
+<p>Nodes connect to the cluster port directly when they can (fastest). When it is not reachable — the
+primary is published through a reverse proxy or a tunnel such as Cloudflare Tunnel, which only pass
+HTTPS — they fall back to the same encrypted channel as a WebSocket on the web URL
+(<code>wss://&lt;primary&gt;/api/v1/cluster/ws</code>), automatically and without extra setup; the node remembers
+which way worked. The proxy must allow WebSockets (Cloudflare does).</p>
+<p>When a machine starts cluster mode (enable, join, or a restart in a cluster role) it opens its
+cluster port in an active host firewall with root rights: <code>ufw allow &lt;port&gt;/tcp</code> or
+<code>firewall-cmd --add-port=&lt;port&gt;/tcp</code> (runtime and permanent), run directly as root or through
+<code>sudo -n</code> (it never asks for a password). Without root rights it posts a notice with the command to
+run. Cloud firewalls and security groups are outside the machine: open the port there yourself, or
+rely on the WebSocket fallback.</p>
+<h2 id="limits"><a class="anchor" href="#limits" aria-label="Link to section">#</a>Limits</h2>
+<ul>
+<li>Binaries are shared only between machines of the same OS and architecture; a node of another
+platform needs omp installed locally.</li>
+<li>Replicas serve a read-only UI; changes are made on the primary.</li>
+<li>OAuth subscriptions whose refresh tokens rotate may ask for a new login if two machines refresh the
+same token at once.</li>
+</ul>
+
+          <footer class="doc-foot"><a class="doc-pn doc-pn-prev" href="../advanced/"><span>Previous</span>← Advanced</a><a class="doc-pn doc-pn-next" href="../task-cleanup/"><span>Next</span>Task cleanup →</a></footer>
+        </article>
+        <nav class="doc-toc" aria-label="On this page"><p class="doc-label">On this page</p><ul><li><a href="#setting-it-up">Setting it up</a></li><li><a href="#how-runs-are-distributed">How runs are distributed</a></li><li><a href="#failures-and-failover">Failures and failover</a></li><li><a href="#security">Security</a></li><li><a href="#ports">Ports</a></li><li><a href="#limits">Limits</a></li></ul></nav>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

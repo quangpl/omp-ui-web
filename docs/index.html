@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Overview · OMP-UI docs</title>
+  <meta name="description" content="OMP-UI is the self-hosted OMP UI for omp (oh-my-pi), the AI coding agent. It gives omp a web interface: an OMP kanban board where each card is a task, an OMP wo">
+  <meta name="theme-color" content="#09090b">
+  <link rel="canonical" href="https://omp-ui.quang.asia/docs/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="OMP-UI">
+  <meta property="og:title" content="Overview · OMP-UI docs">
+  <meta property="og:description" content="OMP-UI is the self-hosted OMP UI for omp (oh-my-pi), the AI coding agent. It gives omp a web interface: an OMP kanban board where each card is a task, an OMP wo">
+  <meta property="og:url" content="https://omp-ui.quang.asia/docs/">
+  <link rel="icon" type="image/svg+xml" href="../assets/logo.svg">
+  <link rel="apple-touch-icon" href="../assets/icon.png">
+  <link rel="preload" href="../assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../assets/fonts/geist-mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../assets/styles.css">
+</head>
+<body class="bg-bg font-sans text-fg antialiased selection:bg-acc selection:text-acc-ink doc-body">
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:bg-acc focus:px-4 focus:py-2 focus:text-acc-ink">Skip to content</a>
+  <header class="doc-top">
+    <a href="../" class="doc-brand"><img src="../assets/logo.svg" alt="" width="24" height="24">OMP-UI</a>
+    <nav aria-label="Primary" class="doc-top-links">
+      <a href="./" aria-current="page">Docs</a>
+      <a href="https://github.com/quangpl/omp-ui" rel="noopener">GitHub <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+    </nav>
+  </header>
+  <div class="doc-shell">
+    <aside class="doc-side">
+      <details class="doc-mobile"><summary>Documentation</summary><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="./" aria-current="page">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="advanced/">Advanced</a></li><li><a href="cluster/">Cluster mode</a></li><li><a href="task-cleanup/">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="api/">REST API</a></li><li><a href="changelog/">Changelog</a></li></ul>
+  </nav></details>
+      <div class="doc-desktop"><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="./" aria-current="page">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="advanced/">Advanced</a></li><li><a href="cluster/">Cluster mode</a></li><li><a href="task-cleanup/">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="api/">REST API</a></li><li><a href="changelog/">Changelog</a></li></ul>
+  </nav></div>
+    </aside>
+    <main id="main" class="doc-main">
+      <div class="doc-crumb"><span>§ 01&nbsp;&nbsp;Start</span><i aria-hidden="true"></i><a href="advanced/">Advanced →</a></div>
+      <h1>Overview</h1>
+      <p class="doc-lead"><strong>OMP-UI is the self-hosted OMP UI for <a href="https://omp.sh/docs">omp</a> (oh-my-pi), the AI coding agent.</strong> It gives omp a web interface: an OMP kanban board where each card is a task, an OMP workflow that takes every card from plan to pull request, and an OMP web dashboard you can open from your desktop or phone. Self-host OMP-UI on your own machine or server with one command, <code>npx omp-ui</code>.</p>
+      <div class="doc-grid">
+        <article class="doc-prose">
+
+<p><strong>Website:</strong> <a href="https://omp-ui.quang.asia">omp-ui.quang.asia</a> · <strong>npm package:</strong> <a href="https://www.npmjs.com/package/omp-ui">omp-ui on npm</a> · <strong>Releases:</strong> <a href="https://github.com/quangpl/omp-ui/releases">GitHub Releases</a></p>
+<p><img src="images/board.png" alt="OMP UI: the OMP kanban board with cards in To do, In progress and Done"></p>
+<h2 id="features"><a class="anchor" href="#features" aria-label="Link to section">#</a>Features</h2>
+<ul>
+<li><strong>OMP kanban board.</strong> Cards move through To do, In progress and Done as omp agents work on them.</li>
+<li><strong>OMP workflow from plan to pull request.</strong> Describe the idea, an omp agent builds it, you review it through comments, then ship it as a PR or a push. Conflicts with the base branch are resolved automatically.</li>
+<li><strong>OMP web UI on any device.</strong> Watch agent output live in the browser, on desktop or phone.</li>
+<li><strong>Self-host OMP in one command.</strong> <code>npx omp-ui</code> starts it under pm2 with SQLite by default. Docker is supported too.</li>
+<li><strong>Developer-friendly.</strong> A CLI, a <a href="api/">REST API</a>, keyboard shortcuts, and GitHub pull requests or GitLab merge requests.</li>
+<li><strong>Schedulers and stats.</strong> Recurring cards on a cron schedule, plus usage and cost stats.</li>
+<li><strong>Cluster mode.</strong> Spread agent runs across several machines (<a href="cluster/">details</a>).</li>
+<li><strong>Open source.</strong> MIT licensed.</li>
+</ul>
+<h2 id="screenshots"><a class="anchor" href="#screenshots" aria-label="Link to section">#</a>Screenshots</h2>
+<p><img src="images/board.png" alt="OMP-UI kanban board for omp AI coding agents"></p>
+<p><em>The board: cards move through To do, In progress and Done as agents work on them.</em></p>
+<p><img src="images/card.png" alt="OMP-UI card detail with agent feedback comments"></p>
+<p><em>Card detail: steer the agent with feedback comments and follow its run live.</em></p>
+<p><img src="images/stats.png" alt="OMP-UI stats page with agents running, AI spend and token usage"></p>
+<p><em>Stats: running agents, AI spend, token usage and host health.</em></p>
+<p><img src="images/new-task.png" alt="OMP-UI new task dialog for creating a card from free text"></p>
+<p><em>New task: describe the work in plain text and the agent starts right away.</em></p>
+<img src="images/mobile.png" alt="OMP-UI mobile kanban board on a phone" width="300"><p><em>Mobile: follow and steer your agents from a phone.</em></p>
+<h2 id="requirements"><a class="anchor" href="#requirements" aria-label="Link to section">#</a>Requirements</h2>
+<ul>
+<li>Node.js 22.13 or newer</li>
+<li>omp, installed and signed in:</li>
+</ul>
+<pre><code class="language-sh">curl -fsSL https://omp.sh/install | sh
+omp            # run once and sign in to an AI provider
+</code></pre>
+<h2 id="quick-start-self-host-omp-ui"><a class="anchor" href="#quick-start-self-host-omp-ui" aria-label="Link to section">#</a>Quick start: self-host OMP-UI</h2>
+<pre><code class="language-sh">npx omp-ui
+</code></pre>
+<p>This one command sets everything up, starts OMP-UI in the background with pm2 and prints its URL. It asks for a password for the <code>admin</code> account, or generates one and prints it. Open the URL, sign in and follow the setup wizard.</p>
+<p>To install it permanently:</p>
+<pre><code class="language-sh">npm i -g omp-ui
+omp-ui
+</code></pre>
+<p>Or install a build straight from <a href="https://github.com/quangpl/omp-ui/releases">GitHub Releases</a> (every push to <code>main</code> publishes one):</p>
+<pre><code class="language-sh">npm i -g https://github.com/quangpl/omp-ui/releases/latest/download/omp-ui.tgz   # latest release
+npm i -g https://github.com/quangpl/omp-ui/releases/download/nightly/omp-ui.tgz  # latest main build
+</code></pre>
+<p>Settings and data live in <code>~/.omp-ui</code>. SQLite is the default database, so you don&#39;t need to set one up.</p>
+<p>If npm&#39;s global bin folder is not on your <code>PATH</code> (common with Homebrew&#39;s <code>node@22</code>), the install links <code>omp-ui</code> into a folder that is, such as <code>/usr/local/bin</code> or <code>~/.local/bin</code>, and prints a one-line command that adds the folder to your shell config and reloads it. Run that command and <code>omp-ui</code> works right away. You can also run it yourself:</p>
+<pre><code class="language-sh">echo &quot;export PATH=\&quot;$(npm prefix -g)/bin:\$PATH\&quot;&quot; &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc
+</code></pre>
+<h2 id="basic-commands"><a class="anchor" href="#basic-commands" aria-label="Link to section">#</a>Basic commands</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>omp-ui</code></td>
+<td>Set up and start OMP-UI</td>
+</tr>
+<tr>
+<td><code>omp-ui status</code></td>
+<td>Check whether it is running and show its URL</td>
+</tr>
+<tr>
+<td><code>omp-ui stop</code> / <code>start</code> / <code>restart</code></td>
+<td>Stop, start or restart the server</td>
+</tr>
+<tr>
+<td><code>omp-ui logs -f</code></td>
+<td>Follow the server log</td>
+</tr>
+<tr>
+<td><code>omp-ui open</code></td>
+<td>Open OMP-UI in your browser</td>
+</tr>
+<tr>
+<td><code>omp-ui config set port 8080</code></td>
+<td>Change a setting (<code>port</code>, <code>data-dir</code>, <code>db-url</code>), then run <code>restart</code></td>
+</tr>
+<tr>
+<td><code>omp-ui doctor</code></td>
+<td>Check Node.js, omp, git, gh and pm2</td>
+</tr>
+<tr>
+<td><code>omp-ui update</code></td>
+<td>Update to the latest version and restart</td>
+</tr>
+<tr>
+<td><code>omp-ui help</code></td>
+<td>List every command</td>
+</tr>
+</tbody></table></div>
+<h2 id="the-omp-workflow-on-the-kanban-board"><a class="anchor" href="#the-omp-workflow-on-the-kanban-board" aria-label="Link to section">#</a>The OMP workflow on the kanban board</h2>
+<ol>
+<li><strong>Create a project.</strong> Pick a folder or clone a Git repository.</li>
+<li><strong>Add a card.</strong> Describe the task in your own words, and an agent starts working on it.</li>
+<li><strong>Give feedback.</strong> Comment on the card. The agent reads your comments and keeps going.</li>
+<li><strong>Ship it.</strong> Click <strong>Create PR</strong>, <strong>Push to main</strong> or <strong>Push to current branch</strong>.</li>
+</ol>
+<h2 id="open-the-omp-web-ui-from-anywhere"><a class="anchor" href="#open-the-omp-web-ui-from-anywhere" aria-label="Link to section">#</a>Open the OMP web UI from anywhere</h2>
+<p>OMP-UI runs commands on your machine. Before exposing it, set a strong admin password with <code>omp-ui passwd</code>.</p>
+<h3 id="tailscale-private-recommended"><a class="anchor" href="#tailscale-private-recommended" aria-label="Link to section">#</a>Tailscale (private, recommended)</h3>
+<p>Reach OMP-UI only from your own devices, over HTTPS:</p>
+<pre><code class="language-sh">tailscale serve --bg 3000
+</code></pre>
+<p>Open <code>https://&lt;machine-name&gt;.&lt;tailnet&gt;.ts.net</code> on any device in your tailnet. To share it with people outside your tailnet, use <code>tailscale funnel --bg 3000</code> instead.</p>
+<h3 id="cloudflare-tunnel"><a class="anchor" href="#cloudflare-tunnel" aria-label="Link to section">#</a>Cloudflare Tunnel</h3>
+<p>To get a temporary public link right away:</p>
+<pre><code class="language-sh">omp-ui public          # prints an https://….trycloudflare.com link
+omp-ui public stop
+</code></pre>
+<p>The link changes every time it starts. For a permanent address on your own domain, create a <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/">named Cloudflare Tunnel</a> that points to <code>http://localhost:3000</code>.</p>
+<p>If you use Tailscale, Cloudflare or another proxy, add <code>VINEXT_TRUST_PROXY=1</code> to <code>~/.omp-ui/.env</code>, then run <code>omp-ui restart</code>.</p>
+<h2 id="self-host-omp-ui-with-docker"><a class="anchor" href="#self-host-omp-ui-with-docker" aria-label="Link to section">#</a>Self-host OMP-UI with Docker</h2>
+<pre><code class="language-sh">docker compose up -d   # then open http://localhost:3000
+</code></pre>
+<h2 id="faq"><a class="anchor" href="#faq" aria-label="Link to section">#</a>FAQ</h2>
+<p><strong>What is OMP-UI?</strong>
+A web UI for omp. It runs omp agents on cards from an OMP kanban board and shows their work in the browser.</p>
+<p><strong>Is there an official OMP UI or OMP web interface?</strong>
+omp itself is a terminal tool. OMP-UI is an open-source OMP web UI built on top of it.</p>
+<p><strong>Can I self-host OMP?</strong>
+Yes. OMP-UI runs on your own machine or server: <code>npx omp-ui</code>, pm2 or Docker. Your code and data stay with you.</p>
+<p><strong>How does the OMP workflow work?</strong>
+Plan, build, review, ship: write a card, an omp agent builds it in your repository, you review it through comments, then you open a pull request or push.</p>
+<h2 id="learn-more"><a class="anchor" href="#learn-more" aria-label="Link to section">#</a>Learn more</h2>
+<ul>
+<li><a href="advanced/">Advanced guide</a>: every feature, the full CLI, PM2, systemd, Docker, databases, clustering and configuration.</li>
+<li><a href="api/">API reference</a></li>
+<li><a href="cluster/">Cluster mode</a></li>
+<li><a href="changelog/">Changelog</a></li>
+<li><a href="https://github.com/quangpl/omp-ui/blob/main/SECURITY.md">Security policy</a></li>
+</ul>
+<h2 id="contributing"><a class="anchor" href="#contributing" aria-label="Link to section">#</a>Contributing</h2>
+<p>See <a href="https://github.com/quangpl/omp-ui/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> and the <a href="https://github.com/quangpl/omp-ui/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.</p>
+<pre><code class="language-sh">pnpm install
+pnpm dev
+pnpm test
+</code></pre>
+<h2 id="license"><a class="anchor" href="#license" aria-label="Link to section">#</a>License</h2>
+<p><a href="https://github.com/quangpl/omp-ui/blob/main/LICENSE">MIT</a></p>
+
+          <footer class="doc-foot"><span></span><a class="doc-pn doc-pn-next" href="advanced/"><span>Next</span>Advanced →</a></footer>
+        </article>
+        <nav class="doc-toc" aria-label="On this page"><p class="doc-label">On this page</p><ul><li><a href="#features">Features</a></li><li><a href="#screenshots">Screenshots</a></li><li><a href="#requirements">Requirements</a></li><li><a href="#quick-start-self-host-omp-ui">Quick start: self-host OMP-UI</a></li><li><a href="#basic-commands">Basic commands</a></li><li><a href="#the-omp-workflow-on-the-kanban-board">The OMP workflow on the kanban board</a></li><li><a href="#open-the-omp-web-ui-from-anywhere">Open the OMP web UI from anywhere</a></li><li><a href="#self-host-omp-ui-with-docker">Self-host OMP-UI with Docker</a></li><li><a href="#faq">FAQ</a></li><li><a href="#learn-more">Learn more</a></li><li><a href="#contributing">Contributing</a></li><li><a href="#license">License</a></li></ul></nav>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

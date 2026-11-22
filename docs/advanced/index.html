@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Advanced · OMP-UI docs</title>
+  <meta name="description" content="Self-hosted kanban board for omp coding agents. Write a card; an agent does the work. Runs on your machine or server and works on your phone.">
+  <meta name="theme-color" content="#09090b">
+  <link rel="canonical" href="https://omp-ui.quang.asia/docs/advanced/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="OMP-UI">
+  <meta property="og:title" content="Advanced · OMP-UI docs">
+  <meta property="og:description" content="Self-hosted kanban board for omp coding agents. Write a card; an agent does the work. Runs on your machine or server and works on your phone.">
+  <meta property="og:url" content="https://omp-ui.quang.asia/docs/advanced/">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="apple-touch-icon" href="../../assets/icon.png">
+  <link rel="preload" href="../../assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../../assets/fonts/geist-mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/styles.css">
+</head>
+<body class="bg-bg font-sans text-fg antialiased selection:bg-acc selection:text-acc-ink doc-body">
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:bg-acc focus:px-4 focus:py-2 focus:text-acc-ink">Skip to content</a>
+  <header class="doc-top">
+    <a href="../../" class="doc-brand"><img src="../../assets/logo.svg" alt="" width="24" height="24">OMP-UI</a>
+    <nav aria-label="Primary" class="doc-top-links">
+      <a href="../" aria-current="page">Docs</a>
+      <a href="https://github.com/quangpl/omp-ui" rel="noopener">GitHub <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+    </nav>
+  </header>
+  <div class="doc-shell">
+    <aside class="doc-side">
+      <details class="doc-mobile"><summary>Documentation</summary><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="../">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="../advanced/" aria-current="page">Advanced</a></li><li><a href="../cluster/">Cluster mode</a></li><li><a href="../task-cleanup/">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="../api/">REST API</a></li><li><a href="../changelog/">Changelog</a></li></ul>
+  </nav></details>
+      <div class="doc-desktop"><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="../">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="../advanced/" aria-current="page">Advanced</a></li><li><a href="../cluster/">Cluster mode</a></li><li><a href="../task-cleanup/">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="../api/">REST API</a></li><li><a href="../changelog/">Changelog</a></li></ul>
+  </nav></div>
+    </aside>
+    <main id="main" class="doc-main">
+      <div class="doc-crumb"><span>§ 02&nbsp;&nbsp;Guides</span><i aria-hidden="true"></i><a href="../cluster/">Cluster mode →</a></div>
+      <h1>Advanced</h1>
+      <p class="doc-lead">Self-hosted kanban board for <a href="https://omp.sh/docs">omp</a> coding agents. Write a card; an agent does the work. Runs on your machine or server and works on your phone.</p>
+      <div class="doc-grid">
+        <article class="doc-prose">
+
+<h2 id="install-from-npm"><a class="anchor" href="#install-from-npm" aria-label="Link to section">#</a>Install from npm</h2>
+<pre><code class="language-sh">npx omp-ui                  # or: npm i -g omp-ui &amp;&amp; omp-ui
+</code></pre>
+<p>With no arguments it creates <code>~/.omp-ui</code> (settings in <code>.env</code>, data in <code>~/.omp-ui/data</code>, SQLite by default; override the folder with <code>OMP_UI_HOME</code>), starts OMP-UI under pm2 (bundled) and prints the URL. Other commands:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>omp-ui start</code> / <code>stop</code> / <code>restart</code> / <code>status</code></td>
+<td>Manage the pm2 process</td>
+</tr>
+<tr>
+<td><code>omp-ui logs [-f]</code></td>
+<td>Show or follow the log</td>
+</tr>
+<tr>
+<td><code>omp-ui open</code></td>
+<td>Open it in your browser</td>
+</tr>
+<tr>
+<td><code>omp-ui config</code> / <code>config set port 8080</code> / <code>config set data-dir &lt;dir&gt;</code> / <code>config set db-url &lt;url&gt;</code></td>
+<td>Show or change settings; apply with <code>restart</code></td>
+</tr>
+<tr>
+<td><code>omp-ui doctor</code></td>
+<td>Check node, omp, git, gh and pm2</td>
+</tr>
+<tr>
+<td><code>omp-ui update</code></td>
+<td><code>npm i -g omp-ui@latest</code>, then restart</td>
+</tr>
+<tr>
+<td><code>omp-ui uninstall</code></td>
+<td>Remove the pm2 process (settings and data stay)</td>
+</tr>
+<tr>
+<td><code>omp-ui version</code> / <code>help</code></td>
+<td>Version and command list</td>
+</tr>
+</tbody></table></div>
+<p>The sections below describe running from a source checkout with <code>./omp-ui</code>.</p>
+<h2 id="start-in-one-command"><a class="anchor" href="#start-in-one-command" aria-label="Link to section">#</a>Start in one command</h2>
+<pre><code class="language-sh">./omp-ui up
+</code></pre>
+<p><code>up</code> asks for a password for the <code>admin</code> account, then installs, builds and starts OMP-UI. It prints a local link and one for your phone on the same Wi-Fi. Add more accounts later in <strong>Settings → Users</strong> (see <a href="#users">Users</a>).</p>
+<p>Requires <strong>Node.js 22.13 or newer</strong> and <strong>omp</strong>, installed and signed in:</p>
+<pre><code class="language-sh">curl -fsSL https://omp.sh/install | sh   # install omp
+omp                                      # run once, sign in to a provider
+</code></pre>
+<p><strong>Docker</strong> instead (the image includes omp and shares your sign-ins — see <a href="#credentials">Credentials</a>):</p>
+<pre><code class="language-sh">./omp-ui docker up                       # or: docker compose up -d — then open http://localhost:3000
+</code></pre>
+<h2 id="how-it-works"><a class="anchor" href="#how-it-works" aria-label="Link to section">#</a>How it works</h2>
+<ol>
+<li><strong>Create a project.</strong> Pick a folder or clone a Git repo. A project can span several folders, e.g. separate frontend and backend repos.</li>
+<li><strong>Add a task.</strong> Describe the task in your own words, any length (logs, specs, links). It lands in <strong>In progress</strong> immediately; a background agent turns it into a title and brief, then an omp agent works on it in your project folders. Watch it live.</li>
+<li><strong>Comment to give feedback.</strong> The agent picks up comments, marks them resolved, and moves the card to <strong>Done</strong> when finished. Commenting on a Done card reopens it; the agent continues where it left off.</li>
+</ol>
+<p>Ship the result with one tap: <strong>Create PR/MR</strong>, <strong>Push to main</strong> or <strong>Push to current branch</strong>.</p>
+<p><strong>Quick actions.</strong> Cards move between columns on their own as the agent works; you can&#39;t drag them across columns or set a status (dragging only reorders within a column). Manual controls: <strong>Start</strong>, <strong>Resume</strong> or <strong>Retry</strong> (run the agent), <strong>Stop</strong> (the card stays put) and <strong>Revert to To do</strong> (stop the agent, move the card back to To do). An unpushed Done card also shows a <strong>Push to main</strong> icon (git repo with a remote only); once pushed, its title is struck through and the icon disappears. Hover, right-click or open a card, or focus it and press <kbd>R</kbd> (Start/Resume/Retry), <kbd>S</kbd> (Stop), <kbd>Z</kbd> (Revert) or <kbd>P</kbd> (Push to main). On phones, the card&#39;s main button is its first quick action; the rest are in its <strong>⋯</strong> menu. Failed cards keep <strong>Retry</strong> pinned.</p>
+<p><strong>Bulk actions.</strong> Select cards with <kbd>X</kbd> or <kbd>⌘</kbd>/<kbd>Ctrl</kbd>/<kbd>Shift</kbd>+click (see <a href="#keyboard-shortcuts">Keyboard shortcuts</a>). A floating bar shows the selection count and how many cards each action applies to: <strong>Start</strong>, <strong>Stop</strong>, <strong>Revert</strong>, <strong>Push</strong>. <kbd>R</kbd>/<kbd>S</kbd>/<kbd>Z</kbd>/<kbd>P</kbd> also act on the selection. The <strong>To do</strong> header has <strong>Start all</strong>; <strong>In progress</strong> has <strong>Stop all</strong>.</p>
+<p><strong>Agent questions.</strong> When an agent ends with a question in its summary (&quot;Should the banner auto-dismiss?&quot;), the card shows an amber <strong>The agent has a question</strong> strip. Click it to move the card back to <strong>To do</strong> and open the question; type your answer and the agent continues — or dismiss it. You can also answer from the open card in any column.</p>
+<p><strong>Task progress.</strong> Every card shows a progress ring before its title, on the board and in the card&#39;s status pill. When the agent keeps a todo list (omp&#39;s <code>todo</code> tool), the ring fills with its completed items and the card shows the count (e.g. <code>2/5</code>); the open card lists the items by phase under <strong>Progress</strong>. While the list has nothing left, each open feedback comment counts as one more pending item (e.g. <code>3/4</code>, &quot;1 open feedback&quot;), so a resumed or steered card stops looking finished until the agent adds items for it or the feedback is resolved. Without a todo list the ring follows the column: dashed in To do, half in In progress, full with a check in Done. The list stays on the card after the run ends.</p>
+<p><strong>Shortcuts and menus.</strong> <kbd>N</kbd> on any page adds a card; it lands in In progress and its agent starts right away. Outside a board, the form asks for the project. <kbd>⌘K</kbd>/<kbd>Ctrl</kbd>+<kbd>K</kbd> (or <kbd>/</kbd>) opens the command palette: search cards, jump to a project or page, run an action. Right-click a card (or focus it and press <kbd>.</kbd>) to open it, run quick actions, duplicate it, copy its link, or delete it. Right-click the board background or a project on the Projects page to add a card there. All keys: <a href="#keyboard-shortcuts">Keyboard shortcuts</a>; <kbd>?</kbd> anywhere opens the cheat sheet.</p>
+<details>
+<summary>The details</summary><ul>
+<li>The columns are <strong>To do</strong>, <strong>In progress</strong> and <strong>Done</strong>.</li>
+<li>A new card lands in <strong>In progress</strong> and its agent starts immediately, regardless of the project&#39;s <strong>Auto-run</strong> setting. Duplicates always go to To do.</li>
+<li><strong>New cards from text.</strong> What you type is the card: the agent starts at once with your text as written, and <strong>Create task</strong> closes the form immediately so you can add the next card. A single line of up to 100 characters becomes the title; longer text keeps its first line (its first sentence if long, up to 80 characters) as the title and the full text as the description. Text over 20,000 characters is also saved verbatim on the card as <code>brief.md</code>. The same applies to a column&#39;s <strong>Add a task</strong> box and to scheduler cards.</li>
+<li>Each card&#39;s agent runs <code>omp --mode rpc --cwd &lt;primary folder&gt;</code>, plus <code>--add-dir &lt;folder&gt;</code> for every extra folder. It loads the same <code>config.yml</code>, project <code>.omp</code>, context files, skills, extensions and tool set as a direct <code>omp</code> chat in that folder (the per-run <code>--config</code> overlay is merged on top and only sets what the OMP-UI settings below turn on), so omp&#39;s own steering, auto compaction, <code>task</code> subagents and prompt caching work unchanged. A message sent in the card&#39;s <strong>Activity</strong> chat while the agent runs is steered into the live session right away, word for word, like typing into omp mid-run. Under the message the chat shows &quot;Sent to the running agent&quot;, then &quot;Agent received it&quot; once omp hands it to the agent at its next step (&quot;Picked up by the next run&quot; when the run was already wrapping up); the <strong>Agent log</strong> shows &quot;Feedback sent to the running agent (steering)&quot;, then &quot;Steering delivered to the agent: …&quot;. A run finishes only when omp reports the session settled, so a comment sent as the agent wraps up is still answered in the same session instead of being dropped. The log also shows each context compaction (reason, tokens before, summary, failures and retries), waits for background subagents, model fallbacks, and any omp dialog a non-yolo approval mode makes the run decline.</li>
+<li>Helper agents (chat assistant, change summaries) share a pool of warm <code>omp --mode rpc --no-session</code> workers: started on first use, reused between calls, closed after 5 idle minutes, capped at half the logical cores (2–8). None runs on its own after a card finishes: a change summary is written only when you ask for it.</li>
+<li>An agent&#39;s prompt is the card&#39;s title and description plus any unresolved comments, forwarded to omp exactly as written; OMP-UI adds nothing. omp plans and orchestrates (including <code>task</code> subagents) by itself, as in its TUI.</li>
+<li>In the card detail panel the <strong>Description</strong> is rendered as Markdown and starts collapsed to a short faded preview; click the heading or <strong>Show more</strong> to expand or collapse it, and <strong>Edit</strong> to switch to the text editor (<strong>Preview</strong>, <kbd>Esc</kbd> or <strong>Save</strong> return to the rendered view). Linked-file chips and unsaved-edit <strong>Save</strong>/<strong>Cancel</strong> stay visible while collapsed.</li>
+<li><strong>Model per card.</strong> You don&#39;t pick a model when starting a card: omp decides, from its own config (its <code>default</code> model role, thinking level and fallbacks), exactly as in a direct <code>omp</code> chat. A project&#39;s <strong>Model</strong>, if set, or <strong>Settings → Default model</strong> is passed as <code>--model</code> instead. A resumed run (feedback on a finished card) keeps the model and thinking level its omp session saved, like continuing a direct chat: switching models would re-send the whole history uncached.</li>
+<li><strong>Main provider and failover.</strong> With several AI providers authenticated, <strong>Settings → AI Providers → Provider priority</strong> picks the <strong>Main</strong> provider agents run on, plus backup providers in order; only providers are chosen, each runs the model of one of your omp model roles (the <code>default</code> role first; a provider no role uses is skipped). Runs stay on Main and move to the next provider only while Main is out of quota: <code>omp usage</code> reports one of its limits used up (until that limit resets) or a run on it failed on a quota error (30 min). Inside a run, omp switches to the backups on a provider error — a usage limit or the provider being unavailable (<code>retry.fallbackChains</code> with <code>fallbackOn: any</code>, in the run&#39;s config overlay); runs go back to Main once its quota resets. The run log names the provider used and why. The list replaces the <strong>Default model</strong>; a project&#39;s <strong>Model</strong> still wins. A resumed run keeps its session&#39;s model unless the previous run ran out of quota. Helper agents (advisor, change summaries, chat and scheduler assistants) follow the same pick and mid-run fallback: a project&#39;s <strong>Model</strong> wins, their role (<code>advisor</code>/<code>slow</code>, <code>smol</code>) only when its model is on the provider in use, else the picked provider&#39;s model; with an empty list they keep using their role, the project&#39;s <strong>Model</strong> or the <strong>Default model</strong>.</li>
+<li>The <strong>Agent log</strong> shows run internals: counts of tool calls, subagents, messages and errors; an <strong>Agents</strong> section with one card per subagent (live status, current tool, tokens, cost; expand for assignment, recent tool calls, output, and final report or error), sorted with working and failed agents first; and a <strong>Steps</strong> timeline: each step is what the agent thought or said, with the actions it took next listed by intent (&quot;Running the tests&quot;) and icon. Tap an action for the exact command and, if it failed, its error; long steps fold after a few actions, and the run&#39;s closing message is highlighted as its <strong>Summary</strong>. <strong>Raw</strong> shows every event as recorded (with optional line wrapping); the choice is remembered.</li>
+<li><strong>Memory and CPU per card.</strong> While a card&#39;s agent runs, the card and its detail panel (<strong>Resources</strong>) show the memory and CPU use of its omp process and everything it started (subagents, tools, shells), sampled every 5 s from <code>/proc</code> on Linux or <code>ps</code> on macOS (not sampled on Windows). Once the run ends they show that run&#39;s peak memory and CPU time; the next run starts fresh.</li>
+<li><strong>Cost and tokens per card.</strong> Each card shows its agent&#39;s estimated cost and token count (coins and ⇅ icons; hover for the input, output and cache breakdown and the number of model requests), and the detail panel a <strong>Cost &amp; tokens</strong> row. They add up every model request of the card&#39;s omp session (the agent and its subagents, all runs), from the usage omp records in the session files, priced by omp at the models&#39; list prices. While the agent runs they refresh every 15 s; finished cards from before this feature are tallied once at server start.</li>
+<li>A comment on a running card goes straight into the live session, word for word, like typing into the omp CLI mid-run: omp&#39;s magic keywords (<code>orchestrate</code>, <code>ultrathink</code>, …) take effect. Messages from another card&#39;s agent have these keywords neutralized.</li>
+<li>On success, the agent&#39;s final message is posted as a comment, the feedback it handled is resolved, and the card moves to Done.</li>
+<li>On failure, the card stays in In progress with the error and retries automatically in the same omp session until it is Done or you press <strong>Stop</strong>. Quota and usage-limit errors (detected from the error message: quota, usage or rate limit, 429, …) wait 5, 10, 15, 30 min, then hourly, and the card shows <strong>Waiting for quota</strong>; other errors back off 15 s, 30 s, 1 min, 2 min … up to 10 min apart, and the card shows <strong>Retrying</strong>. Turn off <strong>Keep retrying until done</strong> to stop after 5 consecutive retries instead: the card then stays failed until you comment or press <strong>Retry</strong>. Configure in <strong>Settings → Retry failed runs automatically</strong>.</li>
+<li><strong>Stop</strong> leaves the card where it is (press <strong>Resume</strong> to continue the same session); <strong>Revert to To do</strong> stops the agent and parks the card in To do.</li>
+<li>Up to <code>MAX_AGENTS</code> agents run concurrently. The default, <code>auto</code>, derives the limit from the machine: the minimum of the logical cores, the running agents plus what free memory allows at the memory per agent (keeping 10% of RAM free, at most 2 GB), and 32; re-checked every 30 s. The memory per agent is learned: the 75th percentile of the peak memory of the last 20 runs that lived at least 2 min (at start, seeded from cards whose stored usage shows at least 30 CPU-seconds), kept between 256 MB and 4 GB, and 600 MB until 3 runs are known. Memory a running agent has not grown into yet (the estimate minus its current use; one not sampled yet counts in full for its first 90 s) is not counted as free, so a burst of launches cannot overcommit memory. A number (1–16) sets a fixed cap. Switch between Auto and Manual in <strong>Settings</strong>, or run <code>omp-ui init --max-agents &lt;n|auto&gt;</code>. Other cards wait in a queue; the header&#39;s queue button shows it and lets you move a card up or run it next.</li>
+<li>On server restart, queued cards go back in the queue, and cards whose agent was working or had failed resume their omp session automatically (this uses one of the card&#39;s retries, even with <strong>Keep retrying until done</strong> on, so a card that keeps crashing the server stops after 5). With automatic retries off, an interrupted card shows <strong>Interrupted by server restart</strong> and <strong>Resume</strong> continues it.</li>
+<li><strong>Self-healing server.</strong> <code>omp-ui start</code>/<code>up</code>, systemd, pm2 and Docker run the server under <code>bin/supervisor.mjs</code>, which restarts it on crash (backing off up to 30 s) and force-restarts it after 3 consecutive failed <code>/api/v1/health</code> checks (15 s apart; tune with <code>OMP_UI_HEALTH_*</code>). See <a href="#start-on-boot-and-self-healing">Start on boot and self-healing</a>.</li>
+</ul>
+</details><h3 id="agents-working-together"><a class="anchor" href="#agents-working-together" aria-label="Link to section">#</a>Agents working together</h3>
+<ul>
+<li><strong>Shared project folders.</strong> Cards work directly in the project&#39;s folders, on the branch that is checked out there, so switch the branch before starting a card. Each run records the git state of the folders when it starts and ends. <strong>Create PR/MR</strong> uses those records: it pushes a new <code>omp/&lt;card&gt;</code> branch made of the default branch plus only that card&#39;s changes (your checked-out branch, commits and uncommitted files are left alone) and opens the PR/MR against the repo&#39;s default branch — pick one per repo under <strong>Project settings → More options → Default branches</strong> (<code>main</code> when nothing is detected or chosen). If the card&#39;s changes build on commits that aren&#39;t on the default branch yet, the PR can&#39;t be built and you get a message saying so. <strong>Push to main</strong> and <strong>Push to current branch</strong> commit everything in the folders.</li>
+<li><strong>Files.</strong> Upload files to a card for its agent to read; the agent saves reports, exports and screenshots there. <strong>Shared files</strong> (board menu) are available to every card&#39;s agent in the project.</li>
+<li><strong>Browser control.</strong> <strong>Settings → Browser control</strong> sets agent browser access: off, headless (default), a visible window on the server, or your own Chrome via <code>omp browser-relay</code>. Screenshots land in the card&#39;s files.</li>
+<li><strong>Agent-to-agent.</strong> Agents can list and read the project&#39;s cards, hand off separate work to a new card (which starts its own agent), message another card&#39;s agent, and wait for cards to finish. A waiting agent lends its slot to the queue. Agent-created cards show a bot icon and link back; messages from other agents are marked as such in the card&#39;s activity.</li>
+<li><strong>Visualize.</strong> The <strong>Visualize</strong> tab is a live factory floor for your agents. The control room up top shows stations in use (of the agent limit), cards in line, cards that need a hand and cards shipped, a ticker of what each worker is doing right now (with the subagents it has at work, each by name and role), and the crew plate: crew level and rank, XP (100 per shipped card), progress to the next level and every badge, earned or locked. The <strong>Factory floor</strong> has one room per department, and each card has its own robot worker (stable name and colour) that stands in the room of what its agent is doing right now: <strong>Design office</strong> (thinking, planning, writing), <strong>Code shop</strong> (reading and editing files), <strong>Build &amp; test</strong> (commands and tests), <strong>Research lab</strong> (web), <strong>Archive</strong> (memory), <strong>Dispatch</strong> (board tools, talking to other cards), <strong>Advisor&#39;s office</strong> and <strong>Team room</strong> (subagents). When the activity changes the worker walks to the next room; busy subagents step out of their agent as smaller robots and walk to their own room. Every worker wears its name and a role tag: card agents are <strong>Lead</strong>; subagents go by the name their lead gave them (<code>AuthScout</code>) and their role from the agent type (<strong>Builder</strong>, <strong>Scout</strong>, <strong>Reviewer</strong>, <strong>Security</strong>, …). Queued cards wait in <strong>Receiving</strong> in start order (a lock means blocked on other cards), failed or stalled cards go to the <strong>Rework bay</strong> and finished ones to the <strong>Shipping dock</strong>. Hover a worker for its card, current activity, time on the run, subagents and links to other cards; click it to open the card. <strong>Worksites</strong> lists every project with its shipped share, a strip of its cards by column and the workers on site. Everything updates live.
+Workers show how they feel, worked out from their run: <strong>working</strong>, <strong>energized</strong> (fresh and productive), <strong>thinking</strong> and <strong>deep in thought</strong> (thinking on a productive run), <strong>stuck</strong> (the same tool failing again and again, or errors with no progress), <strong>stressed</strong>, <strong>running hot</strong> (failing calls piling up), <strong>overloaded</strong> (many busy subagents or a fast tool rate), <strong>tired</strong> (many tool calls, a long run, or low mana) and <strong>needs help</strong> (errors in a row, model retries, or no sign of life for minutes; marked with a &quot;!&quot; badge, and the control room counts them). Each robot&#39;s look shows its role: the card&#39;s <strong>Lead</strong> agent and subagents as <strong>Builder</strong>, <strong>Scout</strong>, <strong>Reviewer</strong>, <strong>Security</strong>, <strong>Sprinter</strong>, <strong>Medium</strong>, <strong>Planner</strong>, <strong>Designer</strong> or <strong>Helper</strong>. The bar under a working robot is its <strong>mana</strong>: how much of its context window is left. The ticker adds the feeling in words and Mana, Tired, Load and Heat meters, and <strong>Who&#39;s who</strong> under the floor explains every role and mood. Animations are off with reduced motion.
+Every working agent names the model it runs on: the lead&#39;s model in the control room and on the factory floor, and a subagent&#39;s when omp reports it (avatar-only spots show it in the tooltip).</li>
+</ul>
+<h3 id="orchestration-guardrails"><a class="anchor" href="#orchestration-guardrails" aria-label="Link to section">#</a>Orchestration guardrails</h3>
+<p><strong>Settings → Orchestration</strong> holds opt-in controls for running agents. All are off by default; they are stored in the database with the other settings and apply without a restart.</p>
+<ul>
+<li><strong>Run time limit.</strong> A run still working after N minutes (5–1440, default 120) is stopped and the card fails without an automatic retry. Checked every 10 s, so turning it on also covers runs already working.</li>
+<li><strong>Stall watchdog.</strong> A run whose omp process sends nothing for N minutes (2–240, default 20) is stopped and fails like a crash, so automatic retries resume it. A single tool that runs silently longer than the timeout (a long build) also trips it; raise the timeout for such projects.</li>
+<li><strong>Run budget.</strong> Stops a run (no automatic retry) once its omp session plus its subagents report more than $N or N tokens (0 = no token cap), from omp&#39;s <code>get_session_stats</code>.</li>
+<li><strong>Wrap-up nudge.</strong> Needs the run time limit or the run budget. Once a run has used N % (50–95, default 80) of whichever is further along (time, dollars or tokens), the agent is told once to stop starting new work, finish or pause the current step, verify what is done and write its summary with its Report, so the limit rarely cuts off unfinished work. The run log shows <code>Wrap-up nudge: 80% of the run time limit used (96 of 120 min); asked the agent to finish up</code>.</li>
+<li><strong>Loop detection.</strong> An agent that repeats the same tool call with the same result 4 times, gets the same error from the same call 3 times, or alternates between two calls 3 times is first told to change approach; if it keeps looping, the run fails without a retry. Applies to runs started while it is on; turning it off stops enforcement right away.</li>
+<li><strong>Git checkpoints.</strong> Before each run, every git folder the agent works in is snapshotted (tracked and untracked files, <code>.gitignore</code> respected) under <code>refs/omp-ui/checkpoints/&lt;card&gt;/…</code> without touching the working tree, index or branch; the newest 20 per card are kept. The card&#39;s <strong>Checkpoints</strong> panel restores one (only while the agent is not running): the current state is checkpointed first, so a restore can be undone.</li>
+<li><strong>Subagent limits.</strong> Caps the subagents of each run (omp&#39;s <code>task</code> tool): how many work at once (1–32, default 8), how deep they nest (1–3, default 1: subagents cannot delegate further) and how long each may take (0–480 min, default 30; 0 = no limit), written into the run&#39;s omp config overlay as <code>task.maxConcurrency</code>, <code>task.maxRecursionDepth</code> and <code>task.maxRuntimeMs</code>. A run on this machine gets its fair share instead of the full cap: 2 subagents per core and one per 192 MB of free memory (after the 10% reserve), split across the cards running here, at least 1; runs on cluster nodes get the setting. The run log shows <code>Subagents: up to N at once, depth D, M min each</code>. Applies to runs started after saving.</li>
+<li><strong>Early context compaction.</strong> omp compacts an agent&#39;s context once it fills N % (20–95, default 50) of the model&#39;s window, so each model request resends fewer tokens (overlay <code>compaction.thresholdPercent</code>; the run log shows <code>Context compaction at N %</code>). Applies to runs started after saving.</li>
+<li><strong>Load guard.</strong> While the 1-minute load average per core is above N % (default 150 %), queued cards stay queued and the queue shows why; running agents are not touched. Never trips on Windows, which reports no load average.</li>
+<li><strong>OpenTelemetry traces.</strong> Each finished run is POSTed as one OTLP/HTTP JSON trace to your collector (e.g. <code>http://localhost:4318/v1/traces</code>): an <code>invoke_agent</code> root span with the card, model, status, cost and tokens, plus <code>execute_tool</code> and subagent child spans (GenAI semantic conventions). Extra headers (auth) come from <code>OTEL_EXPORTER_OTLP_HEADERS</code>; <strong>Send test span</strong> checks the endpoint.</li>
+</ul>
+<h3 id="cluster-mode-several-machines"><a class="anchor" href="#cluster-mode-several-machines" aria-label="Link to section">#</a>Cluster mode (several machines)</h3>
+<p><strong>Settings → Cluster → Enable cluster mode</strong> turns this server into the cluster&#39;s primary and shows a one-line join command. Run it on any other Linux or macOS machine — nothing has to be installed there first: it checks the machine, installs missing system packages (git, tar, gzip, CA certificates) with root rights, installs Node.js with npm and pnpm/yarn, downloads omp and omp-ui from the primary, starts the node in the background and confirms it joined (or stops it and shows why). omp&#39;s configuration and credentials, AI provider keys, MCP secrets and the primary&#39;s git identity, git HTTPS credentials and GitHub/GitLab/npm tokens are shared with every run (never SSH keys); project files are synced to the node before a run and streamed back while it works, so a card runs the same wherever it lands. The queue&#39;s limit becomes the cluster&#39;s (the primary&#39;s own share, optional, plus every node&#39;s slots). Nodes take cards before the primary, which keeps its headroom and takes cards only when no node has a free slot; among the nodes cards are spread in proportion to their free capacity, and CPU load and memory use steer cards away from busy nodes (a node with more than half its memory in use counts as busier, by up to half its slots when its memory is full). A node whose status reports stop, whose health checks fail or whose resource or load guard holds gets no new cards; when no machine can safely take a card, it stays queued. Settings and Stats list the nodes with their resources, and board cards, card details, Visualize and run reports show which machine runs each card. Nodes are replicas: when a node drops out its cards are rescheduled, when the primary goes down the freshest replica is promoted after the failover timeout and resumes the queue, and when the original primary returns it catches up and takes control back. Traffic uses its own TCP port (7790, opened in ufw/firewalld automatically with root rights) with token-based mutual authentication and AES-256-GCM encryption, and falls back to a WebSocket on the web URL when only HTTPS gets through (reverse proxies, Cloudflare Tunnel). Details: <a href="../cluster/">docs/CLUSTER.md</a>.</p>
+<h3 id="around-the-app"><a class="anchor" href="#around-the-app" aria-label="Link to section">#</a>Around the app</h3>
+<ul>
+<li><strong>Navigation.</strong> The left sidebar holds pages, projects, and utilities in its footer. Projects, Schedulers, Visualize, Stats and Settings are listed directly; every other page (Containers, Terminal, Files, Artifacts, Environment, MCP, Logs) sits under a collapsible <strong>Advanced</strong> group, open by default only when the current page is inside it; collapse it to an icon rail with <kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>B</kbd>. On phones, a menu button opens it as a sheet and tabs run along the bottom.</li>
+<li><strong>Theme color.</strong> <strong>Settings → Appearance</strong> picks the interface&#39;s primary color (buttons, links, active navigation, focus rings, chart accents) from 16 Tailwind-based presets: Jade (the default), Blue, Indigo, Violet, Purple, Pink, Rose, Red, Orange, Amber, Green, Emerald, Teal, Cyan, Sky and Slate. A pick recolors every page at once, in light and dark mode, and is saved with the other settings; pages are rendered in the saved color, so there is no flash of the default on load.</li>
+<li><strong>Home.</strong> The Projects page is a dashboard: <strong>Needs you</strong> (cards waiting on you: a question, a failure, a scheduled retry, unanswered feedback, a stalled card, or Done but unpushed), <strong>Live agents</strong>, every project with git status and success rate (pinned ones first), 24-hour and 7-day run stats with a sparkline, an activity feed, a getting-started checklist, and quick actions with go-to key hints. Unpinned projects follow the pinned ones under an <strong>Other projects</strong> toggle, expanded by default, and the project filter searches both. Pin or unpin a project from its ⋯ menu or right-click menu on the dashboard, or right-click it in the sidebar.</li>
+<li><strong>Recent projects.</strong> The sidebar&#39;s <strong>Your projects</strong> lists your 10 most recently opened projects, in the dashboard&#39;s order rather than sorted by time (projects never opened only fill spots left over); <strong>All projects</strong> leads to the others. Opening a project&#39;s board records the time on the server, so the order follows you across devices.</li>
+<li><strong>Optimize.</strong> The Stats page&#39;s <strong>Optimize</strong> section analyzes the server on demand: CPU, memory and disk usage, recommendations, top CPU and memory processes, and every agent-related process (orphaned agents from a crashed server, dev servers and browsers agents started). End a process (never the server itself; a running card&#39;s agent is stopped via its card), close idle helper agents to free memory, and clean storage: files (and leftover worktrees) of deleted cards, old run configs, drafts and change summaries, rotated logs, SQLite compaction and Docker prunes. Items marked <strong>Review</strong> may delete something you still want and are excluded from <strong>Clean up safe items</strong>; omp sessions and tool caches are reported only.</li>
+<li><strong>Scheduled cleanup.</strong> On the Settings page, the OMP-UI-data part of that cleanup (not Docker prunes) can run weekly or monthly, counting from when you turn it on, or right away with <strong>Clean up now</strong>. Pick what it removes; the last run&#39;s results and the next run time are shown there.</li>
+<li><strong>Schedulers.</strong> The <strong>Schedulers</strong> page holds recurring cards: on every match of a scheduler&#39;s cron schedule (in its time zone) it creates a regular card on its project from its text, and the card&#39;s agent starts. The form&#39;s optional <strong>Model</strong> dropdown (the models omp lists, grouped by provider; <strong>Project default</strong> by default) makes every card of that scheduler run on the chosen model instead of the project&#39;s. <strong>New scheduler</strong> opens the form; <strong>Create with Agent</strong> (or the <strong>Chat with Agent</strong> tab of the same page, <code>/schedulers/new?mode=chat</code>) lets you describe it in your own words (&quot;every Monday at 8:00, update dependencies and open a PR if the tests pass&quot;). An agent (the default model from <strong>Settings → Agent</strong>) turns that into a draft: name, project, schedule in words with the next three runs, run limit and the brief each card gets. Nothing is saved until you click <strong>Create scheduler</strong>; keep chatting to change it (&quot;make it 10:00, Fridays only&quot;, &quot;stop after 4 runs&quot;) or <strong>Edit in form</strong> to finish it by hand. Times are in your browser&#39;s time zone unless you name another; the agent only drafts, it cannot create, change or delete schedulers itself.</li>
+<li><strong>Review tab.</strong> A card&#39;s <strong>Review</strong> tab is a GitHub-style code review of its changes per repo against the base branch (uncommitted changes plus commits ahead). On top, an agent writes a one- or two-sentence summary, cached by diff hash in <code>DATA_DIR/runtime/diff-summaries/</code> (a plain changed-file count if that fails), next to the review state and two buttons: <strong>Approve</strong> records the approval for the reviewed changes and moves the card to Done (not while its agent works); <strong>Request changes</strong> asks for a note and posts it as feedback, so the agent picks it up. An approval is marked <strong>changed since</strong> once the code changes after it. Below, the changed files are listed (or <strong>All files</strong>: a tree of every project folder, <code>.gitignore</code>&#39;d files hidden like &quot;@&quot; mentions), one file&#39;s diff is shown side by side (or unified, with optional wrapping), and <kbd>Alt+↓</kbd> / <kbd>Alt+↑</kbd> step through the files. <strong>Edit</strong> opens the file in a code editor with syntax highlighting, as do the tree and <strong>Open file…</strong> (<kbd>⌘P</kbd>); <strong>Diff</strong> goes back to the file&#39;s changes. <kbd>⌘S</kbd> or <strong>Save</strong> writes the file and refreshes the diff; a save over a file that changed on disk meanwhile is refused with a <strong>Reload</strong> option. Only existing text files up to 2 MB open; <code>.git</code> and paths outside the project folders are refused. Closing the card or opening another one with unsaved edits asks first. The chat beside it messages the card&#39;s agent; type <code>@</code> to mention a file, and picking one also opens it in the editor. Side by side on desktop, stacked on phones.</li>
+<li><strong>Files page.</strong> <strong>Files</strong> in the sidebar (<kbd>G</kbd> then <kbd>F</kbd>) is the same editor outside a card: pick a project (all its folders) or <strong>Folder…</strong> for any folder on the server; the URL keeps the choice (<code>/files?project=&lt;id&gt;</code> or <code>/files?folder=&lt;path&gt;</code>) and the last one is reopened. For a project, the panel beside the editor starts a new card in it from your message (<code>@</code> mentions files, and picking one opens it); folders have no chat. Switching the project or folder with unsaved edits asks first. Hide it in <strong>Settings → Menu</strong> like the other optional pages.</li>
+<li><strong>File and folder actions.</strong> In the file tree (the Review tab&#39;s <strong>All files</strong> and the Files page), right-click a file, a folder or the empty area for VSCode-style actions: <strong>New File…</strong> and <strong>New Folder…</strong> (typed inline; <code>a/b.ts</code> creates the folders on the way), <strong>Rename…</strong> (<kbd>F2</kbd>), <strong>Delete</strong> (asks first; permanent), <strong>Duplicate</strong>, <strong>Cut</strong> / <strong>Copy</strong> / <strong>Paste</strong> (<kbd>⌘X</kbd> / <kbd>⌘C</kbd> / <kbd>⌘V</kbd>; a copy onto an existing name becomes <code>name copy</code>), <strong>Copy Path</strong> and <strong>Copy Relative Path</strong>. The tree&#39;s header has <strong>New File</strong>, <strong>New Folder</strong>, <strong>Refresh</strong> and <strong>Collapse All</strong>. While something is cut or copied, a <strong>Paste here</strong> bar sits above the tree. On phones every row has a <strong>…</strong> button (or long-press it) that opens the actions as a bottom sheet with large rows; names are typed inline with ✓ / ✕ buttons, and the delete confirmation has full-width buttons. An open file follows a rename or move and closes when it is deleted. New empty folders show right away; <code>.git</code> and the project folders themselves can&#39;t be changed.</li>
+<li><strong>Attachments.</strong> Card and shared files, file links in comments and agent output, and file links in a card&#39;s description (shown as <strong>Linked files</strong> chips under it) open in a viewer instead of downloading: images (zoom and pan), video and audio (seekable), PDF, Markdown (rendered, with a source toggle), CSV/TSV as a table, Jupyter notebooks, text, code, JSON and logs up to 2 MB (extension-less files such as <code>Dockerfile</code> are detected as text), Word (<code>.docx</code>), Excel (<code>.xlsx</code>, one tab per sheet), PowerPoint (<code>.pptx</code>) and EPUB (simplified text-and-structure previews), and archives (<code>.zip</code>, <code>.jar</code>, <code>.whl</code>, <code>.tar</code>, <code>.tar.gz</code>/<code>.tgz</code>) as a filterable contents list. Office, EPUB and archive previews are parsed in the browser, up to 50 MB. A missing file, a network error or a file too large to preview shows why, with <strong>Try again</strong> where it helps and always <strong>Download</strong>. <kbd>⌘</kbd>/<kbd>Ctrl</kbd>-click opens a file in a new tab. Images, video, audio, PDF and plain-text formats are served inline with HTTP range support.</li>
+<li><strong>Run reports.</strong> The agent&#39;s final message is shown on the card as omp wrote it; OMP-UI asks for no summary or report format. When a message happens to end in a <code>## Report</code> section (<code>Outcome:</code>, <code>Tests:</code>, <code>Changes:</code>, <code>Model:</code> lines, images linked as <code>/api/v1/tasks/&lt;id&gt;/files/&lt;path&gt;</code>), the card&#39;s activity shows it as a report card with the outcome, duration, model, changes, a test summary bar and a screenshot gallery; each screenshot&#39;s <strong>Feedback</strong> button quotes <code>&gt; re: &lt;path&gt;</code> into the comment box. <strong>Create PR/MR</strong> turns the final message into a compact description (its Outcome/Tests/Changes bullets when present, and the task collapsed below).</li>
+<li><strong>Trajectory export.</strong> <code>GET /api/v1/tasks/&lt;id&gt;/trajectory</code> downloads a card&#39;s agent session (or one run, <code>?runId=</code>) as a Hermes-style ShareGPT JSONL trajectory for debugging or training datasets; <code>GET /api/v1/boards/&lt;id&gt;/trajectories</code> streams one line per card (<code>?status=</code> filters). <code>?compress=1</code> shrinks each to about 15,250 tokens like Hermes&#39; trajectory compressor. Known secrets (AI provider keys, MCP credentials, git and npm tokens, OMP-UI&#39;s own) and common token shapes become <code>[REDACTED]</code>. See <a href="../api/#trajectories">docs/API.md</a>.</li>
+<li><strong>Cleanup after tasks.</strong> The repo&#39;s <code>AGENTS.md</code> convention is that an agent removes what it created only for the task (analytics and profiling output, throwaway tests and scripts, test-runner output, Docker containers, volumes and images, scratch files, background processes, unlinked work-in-progress files in the card&#39;s folder) once the work is verified, before it commits or pushes, so a card&#39;s result is its summary plus the files its Report links; OMP-UI adds no prompt for it. Anything the agent did not create (pre-existing files, user uploads, other cards&#39; changes, existing Docker resources) and permanent infrastructure (test suites, Docker configuration) is never removed. Docker containers, stacks, volumes, networks and images an agent starts for a card are marked with the card (<code>omp-ui.task=&lt;card id&gt;</code> label, <code>task-&lt;card id&gt;</code> compose project); whatever is left is removed automatically when a run moves the card to Done or the card or its project is deleted, and unmarked containers are never touched (containers started from a marked image count as marked). Policy: <a href="../task-cleanup/">docs/TASK-CLEANUP.md</a>.</li>
+<li><strong>Containers.</strong> The <strong>Containers</strong> page runs Docker for your projects. Its sidebar entry shows the running container count; click it for a list with <strong>Logs</strong>, <strong>Restart</strong> and <strong>Stop</strong>. One launcher searches templates, local images and Docker Hub (and Quay, when enabled), and accepts a pasted image reference from any registry (<code>ghcr.io</code>, <code>quay.io</code>, <code>registry.k8s.io</code>, <code>public.ecr.aws</code>, …); <kbd>Enter</kbd> runs the image with free host ports mapped automatically. Compose stacks start with one click (including <code>mysql-adminer</code>, <code>elastic-kibana</code>, <code>n8n-postgres</code> and <code>minio-console</code>), or from pasted YAML or a URL. Links: <code>/containers?launch=1</code> opens the launcher, <code>/containers?logs=&lt;id&gt;&amp;name=&lt;name&gt;</code> a container&#39;s logs, <code>/containers?logs=compose:&lt;project&gt;</code> a stack&#39;s logs.</li>
+<li><strong>Terminal.</strong> The <strong>Terminal</strong> tab is a shell on the server, as the server user (OMP-UI&#39;s own secrets are stripped from its environment). Each command runs as its own block with streamed output, exit code and duration; <code>cd</code> carries over to the next command, <kbd>↑</kbd>/<kbd>↓</kbd> recall history, <kbd>Ctrl</kbd>+<kbd>C</kbd> stops the newest running command and <kbd>Ctrl</kbd>+<kbd>L</kbd> (or <code>clear</code>) clears finished blocks. Like a tmux session it keeps running when you leave: commands run detached with their output in <code>DATA_DIR/terminal/</code>, so they survive closing the page and even restarting OMP-UI, and reopening the tab re-attaches with every block and its live output. Limits: 8 concurrent commands, 6 hours and 8 MB of output per command.</li>
+<li><strong>AI providers.</strong> <strong>Settings → AI Providers</strong> sets up the model providers agents run on: API keys (encrypted, applied to the next run without a restart) or an <strong>OAuth sign-in</strong> with a subscription instead of a key — Claude Pro/Max, ChatGPT Plus/Pro (browser or device code), a Google account (Gemini CLI, Antigravity), an OpenRouter account, and under <strong>Also available through omp</strong> GitHub Copilot, Cursor, Kimi Code, GitLab Duo and Devin. <strong>Sign in</strong> runs <code>omp login</code> on the server and shows its sign-in page, device code or question: approve in your browser, and when the server is another machine paste the address the browser ends on. omp keeps and refreshes the tokens in <code>~/.omp</code>; nothing is stored in OMP-UI. Sign out with <code>/logout</code> in omp.</li>
+<li><strong>Logs.</strong> The <strong>Logs</strong> tab shows one sub-tab per log type: <strong>System</strong> (server output, <code>DATA_DIR/omp-ui.log</code>), <strong>Security</strong> (logins, failed and blocked attempts, password and credential changes, unauthorized requests), <strong>Access</strong> (API requests and page views), <strong>Agents</strong> (runs of every card: starts, completions, failures), <strong>Database</strong> (connections, migrations, failed and slow queries), <strong>Restarts</strong> and <strong>Tunnel</strong>. Newest first, with search, severity and time-range filters, paging, refresh and auto-refresh, and export as JSON, NDJSON or text. Rotated <code>*.log.1</code> archives are included and can be picked per file. Security, access and database events are written as JSON lines to <code>DATA_DIR/{security,access,database}.log</code>, rotated past 5 MB; secrets and query strings are never logged.</li>
+<li><strong>OMP settings.</strong> <strong>Settings → OMP</strong> edits omp&#39;s own <code>config.yml</code> (in the agent folder <code>omp config path</code> reports) via a form (model roles as model and thinking-level dropdowns listing the models omp can use, thinking level, approval mode, steering and interrupt modes, retry, compaction, advisor, tools), a <strong>Fallback models</strong> editor (omp&#39;s <code>retry.fallbackChains</code>: per failing model — or &quot;any model of a provider&quot; — an ordered list of fallback models picked from the same dropdowns, with thinking level, reorder and remove, plus the <code>retry.modelFallback</code> switch), <strong>All settings</strong> (every setting omp knows, grouped by section and searchable, each with a control for its type: dropdowns for on/off and choice settings, number and text fields, password fields for secrets, JSON for lists and mappings, and <strong>Reset to default</strong> for keys the file sets) or raw YAML. Each save is validated with the omp CLI on a temporary copy, the previous file is kept as <code>config.yml.bak</code>, and the file is replaced atomically; saving raw YAML over a file that changed meanwhile is refused. OMP-UI&#39;s own approval mode and project or default model override the matching omp settings for its runs.</li>
+<li><strong>Chat control (Telegram, Discord).</strong> <strong>Settings → Chat integrations</strong>: paste a bot token (from <a href="https://t.me/BotFather">@BotFather</a>, or a Discord application&#39;s Bot → Token) and click <strong>Connect</strong>; OMP-UI checks the token and starts the bot (Telegram long polling, or a webhook when you give a public HTTPS URL; Discord over its gateway, so no public URL is needed). Without a Telegram bot yet, <strong>Open @BotFather</strong> opens BotFather straight in Telegram (with a Telegram Web link as fallback) and <strong>Copy /newbot</strong> copies the command to send there; pasting BotFather&#39;s whole reply works, the token is picked out of it. Then send <code>/login &lt;username&gt; &lt;password&gt;</code> to the bot (<code>/login &lt;password&gt;</code> signs in as <code>admin</code>), preferably in a direct message; it answers &quot;OMP-UI connected&quot;. Each chat acts as the account it signed in with: it sees and runs only that user&#39;s projects (an admin&#39;s chat sees all), and finished runs are reported only to chats of the project&#39;s owner and of admins. After that just write what you want in natural language (&quot;show my boards&quot;, &quot;create a card on omp-ui to fix the login page and start it&quot;, &quot;what is running right now?&quot;, &quot;tell card 1a2b to also add tests&quot;, &quot;every weekday at 9:00 triage new issues on omp-ui&quot;): an OMP-UI assistant (an omp helper agent with OMP-UI tools, using the default model from <strong>Settings → Agent</strong>, omp&#39;s default when empty) lists boards and cards, reads, creates, runs, stops, moves and messages cards, lists, creates, changes, pauses and resumes schedulers (in the time zone you name, else the server&#39;s; it repeats the schedule and next run times so you can correct it), picks the chat&#39;s default board, and replies; cards it starts stream their output into the chat. The only commands are <code>/login [username] &lt;password&gt;</code>, <code>/logout</code> and <code>/stop [cardId]</code> (without an id it cancels the assistant&#39;s current request); card ids may be shortened to a unique prefix. Tokens are stored AES-256-GCM encrypted with the credentials key. Changing an account&#39;s password, role or active state, or deleting it, logs its chats out. On Discord, enable <strong>Message Content Intent</strong> to talk to the bot in server channels without mentioning it (slash commands work either way).</li>
+</ul>
+<h2 id="keyboard-shortcuts"><a class="anchor" href="#keyboard-shortcuts" aria-label="Link to section">#</a>Keyboard shortcuts</h2>
+<p>Press <kbd>?</kbd> anywhere for the cheat sheet; type to filter it. <kbd>⌘</kbd> is <kbd>Ctrl</kbd> on Windows and Linux.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Where</th>
+<th>Keys</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Everywhere</td>
+<td><kbd>⌘K</kbd> or <kbd>/</kbd></td>
+<td>Command palette</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>N</kbd> or <kbd>C</kbd></td>
+<td>New task</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>?</kbd></td>
+<td>Keyboard shortcuts (filterable)</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>⌘B</kbd></td>
+<td>Collapse or expand the sidebar</td>
+</tr>
+<tr>
+<td>Go to</td>
+<td><kbd>G</kbd> then <kbd>P</kbd> or <kbd>H</kbd></td>
+<td>Projects home</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>G</kbd> then <kbd>V</kbd> / <kbd>D</kbd> / <kbd>X</kbd> / <kbd>F</kbd> / <kbd>A</kbd> / <kbd>K</kbd> / <kbd>T</kbd> / <kbd>L</kbd> / <kbd>S</kbd></td>
+<td>Visualize / Containers / Terminal / Files / Artifacts / Environment / Stats / Logs / Settings</td>
+</tr>
+<tr>
+<td>Board</td>
+<td><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or <kbd>K</kbd><kbd>J</kbd><kbd>H</kbd><kbd>L</kbd></td>
+<td>Previous / next card, column left / right</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td>
+<td>Jump to To do / In progress / Done</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Home</kbd> / <kbd>End</kbd></td>
+<td>First / last card of the column</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>↵</kbd>, <kbd>O</kbd> or <kbd>E</kbd></td>
+<td>Open card</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>D</kbd></td>
+<td>Duplicate card</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>⌫</kbd> or <kbd>Delete</kbd></td>
+<td>Delete card (asks first)</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Y</kbd></td>
+<td>Copy card link</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>.</kbd> or <kbd>⇧F10</kbd></td>
+<td>Card actions menu</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Space</kbd></td>
+<td>Pick up / drop card (arrows move it)</td>
+</tr>
+<tr>
+<td>Selection &amp; quick actions</td>
+<td><kbd>X</kbd></td>
+<td>Toggle selection of the focused card (or <kbd>⌘</kbd>/<kbd>⇧</kbd>+click)</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>⇧↑</kbd> / <kbd>⇧↓</kbd> or <kbd>⇧K</kbd> / <kbd>⇧J</kbd></td>
+<td>Extend selection up / down</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>⌘A</kbd></td>
+<td>Select all in the column (whole board if no card is focused)</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Esc</kbd></td>
+<td>Clear selection, then unfocus</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>R</kbd> / <kbd>S</kbd> / <kbd>Z</kbd> / <kbd>P</kbd></td>
+<td>Start, resume or retry / Stop / Revert to To do / Push to main, on the selected cards, else the focused card</td>
+</tr>
+<tr>
+<td>Card panel</td>
+<td><kbd>J</kbd> / <kbd>K</kbd></td>
+<td>Next / previous card</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>R</kbd> / <kbd>S</kbd> / <kbd>Z</kbd> / <kbd>P</kbd></td>
+<td>Start, resume or retry / Stop / Revert to To do / Push to main</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>]</kbd> / <kbd>[</kbd></td>
+<td>Next / previous tab</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>⌘↵</kbd></td>
+<td>Send feedback / save text</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Esc</kbd></td>
+<td>Close panel (or leave the field)</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Alt+↓</kbd> / <kbd>Alt+↑</kbd></td>
+<td>Next / previous changed file (Review tab)</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>⌘P</kbd> / <kbd>⌘S</kbd></td>
+<td>Open file / save it (Review tab)</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>F2</kbd> / <kbd>⌫</kbd> / <kbd>⌘X</kbd> <kbd>⌘C</kbd> <kbd>⌘V</kbd></td>
+<td>Rename / delete / cut, copy, paste the focused file or folder (Files tree)</td>
+</tr>
+<tr>
+<td>Home</td>
+<td><kbd>J</kbd> / <kbd>K</kbd></td>
+<td>Next / previous Needs-you row</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>↵</kbd></td>
+<td>Open the focused card</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>R</kbd> / <kbd>S</kbd> / <kbd>P</kbd></td>
+<td>Retry or resume / Stop / Push to main, on the focused card</td>
+</tr>
+<tr>
+<td>Containers</td>
+<td><kbd>L</kbd></td>
+<td>Focus the launcher</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>↑</kbd> / <kbd>↓</kbd></td>
+<td>Select a result (in the launcher)</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>↵</kbd> / <kbd>⇧↵</kbd></td>
+<td>Run with defaults / customize first</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Esc</kbd></td>
+<td>Clear the launcher</td>
+</tr>
+<tr>
+<td>Attachment viewer</td>
+<td><kbd>←</kbd> / <kbd>→</kbd></td>
+<td>Previous / next file (swipe on phones for images, video and audio)</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Home</kbd> / <kbd>End</kbd></td>
+<td>First / last file</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>D</kbd></td>
+<td>Download</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Z</kbd></td>
+<td>Toggle fit / 100% zoom</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Esc</kbd></td>
+<td>Close</td>
+</tr>
+<tr>
+<td>Files list</td>
+<td><kbd>↑</kbd> / <kbd>↓</kbd>, <kbd>Home</kbd> / <kbd>End</kbd></td>
+<td>Move between files</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>↵</kbd> or <kbd>Space</kbd></td>
+<td>Preview the focused file</td>
+</tr>
+<tr>
+<td>Command palette</td>
+<td><kbd>↓</kbd>, <kbd>Ctrl+N</kbd> or <kbd>Tab</kbd></td>
+<td>Next result</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>↑</kbd>, <kbd>Ctrl+P</kbd> or <kbd>⇧Tab</kbd></td>
+<td>Previous result</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Home</kbd> / <kbd>End</kbd>, <kbd>PgUp</kbd> / <kbd>PgDn</kbd></td>
+<td>First / last result, page through results</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>↵</kbd></td>
+<td>Run the highlighted entry</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>⌘↵</kbd></td>
+<td>Open a card in a new tab</td>
+</tr>
+<tr>
+<td></td>
+<td><kbd>Esc</kbd></td>
+<td>Close</td>
+</tr>
+</tbody></table></div>
+<p>The command palette lists the actions of the focused or open card first, then <strong>Recent</strong>. Search is fuzzy; typing an action and a card name (<code>stop login</code>) offers that action on matching cards, and the <strong>Board</strong> group has <strong>Stop all running</strong> and <strong>Start all To do</strong>.</p>
+<h2 id="shipping-changes"><a class="anchor" href="#shipping-changes" aria-label="Link to section">#</a>Shipping changes</h2>
+<p>A card has two ship buttons. Each acts on every project folder with changes; neither asks for confirmation. Agents also push to main or open a PR/MR on their own when the card or your feedback explicitly asks for it.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Button</th>
+<th>What happens</th>
+<th>Needs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Create PR/MR</strong> (recommended)</td>
+<td>Pushes a new <code>omp/&lt;card&gt;</code> branch (the default branch plus only this card&#39;s changes), and opens a pull request (GitHub) or merge request (GitLab) against the default branch</td>
+<td><code>git</code> plus <a href="https://cli.github.com"><code>gh</code></a> for GitHub or <a href="https://gitlab.com/gitlab-org/cli"><code>glab</code></a> for GitLab, signed in</td>
+</tr>
+<tr>
+<td><strong>Push to main</strong></td>
+<td>Commits and pushes directly to the project&#39;s push branch: <code>main</code> unless you change <strong>Push branch</strong> under <strong>Project settings → More options</strong> (created on the remote if missing). <strong>Create PR/MR</strong> still targets the repo&#39;s default branch (<strong>Default branches</strong> under <strong>Project settings → More options</strong>)</td>
+<td><code>git</code> with push access</td>
+</tr>
+<tr>
+<td><strong>Push to current branch</strong></td>
+<td>Same as <strong>Push to main</strong>, but each repo pushes to the branch it is already on (created on the remote if missing); a repo on a detached HEAD is reported as an error</td>
+<td><code>git</code> with push access</td>
+</tr>
+</tbody></table></div>
+<p>Both push buttons commit first, then merge the remote branch into the folder (the pull that keeps a remote which moved on from rejecting the push) and push. If the merge conflicts, it is aborted, the folder is left exactly as it was, and the card reports the conflict — <strong>Create PR/MR</strong> is the way out.</p>
+<p><strong>Discard all changes.</strong> When a project (or a card&#39;s workspace) has uncommitted changes, a <strong>Discard all changes</strong> button appears next to the header&#39;s change count and in the card&#39;s <strong>Ship changes</strong> panel. After a confirmation it resets tracked and staged edits and deletes new untracked files; unpushed commits and git checkpoints are left alone. It is blocked while an agent on the board is running or queued.</p>
+<p>To authenticate, either:</p>
+<ul>
+<li>Run <code>gh auth login</code> and/or <code>glab auth login</code> once.</li>
+<li>Export <code>GH_TOKEN</code> / <code>GITLAB_TOKEN</code> in your shell (or set them in <code>.env</code>).</li>
+</ul>
+<p>Pushing over SSH uses your normal <code>~/.ssh</code> keys and ssh-agent. See <a href="#credentials">Credentials</a> for everything OMP-UI picks up from your machine.</p>
+<p>To change branches, tap the branch name in the board header, then the branch next to a folder. The list shows local branches and <code>origin</code> branches you haven&#39;t checked out yet. Uncommitted changes come along unless they would be overwritten. After switching, the branch is pulled from its upstream (fast-forward only); if that fails (offline, local commits not on the remote, conflicting edits) the switch stays and a warning says why. Switching is blocked while an agent on the board is running or queued.</p>
+<h2 id="users"><a class="anchor" href="#users" aria-label="Link to section">#</a>Users</h2>
+<p>OMP-UI has user accounts with two roles, <strong>admin</strong> and <strong>user</strong>. The first account is the admin <code>admin</code>, created by <code>up</code> (or the setup page on first open).</p>
+<ul>
+<li><strong>Sign in</strong> with your username or email and password. <strong>Settings → Security</strong> changes your own password and signs out your other devices.</li>
+<li><strong>Settings → Users</strong> (admins only): add users (username, optional email, role, password), edit them, activate or deactivate them, set their password, or delete them. Deleting a user either transfers their projects and credentials to another user (the current admin by default) or deletes them with all their cards. Admins cannot delete, demote or deactivate their own account, and at least one active admin always remains. Changing a user&#39;s password, role or active state, or deleting them, signs them out at once, including live updates and the terminal.</li>
+<li><strong>Own data.</strong> Each user sees only their own projects and their cards, comments, runs, credentials and files; admins see everyone&#39;s. OMP-UI&#39;s data directory is off-limits to users in the folder picker, the Files page and project folders.</li>
+<li><strong>Shared settings.</strong> OMP settings, AI providers, Notifications, Menu and Appearance apply to everyone: admins change them, users see them read-only. Agent, Orchestration, data cleanup and chat integration settings are admin-only.</li>
+<li><strong>Admin-only tools.</strong> Terminal, Containers and Logs are hidden from users.</li>
+<li><strong>Upgrading</strong> from a single-password install: the old admin password becomes the password of user <code>admin</code>, every existing project, card and credential is assigned to the first admin, and everyone signs in once more after the upgrade.</li>
+</ul>
+<h2 id="credentials"><a class="anchor" href="#credentials" aria-label="Link to section">#</a>Credentials</h2>
+<p>OMP-UI never asks for your AI or Git logins; it uses what this machine already has.</p>
+<ul>
+<li><p><strong>Local (<code>omp-ui up</code> / <code>start</code>):</strong> the server runs as you, with your full environment. Agents and git use your omp and Claude sign-ins, <code>~/.gitconfig</code>, saved Git credentials, <code>~/.ssh</code> keys and ssh-agent, the <code>gh</code> / <code>glab</code> logins, and any API keys or proxies in your environment (<code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code>, <code>GH_TOKEN</code>, <code>HTTPS_PROXY</code>, …). Values in <code>.env</code> only override; keep credentials out of it.</p>
+</li>
+<li><p><strong>Docker:</strong> <code>docker-compose.yml</code> shares the same things with the container:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>From your computer</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>~/.omp</code></td>
+<td>omp sign-ins and settings</td>
+</tr>
+<tr>
+<td><code>~/.claude</code>, <code>~/.claude.json</code></td>
+<td>Claude Code / Anthropic sign-in</td>
+</tr>
+<tr>
+<td><code>~/.gitconfig</code>, <code>~/.config/git</code>, <code>~/.git-credentials</code> (read-only)</td>
+<td>Git identity, credential helpers, saved HTTPS logins</td>
+</tr>
+<tr>
+<td><code>~/.ssh</code> (read-only), <code>$SSH_AUTH_SOCK</code></td>
+<td>SSH keys and your ssh-agent</td>
+</tr>
+<tr>
+<td><code>~/.config/gh</code>, <code>~/.config/glab-cli</code></td>
+<td>GitHub CLI and GitLab CLI sign-ins</td>
+</tr>
+<tr>
+<td><code>~/.aws</code> (read-only)</td>
+<td>AWS profiles (Bedrock)</td>
+</tr>
+<tr>
+<td>Environment variables</td>
+<td><code>GH_TOKEN</code>, <code>GITHUB_TOKEN</code>, <code>GITLAB_TOKEN</code>, <code>GITLAB_HOST</code>, <code>ANTHROPIC_API_KEY</code>, <code>CLAUDE_CODE_OAUTH_TOKEN</code>, <code>OPENAI_API_KEY</code>, <code>GEMINI_API_KEY</code>, <code>OPENROUTER_API_KEY</code>, <code>AWS_*</code>, <code>HTTP(S)_PROXY</code>, … (full list in <code>docker-compose.yml</code>)</td>
+</tr>
+</tbody></table></div>
+<p>Docker turns a missing path into an empty root-owned folder. <code>omp-ui docker up</code> creates the missing ones first; before a plain <code>docker compose up</code>, run the commands listed in <code>docker-compose.yml</code>. Delete any line there you do not want to share. On Docker Desktop for macOS, start with <code>SSH_AUTH_SOCK=/run/host-services/ssh-auth.sock</code> to share the ssh-agent.</p>
+</li>
+<li><p>OMP-UI&#39;s own secrets (<code>ADMIN_PASSWORD</code>, <code>AUTH_SECRET</code>, <code>DATABASE_URL</code>, <code>POSTGRES_PASSWORD</code>, <code>OMP_UI_*</code>, …) are removed from the environment of agents and git commands.</p>
+</li>
+<li><p><code>omp-ui doctor</code> lists what it found (names only, never values).</p>
+</li>
+</ul>
+<h3 id="environment-variables"><a class="anchor" href="#environment-variables" aria-label="Link to section">#</a>Environment variables</h3>
+<p>The <strong>Environment</strong> page (<code>/env</code>, <kbd>G</kbd> then <kbd>K</kbd>, or <strong>Environment</strong> in the sidebar; admins only) keeps your own <code>KEY=value</code> variables, and every agent OMP-UI starts (card runs, chat, helpers, the in-app terminal&#39;s omp processes) gets them in its environment, on top of the server&#39;s own (yours win on a clash).</p>
+<ul>
+<li>Add a variable with the row at the top, edit a value in place (saved on blur or <kbd>Enter</kbd>), reveal or hide it with the eye, delete it with the bin. Paste <code>.env</code>-style text (<code>KEY=value</code>, <code>export KEY=value</code>, <code>#</code> comments, quotes) into the key field or <strong>Paste a .env file</strong> to add many at once.</li>
+<li>Names must match <code>[A-Za-z_][A-Za-z0-9_]*</code>; OMP-UI&#39;s own secrets (<code>AUTH_SECRET</code>, <code>OMP_UI_*</code>, …) are refused. Values are encrypted with the key described below and apply to the next run without a restart.</li>
+</ul>
+<h3 id="saved-credentials-mcp-servers-and-services"><a class="anchor" href="#saved-credentials-mcp-servers-and-services" aria-label="Link to section">#</a>Saved credentials (MCP servers and services)</h3>
+<p>Connecting a server on the <strong>MCP</strong> page saves its keys and tokens (GitHub, GitLab, Slack, Notion, Linear, OpenAI, Anthropic, AWS, Cloudflare, Stripe, Postgres, Brave Search, a custom MCP server over HTTP, …) as a credential.</p>
+<ul>
+<li>Each provider&#39;s form checks the fields before saving (required values, key formats, URLs) and shows a ready-to-copy <code>mcpServers</code> config snippet; secrets in it stay <code>${ENV_VAR}</code> placeholders.</li>
+<li>Credentials are stored in OMP-UI&#39;s database; secret values are encrypted (AES-256-GCM) and only ever sent back masked. The key is <code>CREDENTIALS_KEY</code> (any non-empty string) or else one generated into <code>DATA_DIR/credentials.key</code> on first use. Back up that file (or the variable) with the database: with another key the stored secrets cannot be decrypted, the credentials show as failing, and their secrets must be entered again.</li>
+<li>Every credential can be tested before saving or at any time. Those with automatic checks on (the default) are re-checked every 10 minutes and show <strong>healthy</strong>, <strong>failing</strong> or <strong>untested</strong>.</li>
+<li>The bell in the sidebar footer (in the header on phones) counts unread problems: failing checks, expired keys, keys expiring within 7 days and untested credentials. Mark them read or dismiss them there; a new failure raises a new notification, and a browser notification when you have allowed them.</li>
+</ul>
+<h3 id="mcp-servers-for-every-agent"><a class="anchor" href="#mcp-servers-for-every-agent" aria-label="Link to section">#</a>MCP servers for every agent</h3>
+<p>The <strong>MCP</strong> page (<code>/mcp</code>, <kbd>G</kbd> then <kbd>I</kbd>, or <strong>MCP</strong> in the sidebar) is a catalog of popular MCP servers (GitHub, GitLab, Slack, Notion, Linear, AWS, Cloudflare, Stripe, Postgres, Brave Search, Sentry, Supabase, a custom HTTP server, …). <strong>Connect</strong> asks only for what the server needs (usually one key, or a saved credential), saves it as a credential, checks it, and writes the server into omp&#39;s user MCP config (<code>~/.omp/agent/mcp.json</code>, or wherever <code>omp config path</code> points), so every agent OMP-UI starts gets its tools from the next run on.</p>
+<ul>
+<li>Entries OMP-UI did not write stay untouched. Secrets never go into <code>mcp.json</code>: it holds <code>${OMPUI_MCP_&lt;SERVER&gt;_&lt;FIELD&gt;}</code> placeholders, and OMP-UI puts the decrypted values into the environment of the omp processes it starts (card runs, chat, helpers, the in-app terminal). omp sessions started elsewhere see the placeholders unresolved.</li>
+<li>Each server shows <strong>connected</strong>, <strong>failing</strong>, <strong>untested</strong>, <strong>disabled</strong> or <strong>error</strong> (its credential was deleted). <strong>Test</strong> runs the credential check and an MCP handshake (<code>initialize</code> + <code>tools/list</code>) and lists the tools agents get; the credential&#39;s background checks keep the status current. Servers can be switched off, moved to another credential or removed.</li>
+<li>stdio servers run on the OMP-UI host through <code>npx</code> (Node.js) or <code>uvx</code> (Python uv); the first start downloads the package.</li>
+<li>Below the catalog, the <strong>mcpservers.org</strong> section lists every MCP server on <a href="https://mcpservers.org">mcpservers.org</a> (about 21,000; featured ones first), with search by name or publisher and a Featured filter. Each row opens the server&#39;s page there for its description and setup; connect a remote one with its endpoint through <strong>Custom MCP server (HTTP)</strong>. OMP-UI reads the list from the site&#39;s sitemaps and refreshes it every 12 hours (or with the reload button); when the site cannot be reached it keeps the last list it read.</li>
+</ul>
+<h2 id="cli"><a class="anchor" href="#cli" aria-label="Link to section">#</a>CLI</h2>
+<p>Run <code>./omp-ui &lt;command&gt;</code>. Add <code>--help</code> to any command for details.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>up</code></td>
+<td>Set everything up and start it. This is the only command you need. Add <code>--public</code> for an internet link and <code>--port 8080</code> to change the port</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>Check whether it is running and show its links</td>
+</tr>
+<tr>
+<td><code>stop</code> / <code>start</code> / <code>restart</code></td>
+<td>Stop or start the server. <code>restart</code> rebuilds first when the sources changed (<code>--rebuild</code> always rebuilds), so committed changes go live with one command. If the build fails, the previous build is put back and started, and the command exits with an error</td>
+</tr>
+<tr>
+<td><code>logs -f</code></td>
+<td>Follow the server log</td>
+</tr>
+<tr>
+<td><code>open</code></td>
+<td>Open OMP-UI in your browser</td>
+</tr>
+<tr>
+<td><code>passwd</code></td>
+<td>Set the password of the <code>admin</code> account (created if missing, made an active admin) at the next start; signs out that account only</td>
+</tr>
+<tr>
+<td><code>public</code></td>
+<td>Get a public <code>https://</code> link (cloudflared, or ngrok) · <code>public stop</code></td>
+</tr>
+<tr>
+<td><code>doctor</code></td>
+<td>Check that Node, omp, git, gh/glab, the port and the database are OK, and list the credentials found</td>
+</tr>
+<tr>
+<td><code>init</code></td>
+<td>Re-run setup (<code>--force</code> overwrites <code>.env</code>, <code>--max-agents &lt;n|auto&gt;</code> sets the agent limit)</td>
+</tr>
+<tr>
+<td><code>pm2 start</code> / <code>stop</code> / <code>restart</code> / <code>logs</code> / <code>status</code> / <code>save</code> / <code>startup</code> / <code>delete</code></td>
+<td>Run it under pm2. <code>omp-ui up --pm2</code> sets everything up first</td>
+</tr>
+<tr>
+<td><code>systemd install</code> / <code>uninstall</code> / <code>start</code> / <code>stop</code> / <code>restart</code> / <code>logs</code> / <code>status</code> / <code>unit</code></td>
+<td>Start on boot with a systemd user service (Linux). <code>omp-ui up --systemd</code> sets everything up first</td>
+</tr>
+<tr>
+<td><code>docker up</code> / <code>down</code> / <code>logs</code> / <code>ps</code></td>
+<td>Run it in Docker (<code>--postgres</code> or <code>--mongo</code> adds a database)</td>
+</tr>
+<tr>
+<td><code>deploy --host me@server</code></td>
+<td>Copy it to a server and start it there with Docker</td>
+</tr>
+<tr>
+<td><code>dev</code> / <code>build</code> / <code>version</code></td>
+<td>For development</td>
+</tr>
+</tbody></table></div>
+<p>Settings live in <code>.env</code>, which <code>init</code> creates with permissions 600. Logs and runtime files go in <code>./data</code>.</p>
+<p><strong>Restart from the browser.</strong> The <strong>Restart server</strong> button in the header (↻; on phones, in the account menu) does <code>omp-ui restart --rebuild</code> for you: it stops the server, builds the current sources and starts it again, then reloads the page on the new build. The app is down while it builds (about a minute), and running agents are interrupted, then resume by themselves (with automatic retries on). If the build fails, the previous build keeps running and the dialog shows the build output (also in <code>data/restart.log</code>). It works for a server started with <code>omp-ui up</code>/<code>start</code>, under pm2 or under systemd (there it runs <code>systemctl --user restart omp-ui.service</code>, which rebuilds when the sources changed); Docker, <code>omp-ui dev</code> and <code>omp-ui start -f</code> show why they can&#39;t restart from the browser.</p>
+<h2 id="databases"><a class="anchor" href="#databases" aria-label="Link to section">#</a>Databases</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>DATABASE_URL</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SQLite</strong> (default)</td>
+<td><code>sqlite:./data/omp-ui.db</code></td>
+<td>No setup needed</td>
+</tr>
+<tr>
+<td><strong>PostgreSQL</strong></td>
+<td><code>postgres://user:pass@host:5432/omp_ui</code></td>
+<td>For an existing Postgres server</td>
+</tr>
+<tr>
+<td><strong>MongoDB</strong></td>
+<td><code>mongodb://host:27017/omp_ui</code> or <code>mongodb+srv://…</code></td>
+<td>For MongoDB or Atlas</td>
+</tr>
+</tbody></table></div>
+<p>To choose a database, either:</p>
+<ul>
+<li>Run <code>omp-ui init --db postgres --db-url postgres://…</code>.</li>
+<li>Or edit <code>DATABASE_URL</code> in <code>.env</code> and run <code>omp-ui restart</code>.</li>
+</ul>
+<p>In Docker, <code>omp-ui docker up --postgres</code> or <code>--mongo</code> runs a bundled database for you. Switching databases starts empty; to take your data along, use <strong>Settings → Data transfer</strong> (below).</p>
+<h3 id="move-to-another-server-or-database"><a class="anchor" href="#move-to-another-server-or-database" aria-label="Link to section">#</a>Move to another server (or database)</h3>
+<p><strong>Settings → Data transfer</strong> (admins) exports everything OMP-UI stores (projects, cards, comments, runs and their logs, schedulers, users with their passwords, settings, saved credentials and AI provider keys, card and project shared files, and the key that decrypts the secrets) as one <code>.tar.gz</code>. On the new server, set it up as usual, then import the archive there: it replaces all of that server&#39;s data, after saving a backup of it (listed in the same section, the newest 3 kept). Afterwards sign in with the accounts from the export. The archive is database-independent, so it also moves data between SQLite, PostgreSQL and MongoDB.</p>
+<ul>
+<li><strong>Not included:</strong> project folders (copy or clone them to the same paths on the new server, or edit each project&#39;s folder) and omp&#39;s own setup in <code>~/.omp</code> (sign in to omp on the new server; resumed cards start a fresh agent session).</li>
+<li><strong>Secrets:</strong> the archive holds password hashes and every saved secret plus their key; keep it like a password. If the old server set <code>CREDENTIALS_KEY</code>, the key is not in the archive: set the same value on the new server.</li>
+<li><strong>Agents:</strong> stop running agents before importing. Cards whose agent was working when the export was made come over stopped; <strong>Resume</strong> continues them.</li>
+<li><code>ADMIN_PASSWORD</code> in the new server&#39;s <code>.env</code> still resets the <code>admin</code> account&#39;s password at every start.</li>
+</ul>
+<h2 id="run-with-pm2"><a class="anchor" href="#run-with-pm2" aria-label="Link to section">#</a>Run with PM2</h2>
+<pre><code class="language-sh">npm i -g pm2                      # optional; without it, `npx -y pm2` is used
+pm2 start ecosystem.config.cjs    # or: omp-ui up --pm2
+pm2 save &amp;&amp; pm2 startup           # start on boot (or: omp-ui pm2 save, omp-ui pm2 startup)
+</code></pre>
+<p>This works on a fresh clone. The first run sets everything up and builds the app, which takes a few minutes. If you didn&#39;t set <code>ADMIN_PASSWORD</code>, the generated password of the <code>admin</code> account is printed to <code>data/pm2-out.log</code> (search for <code>OMP-UI ADMIN PASSWORD</code>). <code>omp-ui up --pm2</code> also shows it in your terminal.</p>
+<ul>
+<li>Follow the logs with <code>omp-ui pm2 logs</code>.</li>
+<li>While pm2 runs it, use <code>omp-ui pm2 stop</code> / <code>restart</code>. Plain <code>omp-ui stop</code> refuses so it doesn&#39;t fight pm2.</li>
+<li><code>omp-ui pm2 restart</code> rebuilds when the sources changed; <code>omp-ui pm2 restart --rebuild</code> stops the app, always rebuilds, then starts it.</li>
+<li><code>pm2 save &amp;&amp; pm2 startup</code> is what makes it start on boot. See <a href="#start-on-boot-and-self-healing">Start on boot and self-healing</a>.</li>
+</ul>
+<h2 id="start-on-boot-and-self-healing"><a class="anchor" href="#start-on-boot-and-self-healing" aria-label="Link to section">#</a>Start on boot and self-healing</h2>
+<p>How each way of running OMP-UI comes back after a crash or a reboot. All of them run the server under <code>bin/supervisor.mjs</code>, which watches its health.</p>
+<h3 id="systemd-linux"><a class="anchor" href="#systemd-linux" aria-label="Link to section">#</a>systemd (Linux)</h3>
+<pre><code class="language-sh">omp-ui up --systemd          # set everything up, then install the service
+omp-ui systemd install       # or just install the service
+</code></pre>
+<ul>
+<li><p><code>install</code> writes a user unit to <code>~/.config/systemd/user/omp-ui.service</code> (from the repo&#39;s <code>omp-ui.service</code>), enables it at boot and starts it. A server you started with <code>omp-ui up</code>/<code>start</code> is stopped first so systemd takes over.</p>
+</li>
+<li><p>It also turns on lingering (<code>loginctl enable-linger $USER</code>) so the service starts at boot without a login. If that fails, run <code>sudo loginctl enable-linger $USER</code>.</p>
+</li>
+<li><p>Manage it with <code>omp-ui systemd start</code> / <code>stop</code> / <code>restart [--rebuild]</code> / <code>status</code> / <code>logs [-n N] [-f]</code> / <code>uninstall</code>.</p>
+</li>
+<li><p><code>omp-ui systemd unit</code> prints the unit for a manual install:</p>
+<pre><code class="language-sh">omp-ui systemd unit &gt; ~/.config/systemd/user/omp-ui.service \
+  &amp;&amp; systemctl --user daemon-reload \
+  &amp;&amp; systemctl --user enable --now omp-ui.service
+</code></pre>
+</li>
+<li><p>The service does not see variables exported in your interactive shell (<code>GH_TOKEN</code>, <code>ANTHROPIC_API_KEY</code>, <code>SSH_AUTH_SOCK</code>, …). Put them in <code>.env</code> or in a drop-in from <code>systemctl --user edit omp-ui.service</code>:</p>
+<pre><code class="language-ini">[Service]
+Environment=GH_TOKEN=…
+</code></pre>
+</li>
+<li><p><code>PATH</code> is captured at install time. Re-run <code>omp-ui systemd install</code> after changing it (e.g. a new Node or omp location).</p>
+</li>
+<li><p>While systemd runs it, plain <code>omp-ui stop</code> / <code>restart</code> refuse; use <code>omp-ui systemd stop</code> / <code>restart</code>. The browser <strong>Restart server</strong> button runs <code>systemctl --user restart omp-ui.service</code>.</p>
+</li>
+<li><p>On stop, systemd sends SIGTERM to the CLI only, which passes it to the supervisor, and the server stops its agents. Anything left after 30 s is killed (<code>KillMode=mixed</code>, <code>TimeoutStopSec=30</code>).</p>
+</li>
+</ul>
+<h3 id="plain-omp-ui-up-start"><a class="anchor" href="#plain-omp-ui-up-start" aria-label="Link to section">#</a>Plain <code>omp-ui up</code> / <code>start</code></h3>
+<ul>
+<li>The supervisor restarts a crashed or unhealthy server, but nothing starts it again after a reboot. Use systemd or pm2.</li>
+<li>Last resort: a <code>@reboot</code> cron entry (<code>crontab -e</code>): <code>@reboot cd /path/to/omp-ui &amp;&amp; ./omp-ui start</code>.</li>
+</ul>
+<h3 id="pm2"><a class="anchor" href="#pm2" aria-label="Link to section">#</a>PM2</h3>
+<ul>
+<li><code>pm2 start ecosystem.config.cjs</code> (or <code>omp-ui up --pm2</code>), then <code>omp-ui pm2 save</code> and <code>omp-ui pm2 startup</code>.</li>
+<li><code>pm2 startup</code> needs a global pm2 (<code>npm i -g pm2</code>) and prints a <code>sudo</code> command: run it. Run <code>pm2 save</code> again after changing the process list.</li>
+<li>pm2 restarts the CLI if it dies; the supervisor inside restarts the server on a crash or failed health checks.</li>
+</ul>
+<h3 id="docker"><a class="anchor" href="#docker" aria-label="Link to section">#</a>Docker</h3>
+<ul>
+<li><code>restart: unless-stopped</code> in <code>docker-compose.yml</code> restarts the containers after a crash or a reboot, as long as the Docker daemon starts at boot (<code>sudo systemctl enable docker</code>; Docker Desktop: <strong>Start Docker Desktop when you sign in</strong>).</li>
+<li>A container you stopped with <code>docker compose stop</code> stays stopped after a reboot.</li>
+<li>The image <code>HEALTHCHECK</code> only marks the container <strong>unhealthy</strong>; Docker does not restart it for that. The supervisor inside does the force restart.</li>
+</ul>
+<h3 id="health-monitoring"><a class="anchor" href="#health-monitoring" aria-label="Link to section">#</a>Health monitoring</h3>
+<ul>
+<li>Crash: the supervisor restarts the server, backing off from 1 s up to 30 s.</li>
+<li><code>OMP_UI_HEALTH_FAILURES</code> failed probes in a row: SIGTERM, then SIGKILL after <code>OMP_UI_STOP_TIMEOUT_MS</code>, then a restart.</li>
+</ul>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>OMP_UI_HEALTH_URL</code></td>
+<td><code>http://&lt;HOST&gt;:&lt;PORT&gt;/api/v1/health</code></td>
+<td>URL to probe</td>
+</tr>
+<tr>
+<td><code>OMP_UI_HEALTH_INTERVAL_MS</code></td>
+<td><code>15000</code></td>
+<td>Time between probes</td>
+</tr>
+<tr>
+<td><code>OMP_UI_HEALTH_TIMEOUT_MS</code></td>
+<td><code>10000</code></td>
+<td>Timeout per probe</td>
+</tr>
+<tr>
+<td><code>OMP_UI_HEALTH_FAILURES</code></td>
+<td><code>3</code></td>
+<td>Failed probes in a row before a force restart (<code>0</code> = never)</td>
+</tr>
+<tr>
+<td><code>OMP_UI_HEALTH_GRACE_MS</code></td>
+<td><code>120000</code></td>
+<td>Startup time before failures count</td>
+</tr>
+<tr>
+<td><code>OMP_UI_STOP_TIMEOUT_MS</code></td>
+<td><code>8000</code></td>
+<td>Wait after SIGTERM before SIGKILL</td>
+</tr>
+</tbody></table></div>
+<p>To see it, look for <code>[supervisor …] health check failed (n/3)</code> and <code>server is unhealthy — force restarting it</code> in <code>data/omp-ui.log</code>, <code>data/pm2-out.log</code>, <code>omp-ui systemd logs</code> or <code>docker compose logs omp-ui</code>.</p>
+<p><strong>Resource guard:</strong> Every 5 seconds the server checks memory and CPU of the whole machine. At 75% memory, or 75% CPU over 30 seconds, queued cards wait and the queue shows why; running agents are never stopped. Below 65% the queued cards start again. The hold covers every queued card, also one an agent waits for (<code>board_wait_for_cards</code>): that agent keeps waiting until usage drops. The events are in <strong>Logs</strong> → <strong>System</strong>. <strong>Stats</strong> → <strong>Optimize</strong> shows the current usage. The thresholds in <code>.env</code> apply within 5 seconds without a restart (in Docker, recreate the container). With <code>OMP_UI_RESOURCE_RESTART_MIN</code> set, a server run by the supervisor (<code>omp-ui up</code>, pm2, systemd, Docker) restarts itself after memory pressure lasted that long, once no agent runs, no card is being written and cards are queued.</p>
+<h3 id="no-data-loss-on-restarts"><a class="anchor" href="#no-data-loss-on-restarts" aria-label="Link to section">#</a>No data loss on restarts</h3>
+<ul>
+<li>Database writes are committed synchronously (SQLite in WAL mode, Postgres, MongoDB).</li>
+<li>Data lives in <code>DATA_DIR</code> / <code>DATABASE_URL</code> (Docker: the <code>./data</code> bind mount and the named volumes).</li>
+<li>On SIGTERM the server stops its omp agents.</li>
+<li>After any restart, queued cards go back in the queue and interrupted cards resume their omp session automatically.</li>
+</ul>
+<h2 id="docker-2"><a class="anchor" href="#docker-2" aria-label="Link to section">#</a>Docker</h2>
+<ul>
+<li><p><code>docker compose up -d</code> builds the image (Node 24 with omp, git, gh and glab) and runs it as an unprivileged user.</p>
+</li>
+<li><p>The container uses these folders from your computer:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>On your computer</th>
+<th>In the container</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>./data</code></td>
+<td><code>/data</code></td>
+<td>Database and logs</td>
+</tr>
+<tr>
+<td><code>~/.omp</code></td>
+<td><code>/home/omp/.omp</code></td>
+<td>omp sign-in</td>
+</tr>
+<tr>
+<td><code>WORKSPACE_DIR</code></td>
+<td><code>/workspace</code></td>
+<td>Your projects</td>
+</tr>
+<tr>
+<td>Your sign-ins and keys</td>
+<td>under <code>/home/omp</code></td>
+<td>See <a href="#credentials">Credentials</a></td>
+</tr>
+</tbody></table></div>
+<p>The <code>WORKSPACE_DIR</code> default is <code>./workspace</code>. In the app, project folders are under <code>/workspace/…</code>.</p>
+</li>
+<li><p>If omp is not signed in on your computer yet, run <code>omp</code> there, or <code>docker compose exec -u omp omp-ui omp</code>.</p>
+</li>
+<li><p><code>omp-ui docker up --postgres</code> (or <code>--mongo</code>) saves the choice to <code>.env</code>, so plain <code>docker compose up -d</code> keeps using it.</p>
+</li>
+<li><p><code>omp-ui deploy --host me@server</code> copies the project, including <code>.env</code>, to <code>~/omp-ui</code> on the server and runs <code>docker compose up -d --build</code> there.</p>
+</li>
+<li><p>To pin versions: <code>docker compose build --build-arg OMP_VERSION=v18.19.0 --build-arg GLAB_VERSION=v1.130.0</code>.</p>
+</li>
+<li><p><strong>Start on boot:</strong> the containers come back after a crash or reboot when the Docker daemon starts at boot. See <a href="#start-on-boot-and-self-healing">Start on boot and self-healing</a>.</p>
+</li>
+</ul>
+<h2 id="use-it-from-anywhere"><a class="anchor" href="#use-it-from-anywhere" aria-label="Link to section">#</a>Use it from anywhere</h2>
+<ul>
+<li><strong>Quick link:</strong> <code>omp-ui public</code> prints an <code>https://….trycloudflare.com</code> link. The link changes on each start. The CLI refuses to open the link if no admin password is set. With Docker, use <code>docker compose --profile public up -d</code>, then <code>docker compose logs tunnel</code>.</li>
+<li><strong>Your own domain:</strong> put a TLS reverse proxy in front of <code>127.0.0.1:3000</code> and set <code>VINEXT_TRUST_PROXY=1</code> in <code>.env</code>. Turn off response buffering for live updates, e.g. <code>proxy_buffering off;</code> in nginx. A Caddy example: <code>omp.example.com { reverse_proxy 127.0.0.1:3000 }</code>.</li>
+<li><strong>Phone:</strong> open the link, then tap <strong>Share → Add to Home Screen</strong>.</li>
+<li><strong>Your own app:</strong> a client only needs the server URL and an account&#39;s username (or email) and password; a password-only sign-in uses the <code>admin</code> account. See <a href="../api/"><code>docs/API.md</code></a>.</li>
+</ul>
+<h2 id="configuration"><a class="anchor" href="#configuration" aria-label="Link to section">#</a>Configuration</h2>
+<p><code>.env</code> is created for you. Every variable is described in <a href="https://github.com/quangpl/omp-ui/blob/main/.env.example"><code>.env.example</code></a>.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Default</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>PORT</code> / <code>HOST</code></td>
+<td><code>3000</code> / <code>0.0.0.0</code></td>
+<td>Where the server listens. <code>HOST=127.0.0.1</code> keeps it to this computer</td>
+</tr>
+<tr>
+<td><code>ADMIN_PASSWORD</code></td>
+<td>–</td>
+<td>Password of the <code>admin</code> account, applied at every start (creates the account if missing and makes it an active admin). Change it with <code>omp-ui passwd</code></td>
+</tr>
+<tr>
+<td><code>AUTH_SECRET</code></td>
+<td>generated</td>
+<td>Signs login tokens</td>
+</tr>
+<tr>
+<td><code>DATA_DIR</code></td>
+<td><code>./data</code></td>
+<td>Database, logs, pid files</td>
+</tr>
+<tr>
+<td><code>DATABASE_URL</code></td>
+<td><code>sqlite:${DATA_DIR}/omp-ui.db</code></td>
+<td><code>sqlite:</code> · <code>postgres://</code> · <code>mongodb://</code> (see <a href="#databases">Databases</a>)</td>
+</tr>
+<tr>
+<td><code>MONGODB_DB</code></td>
+<td><code>omp_ui</code></td>
+<td>MongoDB database name if the URL has none</td>
+</tr>
+<tr>
+<td><code>WORKSPACE_DIR</code></td>
+<td><code>~/omp-workspace</code> (Docker: <code>/workspace</code>)</td>
+<td>The folder picker starts here, and cloned repositories go here</td>
+</tr>
+<tr>
+<td><code>OMP_PATH</code></td>
+<td><code>omp</code></td>
+<td>omp executable</td>
+</tr>
+<tr>
+<td><code>MAX_AGENTS</code></td>
+<td><code>auto</code></td>
+<td>Agents running at once: <code>auto</code> (from CPU cores and free memory) or a fixed number 1–16</td>
+</tr>
+<tr>
+<td><code>OMP_EXTRA_ARGS</code></td>
+<td>–</td>
+<td>Extra omp flags, e.g. <code>--thinking=high</code></td>
+</tr>
+<tr>
+<td><code>OMP_UI_HEALTH_URL</code></td>
+<td><code>http://&lt;HOST&gt;:&lt;PORT&gt;/api/v1/health</code></td>
+<td>URL the supervisor probes. See <a href="#start-on-boot-and-self-healing">Start on boot and self-healing</a></td>
+</tr>
+<tr>
+<td><code>OMP_UI_HEALTH_INTERVAL_MS</code></td>
+<td><code>15000</code></td>
+<td>Time between health probes (ms)</td>
+</tr>
+<tr>
+<td><code>OMP_UI_HEALTH_TIMEOUT_MS</code></td>
+<td><code>10000</code></td>
+<td>Timeout per health probe (ms)</td>
+</tr>
+<tr>
+<td><code>OMP_UI_HEALTH_FAILURES</code></td>
+<td><code>3</code></td>
+<td>Failed probes in a row before a force restart (<code>0</code> = never)</td>
+</tr>
+<tr>
+<td><code>OMP_UI_HEALTH_GRACE_MS</code></td>
+<td><code>120000</code></td>
+<td>Startup time before failed probes count (ms)</td>
+</tr>
+<tr>
+<td><code>OMP_UI_STOP_TIMEOUT_MS</code></td>
+<td><code>8000</code></td>
+<td>Wait after SIGTERM before SIGKILL (ms)</td>
+</tr>
+<tr>
+<td><code>OMP_UI_MEMORY_HOLD_PCT</code></td>
+<td><code>75</code></td>
+<td>Hold queued cards while memory in use is at or above this %; <code>0</code> = off</td>
+</tr>
+<tr>
+<td><code>OMP_UI_MEMORY_RESUME_PCT</code></td>
+<td><code>65</code></td>
+<td>Start them again below this %</td>
+</tr>
+<tr>
+<td><code>OMP_UI_CPU_HOLD_PCT</code></td>
+<td><code>75</code></td>
+<td>Hold while CPU averaged over <code>OMP_UI_CPU_SUSTAIN_SEC</code> is at or above this %; <code>0</code> = off</td>
+</tr>
+<tr>
+<td><code>OMP_UI_CPU_RESUME_PCT</code></td>
+<td><code>65</code></td>
+<td>Resume below this %</td>
+</tr>
+<tr>
+<td><code>OMP_UI_CPU_SUSTAIN_SEC</code></td>
+<td><code>30</code></td>
+<td>CPU averaging window, seconds</td>
+</tr>
+<tr>
+<td><code>OMP_UI_RESOURCE_RESTART_MIN</code></td>
+<td><code>0</code></td>
+<td>Graceful restart after memory pressure lasted this many whole minutes, once no agent runs and cards are queued; <code>0</code> = never</td>
+</tr>
+<tr>
+<td><code>GH_TOKEN</code> / <code>GITLAB_TOKEN</code></td>
+<td>–</td>
+<td>Git hosting tokens (instead of <code>gh</code> / <code>glab</code> login). Usually exported in your shell; see <a href="#credentials">Credentials</a></td>
+</tr>
+<tr>
+<td><code>CREDENTIALS_KEY</code></td>
+<td><code>DATA_DIR/credentials.key</code></td>
+<td>Encryption key for saved secrets (environment variables, MCP credentials, AI provider keys). See <a href="#saved-credentials-mcp-servers-and-services">Saved credentials</a></td>
+</tr>
+<tr>
+<td><code>VINEXT_TRUST_PROXY</code></td>
+<td>–</td>
+<td><code>1</code> behind a reverse proxy</td>
+</tr>
+</tbody></table></div>
+<h2 id="security"><a class="anchor" href="#security" aria-label="Link to section">#</a>Security</h2>
+<ul>
+<li><strong>Set strong passwords before you make OMP-UI public</strong>, for the <code>admin</code> account and every other one. They are the only thing protecting a tool that runs commands on your machine.</li>
+<li>A fresh install lets the first visitor create the admin account, and the server listens on <code>0.0.0.0</code> by default. Set <code>ADMIN_PASSWORD</code> (the CLI generates one) or <code>HOST=127.0.0.1</code> before the first start on a reachable machine.</li>
+<li>Agents run commands on the host as the server user for every account, not only for admins. Only give accounts to people you trust with that machine.</li>
+<li>Agents run in <strong><code>yolo</code></strong> approval mode by default: they run commands and edit files without asking. Only point projects at folders you are happy for an agent to change. Use Docker if you want isolation. You can change the mode in <strong>Settings</strong>.</li>
+<li>Changing a password signs out that account&#39;s sessions. Keep <code>.env</code> private.</li>
+<li>Use HTTPS outside your home network: either the <code>public</code> link or a reverse proxy.</li>
+</ul>
+<h2 id="development"><a class="anchor" href="#development" aria-label="Link to section">#</a>Development</h2>
+<pre><code class="language-sh">pnpm install &amp;&amp; ./omp-ui dev        # live reload, loads .env
+pnpm typecheck
+</code></pre>
+<p>Built with <a href="https://vinext.dev">vinext</a> (Next.js App Router on Vite), React, Tailwind v4, shadcn/ui and dnd-kit.</p>
+<p>Agents working on this repo follow <a href="https://github.com/quangpl/omp-ui/blob/main/AGENTS.md">AGENTS.md</a> (task artifact cleanup).</p>
+
+          <footer class="doc-foot"><a class="doc-pn doc-pn-prev" href="../"><span>Previous</span>← Overview</a><a class="doc-pn doc-pn-next" href="../cluster/"><span>Next</span>Cluster mode →</a></footer>
+        </article>
+        <nav class="doc-toc" aria-label="On this page"><p class="doc-label">On this page</p><ul><li><a href="#install-from-npm">Install from npm</a></li><li><a href="#start-in-one-command">Start in one command</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#keyboard-shortcuts">Keyboard shortcuts</a></li><li><a href="#shipping-changes">Shipping changes</a></li><li><a href="#users">Users</a></li><li><a href="#credentials">Credentials</a></li><li><a href="#cli">CLI</a></li><li><a href="#databases">Databases</a></li><li><a href="#run-with-pm2">Run with PM2</a></li><li><a href="#start-on-boot-and-self-healing">Start on boot and self-healing</a></li><li><a href="#docker-2">Docker</a></li><li><a href="#use-it-from-anywhere">Use it from anywhere</a></li><li><a href="#configuration">Configuration</a></li><li><a href="#security">Security</a></li><li><a href="#development">Development</a></li></ul></nav>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

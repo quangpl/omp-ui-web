@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task cleanup · OMP-UI docs</title>
+  <meta name="description" content="A card's result is its summary. Anything else an agent leaves behind after the task (profiles, throwaway tests, Docker containers, scratch notes, stray processe">
+  <meta name="theme-color" content="#09090b">
+  <link rel="canonical" href="https://omp-ui.quang.asia/docs/task-cleanup/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="OMP-UI">
+  <meta property="og:title" content="Task cleanup · OMP-UI docs">
+  <meta property="og:description" content="A card's result is its summary. Anything else an agent leaves behind after the task (profiles, throwaway tests, Docker containers, scratch notes, stray processe">
+  <meta property="og:url" content="https://omp-ui.quang.asia/docs/task-cleanup/">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="apple-touch-icon" href="../../assets/icon.png">
+  <link rel="preload" href="../../assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../../assets/fonts/geist-mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/styles.css">
+</head>
+<body class="bg-bg font-sans text-fg antialiased selection:bg-acc selection:text-acc-ink doc-body">
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:bg-acc focus:px-4 focus:py-2 focus:text-acc-ink">Skip to content</a>
+  <header class="doc-top">
+    <a href="../../" class="doc-brand"><img src="../../assets/logo.svg" alt="" width="24" height="24">OMP-UI</a>
+    <nav aria-label="Primary" class="doc-top-links">
+      <a href="../" aria-current="page">Docs</a>
+      <a href="https://github.com/quangpl/omp-ui" rel="noopener">GitHub <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+    </nav>
+  </header>
+  <div class="doc-shell">
+    <aside class="doc-side">
+      <details class="doc-mobile"><summary>Documentation</summary><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="../">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="../advanced/">Advanced</a></li><li><a href="../cluster/">Cluster mode</a></li><li><a href="../task-cleanup/" aria-current="page">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="../api/">REST API</a></li><li><a href="../changelog/">Changelog</a></li></ul>
+  </nav></details>
+      <div class="doc-desktop"><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="../">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="../advanced/">Advanced</a></li><li><a href="../cluster/">Cluster mode</a></li><li><a href="../task-cleanup/" aria-current="page">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="../api/">REST API</a></li><li><a href="../changelog/">Changelog</a></li></ul>
+  </nav></div>
+    </aside>
+    <main id="main" class="doc-main">
+      <div class="doc-crumb"><span>§ 04&nbsp;&nbsp;Guides</span><i aria-hidden="true"></i><a href="../api/">REST API →</a></div>
+      <h1>Task cleanup</h1>
+      <p class="doc-lead">A card&#39;s result is its summary. Anything else an agent leaves behind after the task (profiles, throwaway tests, Docker
+containers, scratch notes, stray processes) pollutes diffs and pull requests, fills the disk, can leak data, and
+confuses later runs on the same card or project. So agents clean up after themselves.</p>
+      <div class="doc-grid">
+        <article class="doc-prose">
+
+<p>This policy covers temporary artifacts only: things created just to carry out the task. It does not cover permanent
+project infrastructure such as <code>tests/</code>, <code>e2e/</code>, <code>Dockerfile</code> or <code>docker-compose.yml</code>, nor changes the task asked for.</p>
+<h2 id="rule"><a class="anchor" href="#rule" aria-label="Link to section">#</a>Rule</h2>
+<p>Once the task is done — the work is verified (Testing passed), before any commit, push or PR the task asks for, and
+before the final summary — the agent removes every temporary artifact it created for the task. Only the result is
+kept. Cleaning up before committing keeps throwaway files out of the commit or PR.</p>
+<h2 id="what-gets-cleaned-up"><a class="anchor" href="#what-gets-cleaned-up" aria-label="Link to section">#</a>What gets cleaned up</h2>
+<p>Anything created specifically to execute the task:</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Examples</th>
+<th>How to remove</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Analytics and profiling</td>
+<td>CPU/heap profiles (<code>*.cpuprofile</code>, <code>*.heapsnapshot</code>), traces, benchmark output, bundle/size analysis, Lighthouse reports, ad-hoc stats/CSV/JSON exports</td>
+<td>Delete the files</td>
+</tr>
+<tr>
+<td>Testing files</td>
+<td>Throwaway scripts and tests written only to prove a change, generated fixtures/test data, test-runner output the run created (<code>test-results/</code>, <code>playwright-report/</code>, <code>coverage/</code>, <code>.e2e-data/</code>, <code>*.log</code>)</td>
+<td>Delete the files and folders</td>
+</tr>
+<tr>
+<td>Docker artifacts</td>
+<td>Containers, compose stacks, volumes, networks, and images built (or pulled solely) for the task</td>
+<td>Mark them at start (<code>docker compose -p task-&lt;card id&gt;</code>, <code>--label omp-ui.task=&lt;card id&gt;</code> on <code>docker run</code>/<code>create</code>/<code>build</code>/<code>volume create</code>/<code>network create</code>); remove only those: <code>docker compose -p task-&lt;card id&gt; down -v --remove-orphans</code>, <code>docker rm -f</code>, <code>docker volume rm</code>, <code>docker network rm</code>, <code>docker image rm</code></td>
+</tr>
+<tr>
+<td>Scratch files</td>
+<td>Notes, plans, debug logs, dumps, downloads, copies/exports of data, temp configs, <code>*.bak</code>, patches</td>
+<td>Delete the <code>mktemp -d</code> folder and any in-repo temp files</td>
+</tr>
+<tr>
+<td>Background processes</td>
+<td>Dev servers, watchers, browsers, tunnels, background jobs the agent started</td>
+<td>Stop them</td>
+</tr>
+<tr>
+<td>Card files folder</td>
+<td>Work-in-progress files the agent saved there that the final Report does not link</td>
+<td>Delete them</td>
+</tr>
+<tr>
+<td>Git leftovers</td>
+<td>Temporary branches, stashes and extra worktrees the agent made</td>
+<td>Delete them; never the project&#39;s own branches, or the refs under <code>refs/omp-ui/</code> that OMP-UI manages</td>
+</tr>
+</tbody></table></div>
+<h2 id="docker-containers"><a class="anchor" href="#docker-containers" aria-label="Link to section">#</a>Docker containers</h2>
+<p>Every container, compose stack, volume, network and image the agent starts only for the task is marked with the card:
+the label <code>omp-ui.task=&lt;card id&gt;</code> (<code>docker run</code>, <code>docker create</code>, <code>docker build</code>, <code>docker volume create</code>,
+<code>docker network create</code>) or the compose project <code>task-&lt;card id&gt;</code> (lowercased; <code>docker compose -p task-&lt;card id&gt;</code>).
+Containers inherit their image&#39;s labels, so a container started from a marked image counts as marked too and is removed
+with it.</p>
+<ul>
+<li><strong>Agent.</strong> Before finishing, the agent stops and removes them, then checks that
+<code>docker ps -a --filter label=omp-ui.task=&lt;card id&gt;</code> and
+<code>docker ps -a --filter label=com.docker.compose.project=task-&lt;card id&gt;</code> list nothing.</li>
+<li><strong>Safety net.</strong> When a run moves the card to Done (a manual move does not trigger it), and when the card or its
+project is deleted (in the background, one card at a time), OMP-UI removes the marked leftovers: containers with
+their anonymous volumes first, then networks, volumes, and images (each tag removed without force, so an image another
+container still uses stays). After a run it logs <code>Removed leftover Docker resources: …</code> in the card&#39;s run log.</li>
+<li><strong>Unmarked resources are never touched</strong>: the user&#39;s own containers, volumes and images, and other cards&#39;. The one
+exception is inheritance: a container started from a marked image counts as marked.</li>
+<li><strong>Kept containers.</strong> A container the task asks to leave running is a result, not a leftover: the agent does not mark
+the container or the image it runs from, and names it in the Report.</li>
+</ul>
+<h2 id="what-is-kept"><a class="anchor" href="#what-is-kept" aria-label="Link to section">#</a>What is kept</h2>
+<ul>
+<li>The result summary: the run&#39;s final message ending with <code>## Report</code> (posted on the card, listed on the Artifacts
+page).</li>
+<li>Files the Report links in the card&#39;s files folder (screenshots, test reports, exports) — they are part of the result.</li>
+<li>The changes the task asked for: code, docs, config, and tests meant to stay (e.g. regression tests).</li>
+</ul>
+<h2 id="never-delete"><a class="anchor" href="#never-delete" aria-label="Link to section">#</a>Never delete</h2>
+<ul>
+<li>Anything that existed before the task&#39;s first run (leftovers of an interrupted earlier run of this same task are not
+protected).</li>
+<li>Files the user uploaded.</li>
+<li>Board shared files other cards still need, other cards&#39; files, and other cards&#39; in-progress changes in a shared
+working tree.</li>
+<li>Docker containers, volumes, networks and images that already existed or that you did not create (a plain
+<code>docker compose up</code> in the user&#39;s checkout reuses the user&#39;s own compose project and volumes).</li>
+<li>Permanent project infrastructure: <code>tests/</code>, <code>e2e/</code>, <code>Dockerfile</code>, <code>docker-compose.yml</code>, <code>.env*</code>, OMP-UI&#39;s data
+folder (<code>DATA_DIR</code>, default <code>data/</code>), except unlinked work-in-progress files you saved in your own card folder.</li>
+<li>OMP-UI&#39;s git refs (<code>refs/omp-ui/…</code>: checkpoints and run snapshots).</li>
+</ul>
+<h2 id="when"><a class="anchor" href="#when" aria-label="Link to section">#</a>When</h2>
+<ul>
+<li>At the end of every run that finishes the work, before committing or pushing and before the final summary, including
+feedback rounds, for what that round created.</li>
+<li>Interrupted or failed run: the run that resumes and finishes the task cleans up the leftovers.</li>
+</ul>
+<h2 id="workflow"><a class="anchor" href="#workflow" aria-label="Link to section">#</a>Workflow</h2>
+<ol>
+<li><strong>Start.</strong><ul>
+<li>Put scratch files in a folder from <code>mktemp -d</code>, outside the project.</li>
+<li>Mark Docker resources with the card so they are easy to find and remove: compose <code>-p task-&lt;card id&gt;</code>,
+<code>--label omp-ui.task=&lt;card id&gt;</code>, and names like <code>--name task-&lt;card id&gt;-db</code>.</li>
+<li>Note every background process you start.</li>
+</ul>
+</li>
+<li><strong>Finish</strong> (after verification passes, before any commit or push).<ul>
+<li>Stop the processes you started.</li>
+<li>Remove the Docker resources you made: <code>docker compose -p task-&lt;card id&gt; down -v --remove-orphans</code>, <code>docker rm -f</code>,
+<code>docker volume rm</code>, <code>docker network rm</code>, <code>docker image rm</code>. Check that
+<code>docker ps -a --filter label=omp-ui.task=&lt;card id&gt;</code> and
+<code>docker ps -a --filter label=com.docker.compose.project=task-&lt;card id&gt;</code> list nothing.</li>
+<li>Delete the scratch folder and in-repo temp files.</li>
+<li>Check <code>git status --short</code> shows none of your own leftovers, and <code>git status --short --ignored</code> shows no new
+ignored output you created. Other cards&#39; agents share this working tree: leave
+changes you did not make.</li>
+<li>Delete unlinked work-in-progress files you saved in the card folder.</li>
+</ul>
+</li>
+<li><strong>Report.</strong> Commit/push if the task asks, then write the summary and <code>## Report</code>, linking the kept deliverables.</li>
+</ol>
+<h2 id="when-unsure"><a class="anchor" href="#when-unsure" aria-label="Link to section">#</a>When unsure</h2>
+<ul>
+<li>Needed by the result (a requested change, or linked by the Report)? Keep.</li>
+<li>Existed before the task&#39;s first run, or made by someone else? Keep.</li>
+<li>Otherwise, if you created it, delete it.</li>
+<li>Still unsure whether something is meant to stay? Keep it.</li>
+</ul>
+<h2 id="how-it-is-enforced"><a class="anchor" href="#how-it-is-enforced" aria-label="Link to section">#</a>How it is enforced</h2>
+<ul>
+<li><strong><code>AGENTS.md</code> convention, no added prompt.</strong> The policy is the repo&#39;s convention: the root <a href="https://github.com/quangpl/omp-ui/blob/main/AGENTS.md"><code>AGENTS.md</code></a>,
+which omp loads for agents working in this repo, points here. OMP-UI does not add a cleanup instruction to any
+agent prompt; what it enforces itself is the server-side removal of leftover Docker resources (below).</li>
+<li><strong>No server-side file deletion, on purpose.</strong> The card folder holds user uploads and files feedback refers to
+(<code>&gt; re: &lt;path&gt;</code>), and Done cards can reopen, so the server cannot tell leftovers from results. The agent that made
+the files is the one that knows. Docker resources are different because the card&#39;s label attributes them exactly.</li>
+<li><strong>Docker safety net.</strong> When a run moves the card to Done (a manual move does not trigger it), OMP-UI removes the
+Docker resources left with the card&#39;s label or compose project, including containers started from a marked image,
+and nothing else (<code>removeTaskDockerResources</code> in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/docker.ts"><code>lib/docker.ts</code></a>; names in
+<a href="https://github.com/quangpl/omp-ui/blob/main/lib/task-docker.ts"><code>lib/task-docker.ts</code></a>). When the card or its project is deleted, <code>queueTaskDockerCleanup</code>
+does the same in the background, one card at a time, so the delete does not wait for Docker.</li>
+<li><strong>OMP-UI&#39;s own data is separate.</strong> Settings → Data cleanup and Stats → Optimize remove files (and leftover worktrees)
+of deleted cards; that is OMP-UI housekeeping, separate from task cleanup.</li>
+<li><strong>Review.</strong> Reviewers spot leftovers in the card&#39;s Review tab and use <strong>Request changes</strong>.</li>
+</ul>
+
+          <footer class="doc-foot"><a class="doc-pn doc-pn-prev" href="../cluster/"><span>Previous</span>← Cluster mode</a><a class="doc-pn doc-pn-next" href="../api/"><span>Next</span>REST API →</a></footer>
+        </article>
+        <nav class="doc-toc" aria-label="On this page"><p class="doc-label">On this page</p><ul><li><a href="#rule">Rule</a></li><li><a href="#what-gets-cleaned-up">What gets cleaned up</a></li><li><a href="#docker-containers">Docker containers</a></li><li><a href="#what-is-kept">What is kept</a></li><li><a href="#never-delete">Never delete</a></li><li><a href="#when">When</a></li><li><a href="#workflow">Workflow</a></li><li><a href="#when-unsure">When unsure</a></li><li><a href="#how-it-is-enforced">How it is enforced</a></li></ul></nav>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

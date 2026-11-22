@@ -1,0 +1,1379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>REST API · OMP-UI docs</title>
+  <meta name="description" content="Base path: /api/v1. JSON in/out. Errors: HTTP 4xx/5xx with { &quot;error&quot;: &quot;message&quot; }. Designed for the web UI and future mobile clients: a client only needs the se">
+  <meta name="theme-color" content="#09090b">
+  <link rel="canonical" href="https://omp-ui.quang.asia/docs/api/">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="OMP-UI">
+  <meta property="og:title" content="REST API · OMP-UI docs">
+  <meta property="og:description" content="Base path: /api/v1. JSON in/out. Errors: HTTP 4xx/5xx with { &quot;error&quot;: &quot;message&quot; }. Designed for the web UI and future mobile clients: a client only needs the se">
+  <meta property="og:url" content="https://omp-ui.quang.asia/docs/api/">
+  <link rel="icon" type="image/svg+xml" href="../../assets/logo.svg">
+  <link rel="apple-touch-icon" href="../../assets/icon.png">
+  <link rel="preload" href="../../assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../../assets/fonts/geist-mono.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/styles.css">
+</head>
+<body class="bg-bg font-sans text-fg antialiased selection:bg-acc selection:text-acc-ink doc-body">
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:bg-acc focus:px-4 focus:py-2 focus:text-acc-ink">Skip to content</a>
+  <header class="doc-top">
+    <a href="../../" class="doc-brand"><img src="../../assets/logo.svg" alt="" width="24" height="24">OMP-UI</a>
+    <nav aria-label="Primary" class="doc-top-links">
+      <a href="../" aria-current="page">Docs</a>
+      <a href="https://github.com/quangpl/omp-ui" rel="noopener">GitHub <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+    </nav>
+  </header>
+  <div class="doc-shell">
+    <aside class="doc-side">
+      <details class="doc-mobile"><summary>Documentation</summary><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="../">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="../advanced/">Advanced</a></li><li><a href="../cluster/">Cluster mode</a></li><li><a href="../task-cleanup/">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="../api/" aria-current="page">REST API</a></li><li><a href="../changelog/">Changelog</a></li></ul>
+  </nav></details>
+      <div class="doc-desktop"><nav class="doc-nav" aria-label="Documentation">
+    <p class="doc-label">Documentation</p>
+    <p class="doc-group">Start</p><ul><li><a href="../">Overview</a></li></ul><p class="doc-group">Guides</p><ul><li><a href="../advanced/">Advanced</a></li><li><a href="../cluster/">Cluster mode</a></li><li><a href="../task-cleanup/">Task cleanup</a></li></ul><p class="doc-group">Reference</p><ul><li><a href="../api/" aria-current="page">REST API</a></li><li><a href="../changelog/">Changelog</a></li></ul>
+  </nav></div>
+    </aside>
+    <main id="main" class="doc-main">
+      <div class="doc-crumb"><span>§ 05&nbsp;&nbsp;Reference</span><i aria-hidden="true"></i><a href="../changelog/">Changelog →</a></div>
+      <h1>REST API</h1>
+      <p class="doc-lead">Base path: <code>/api/v1</code>. JSON in/out. Errors: HTTP 4xx/5xx with <code>{ &quot;error&quot;: &quot;message&quot; }</code>.
+Designed for the web UI and future mobile clients: a client only needs the <strong>server URL</strong> and a <strong>username (or email) and password</strong>.</p>
+      <div class="doc-grid">
+        <article class="doc-prose">
+
+<h2 id="authentication"><a class="anchor" href="#authentication" aria-label="Link to section">#</a>Authentication</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+<th>Auth</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/auth/status</code></td>
+<td>–</td>
+<td><code>AuthStatus</code>: <code>{ configured: boolean, authenticated: boolean, user: User | null }</code>. <code>configured</code>: at least one account exists; <code>user</code>: the signed-in account</td>
+<td>none</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/auth/setup</code></td>
+<td><code>{ username?, email?, password }</code> (<code>username</code> default <code>&quot;admin&quot;</code>; password min 8 chars)</td>
+<td><code>TokenResponse</code> + cookie. Creates the first account, an admin. 400 for an invalid username, email or password</td>
+<td>none; only while no account exists (409 otherwise)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/auth/login</code></td>
+<td><code>{ username?, password }</code></td>
+<td><code>TokenResponse</code> + cookie. <code>username</code> is a username or an email (case-insensitive); omitted or empty → <code>&quot;admin&quot;</code> (password-only clients). 401 <code>{ error: &quot;Invalid username or password&quot; }</code> (also for a deactivated account); 409 before setup</td>
+<td>none; rate limited (429 with <code>retry-after</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/auth/logout</code></td>
+<td>–</td>
+<td><code>{ ok: true }</code>, clears cookie</td>
+<td>any</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/auth/password</code></td>
+<td><code>{ current, next }</code></td>
+<td><code>TokenResponse</code> for this session. Changes <strong>the caller&#39;s</strong> password and signs out the caller&#39;s other sessions and chat logins; other accounts are untouched. 403 wrong <code>current</code>, 400 <code>next</code> under 8 chars</td>
+<td>required</td>
+</tr>
+</tbody></table></div>
+<p><code>TokenResponse</code> = <code>{ token, expiresAt, user: User }</code>. <code>User</code> = <code>{ id, username, email: string \| null, role: &quot;admin&quot; \| &quot;user&quot;, isActive, createdAt, updatedAt }</code>.</p>
+<p>Authenticated requests send <strong>either</strong> the <code>omp_ui_token</code> httpOnly cookie (web) <strong>or</strong> <code>Authorization: Bearer &lt;token&gt;</code> (mobile/CLI).
+Tokens (format <code>v2</code>) are HMAC-SHA256 signed, valid 30 days and bound to one account: they stop working when that account&#39;s password changes (by itself, an admin or <code>omp-ui passwd</code>), or when it is deactivated, changes role or is deleted. Bumping the global epoch (settings key <code>token_epoch</code>) revokes every account&#39;s tokens at once. Tokens issued before the multi-user upgrade (v1) are rejected, so every client signs in once more.</p>
+<p>Upgrades: the old admin password becomes the account <code>admin</code>, and every existing project, card and credential is assigned to the first admin at boot. The <code>ADMIN_PASSWORD</code> env var, when set, is applied at every boot to the <code>admin</code> account: created if missing, made an active admin, and signed out when the password differs from the stored one. <code>omp-ui passwd</code> writes <code>ADMIN_PASSWORD</code> to <code>.env</code>, so it resets the <code>admin</code> account only (at the next boot).</p>
+<h3 id="access-control"><a class="anchor" href="#access-control" aria-label="Link to section">#</a>Access control</h3>
+<p>Data is per user: a regular user (<code>role: &quot;user&quot;</code>) sees and changes only their own projects and everything under them (cards, comments, runs and run events, schedulers, artifacts, card and project files, workspaces, git actions), their own <a href="#credentials">credentials</a>, and only those in live events (<code>/events</code>), the agent queue (<code>/queue</code>) and the dashboard. New projects and credentials belong to their creator. Admins see and change everyone&#39;s data. An id the caller cannot see answers 404 exactly like an unknown one.</p>
+<p>Admin only (403 <code>{ error: &quot;Admin only&quot; }</code> for regular users, recorded as a security event):</p>
+<ul>
+<li>every method: <code>/users/**</code>, <code>/terminal/**</code>, <code>/docker/**</code>, <code>/logs/**</code> except <code>POST /logs/access</code> (the page-view beacon), <code>/settings/cleanup</code>, <code>/settings/telemetry/test</code>, <code>/settings/ai-providers/oauth/**</code>, <code>/stats/maintenance</code>, <code>/mcp/sync</code>, <code>/mcp/:name/test</code>, <code>/chat/{telegram,discord}/{connect,disconnect}</code>.</li>
+<li>mutations only (GET stays open): <code>POST /system/restart</code>, <code>PATCH /settings</code>, <code>PUT /omp-config</code>, <code>PATCH /settings/ai-providers</code>, <code>POST /settings/ai-providers/test</code>, <code>POST /mcp</code>, <code>PATCH</code>/<code>DELETE /mcp/:name</code>.</li>
+</ul>
+<p>For regular users <code>GET /omp-config</code> answers <code>raw: &quot;&quot;</code> and <code>version: &quot;&quot;</code> (the file may hold secrets).</p>
+<p>Data directory: for regular users, <code>/fs/**</code>, <code>/git/init</code>, <code>/git/repo</code>, <code>/git/clone</code>, the project-files routes and a board&#39;s <code>workdir</code>/<code>extraFolders</code> refuse <code>DATA_DIR</code> and anything inside it (symlinks and <code>..</code> resolved), and on writes (delete, move, copy) also folders that contain it: 403 <code>{ error: &quot;This folder is restricted to administrators&quot; }</code>. Listings leave those folders out.</p>
+<p><code>/events</code> and <code>/terminal/stream</code> close within one heartbeat when the user&#39;s session is revoked, or the user is deactivated, deleted or changes role; the client reconnects with its current token.</p>
+<h2 id="users"><a class="anchor" href="#users" aria-label="Link to section">#</a>Users</h2>
+<p>Account management, <strong>admin only</strong>. Usernames are trimmed and lowercased, 2–32 characters of <code>a-z</code>, <code>0-9</code>, <code>.</code>, <code>_</code>, <code>-</code>, starting with a letter or digit; emails are optional (<code>null</code>), trimmed and lowercased, at most 254 characters; passwords 8–1024 characters. Username and email must be unique across accounts (409 <code>Username already taken</code> / <code>Email already in use</code>). Invalid fields answer 400; an unknown id 404 <code>User not found</code>. Every change is a <code>users</code> security event.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/users</code></td>
+<td>–</td>
+<td><code>User[]</code>, oldest first</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/users</code></td>
+<td><code>CreateUserRequest</code>: <code>{ username, email?, password, role? }</code> (<code>role</code> default <code>&quot;user&quot;</code>)</td>
+<td><code>User</code> (201)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/users/:id</code></td>
+<td>–</td>
+<td><code>User</code></td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/users/:id</code></td>
+<td><code>UpdateUserRequest</code>: <code>Partial&lt;{ username, email, role, isActive }&gt;</code></td>
+<td><code>User</code>. A role change or deactivation signs the user out everywhere (sessions and chat logins). 400 when you demote or deactivate your own account; 409 <code>At least one active admin is required</code> when it would leave no active admin</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/users/:id?reassignTo=&lt;userId&gt;</code></td>
+<td>–</td>
+<td><code>DeleteUserResult</code>: <code>{ ok: true, boards, credentials, reassignedTo }</code>. With <code>reassignTo</code> (an active user other than <code>id</code>), the user&#39;s projects (with everything under them) and credentials move to that user (<code>board.updated</code> per project); without it each project is deleted like <code>DELETE /boards/:id</code> and their credentials are deleted (MCP entries using them are rewritten). <code>boards</code>/<code>credentials</code> count what moved or was deleted. 400 deleting yourself, <code>reassignTo</code> = <code>id</code>, or an unknown or inactive <code>reassignTo</code>; 409 deleting the last active admin</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/users/:id/password</code></td>
+<td><code>{ password }</code></td>
+<td><code>{ ok: true }</code>; signs the user out everywhere. For your own account it answers a fresh <code>TokenResponse</code> instead, so you stay signed in</td>
+</tr>
+</tbody></table></div>
+<h2 id="system"><a class="anchor" href="#system" aria-label="Link to section">#</a>System</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/health</code></td>
+<td><code>{ ok: true, version, db: &quot;sqlite&quot;|&quot;mongodb&quot;|&quot;postgres&quot;, agents: { running: string[], queued: string[] } }</code> (no auth). Reads the database, so a database or agent manager that does not answer makes it fail (500); <code>bin/supervisor.mjs</code> force-restarts the server after repeated failures. The first call after boot resumes interrupted and failed cards (see Agent rules)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/system</code></td>
+<td><code>{ version, db, omp: { path, installed: boolean, version: string|null } }</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/system/word-completions?refresh=1</code></td>
+<td><code>{ model: WordModelData }</code> for the composer&#39;s inline word completion (ghost text): <code>words</code> is <code>[word, count][]</code> unigram counts, most frequent first; <code>bigrams</code> is <code>[previous, [word, count][]][]</code>, the words that follow each previous word. Words are lowercase. Built from omp&#39;s prompt history (<code>history.db</code> in omp&#39;s agent dir; slash commands skipped) plus every card&#39;s title and description; without omp or a history it comes from cards alone. Cached 5 min server-side; <code>refresh=1</code> rebuilds</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/system/restart</code></td>
+<td><code>RestartStatus</code>: <code>{ available, mode: &quot;cli&quot;|&quot;pm2&quot;|null, reason: string|null, running, log: string|null, buildFailed, restarting }</code>. <code>available</code> is true when the omp-ui CLI started this server (<code>DATA_DIR/omp-ui.pid</code> names its supervisor) and it is not attached to a terminal; otherwise <code>reason</code> says why (Docker, dev mode, <code>start -f</code>). <code>running</code>: agents a restart would interrupt. <code>log</code>: last 60 lines of the last restart&#39;s output (<code>DATA_DIR/restart.log</code>, colors stripped); <code>buildFailed</code>: that build failed and the previous build was started instead. <code>restarting</code>: a restart&#39;s CLI process is still running</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/system/restart</code></td>
+<td>Stop, rebuild and start the server: runs <code>omp-ui restart --rebuild</code> (<code>omp-ui pm2 restart --rebuild</code> under pm2) in a detached process, output to <code>DATA_DIR/restart.log</code>. <code>202 { ok: true, mode, interrupted }</code>; the server goes down within seconds. <code>409</code> with the reason when unavailable or a restart is already running</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/settings</code></td>
+<td><code>AppSettings</code>: <code>{ maxConcurrentAgents, ompPath, approvalMode, defaultModel, providerPriority, browser, autoRetry, persistentRetry, maxAutoRetries, cleanupSchedule, cleanupTargets, taskCompletionNotifications, visibleDashboardMenus, primaryColor, runTimeLimit, runTimeLimitMinutes, stallWatchdog, stallTimeoutMinutes, runBudget, runBudgetUsd, runBudgetTokens, wrapUpNudge, wrapUpPercent, loopDetection, gitCheckpoints, subagentLimits, subagentMaxConcurrency, subagentMaxDepth, subagentTimeoutMinutes, contextCompaction, contextCompactPercent, telemetryExport, telemetryEndpoint, loadGuard, loadGuardPercent }</code>. <code>maxConcurrentAgents</code> is <code>&quot;auto&quot;</code> (default; the limit follows the machine, see <a href="#agent-queue">Agent queue</a>) or an integer 1–16</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/settings</code></td>
+<td><code>Partial&lt;AppSettings&gt;</code> → <code>AppSettings</code>. <code>maxConcurrentAgents</code>: <code>&quot;auto&quot;</code> or an integer 1–16, else 400 <code>maxConcurrentAgents must be &quot;auto&quot; or an integer between 1 and 16</code>. <code>providerPriority</code> (array of <code>{ provider }</code>, at most 8, default <code>[]</code> = off): the Main provider (first) and backup providers agents run on; each <code>provider</code> is an omp provider id and appears once, else 400 (a stored <code>model</code> from older versions is ignored). The model is not part of the list: a provider runs the model of an omp model role on it (<code>default</code> first, then the others in config order); a provider no role uses is skipped. Runs and helper agents (change summaries, chat and scheduler assistants) use the first provider that is not out of quota and fall back mid-run on provider errors (a usage limit, or the provider being unavailable; see README). <code>autoRetry</code> (boolean, default <code>true</code>), <code>persistentRetry</code> (boolean, default <code>true</code>) and <code>maxAutoRetries</code> (integer 0–20, default <code>5</code>): automatic retries of failed runs (see Agent rules); a non-boolean <code>persistentRetry</code> is 400 <code>persistentRetry must be a boolean</code>. <code>cleanupSchedule</code> (<code>&quot;off&quot;</code> default, <code>&quot;weekly&quot;</code>, <code>&quot;monthly&quot;</code>) and <code>cleanupTargets</code> (array of <code>SCHEDULED_CLEANUP_IDS</code>; default every one), else 400: scheduled data cleanup, see below. <code>taskCompletionNotifications</code> (boolean, default <code>false</code>, else 400 <code>taskCompletionNotifications must be a boolean</code>): the web UI shows a browser notification when a card on the open board moves to Done; clicking it opens <code>/</code> (browser permission is asked when turning it on). <code>visibleDashboardMenus</code> (array of <code>DASHBOARD_MENU_IDS</code>: <code>visualize</code>, <code>containers</code>, <code>terminal</code>, <code>files</code>, <code>artifacts</code>, <code>env</code>, <code>mcp</code>, <code>stats</code>, <code>settings</code>; default all, may be empty; stored deduplicated in that order, else 400): sections the web UI&#39;s sidebar, phone tabs and home &quot;Go to&quot; links show; hidden pages stay reachable by URL, G-shortcuts and ⌘K. Sections added in a later version show until hidden (the server also stores which sections existed when the list was saved). <code>primaryColor</code> (one of <code>PRIMARY_COLOR_IDS</code>: <code>jade</code>, <code>blue</code>, <code>indigo</code>, <code>violet</code>, <code>purple</code>, <code>pink</code>, <code>rose</code>, <code>red</code>, <code>orange</code>, <code>amber</code>, <code>green</code>, <code>emerald</code>, <code>teal</code>, <code>cyan</code>, <code>sky</code>, <code>slate</code>; default <code>jade</code>, else 400 <code>primaryColor must be one of: …</code>): the web UI&#39;s primary color preset (Settings → Appearance), rendered server-side as <code>&lt;html data-primary&gt;</code> so pages load in it</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/settings/cleanup</code></td>
+<td><code>CleanupStatus</code>: <code>{ schedule, targets, available: { id, label, description, risk }[], lastRunAt, lastTrigger: &quot;manual&quot;|&quot;scheduled&quot;|null, lastResult: MaintenanceResult|null, nextRunAt, running }</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/settings/cleanup</code></td>
+<td>Clean up now: <code>{ ids? }</code> (non-empty <code>SCHEDULED_CLEANUP_IDS</code>; default the saved <code>cleanupTargets</code>) → the updated <code>CleanupStatus</code>. 400 on unknown or empty ids (or no saved targets), 409 while a cleanup is running</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/settings/telemetry/test</code></td>
+<td><code>{ endpoint? }</code> (default the saved <code>telemetryEndpoint</code>) → <code>{ ok, status, error }</code>: sends one <code>omp_ui.test</code> span as OTLP/HTTP JSON (headers from <code>OTEL_EXPORTER_OTLP_HEADERS</code>, 10 s timeout). 400 without an endpoint</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/settings/ai-providers?refresh=1</code></td>
+<td><code>AiProvidersResponse</code> (<strong>Settings → AI Providers</strong>, types in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/ai-providers.ts"><code>lib/ai-providers.ts</code></a>): <code>{ providers: AiProviderState[], other, modelsError, keySource: &quot;env&quot;|&quot;file&quot;, generatedAt }</code>. One <code>AiProviderState</code> per catalog provider (<code>anthropic</code>, <code>openai</code>, <code>google</code>, <code>azure</code>, <code>amazon-bedrock</code>, <code>openrouter</code>, <code>groq</code>, <code>xai</code>, <code>mistral</code>, <code>deepseek</code>, <code>cerebras</code>): <code>{ id, status: &quot;authenticated&quot;|&quot;unverified&quot;|&quot;error&quot;|&quot;not-configured&quot;, statusMessage, activeMethods, fields, ompSignIn: { account }|null, models: { selector, name }[], lastTest }</code>; <code>fields</code> is keyed by env var, each <code>{ envVar, source: &quot;settings&quot;|&quot;environment&quot;|null, value, overridesEnvironment, broken }</code> (secret values masked). <code>models</code> come from <code>omp models --json</code> (cached 5 min) and <code>ompSignIn</code> from <code>omp usage --json</code> (cached 60 s); <code>refresh=1</code> re-runs both. <code>other</code>: providers omp lists models or a sign-in for that the catalog does not cover (e.g. <code>openai-codex</code>); <code>modelsError</code> is set when omp lists no models at all</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/settings/ai-providers</code></td>
+<td><code>AiProviderUpdate</code> <code>{ providerId, values?, clear?, test? }</code> → <code>AiProvidersResponse</code>. <code>values</code> (env var → value, trimmed; <code>&quot;&quot;</code> keeps the saved value) are saved, <code>clear</code> removes saved values (the server environment&#39;s value, if any, applies again). Changing a value resets <code>lastTest</code> and re-lists omp&#39;s models and sign-ins; <code>test: true</code> then tests the new values and stores the result. 400 <code>{ error, fields }</code> (keyed by env var) for env vars the provider does not use, malformed values or values over 16 KiB; 400 for an unknown <code>providerId</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/settings/ai-providers/test</code></td>
+<td><code>AiProviderTestInput</code> <code>{ providerId, values? }</code> → <code>AiProviderTestResponse</code> <code>{ result: { ok, message, latencyMs, checkedAt }, provider }</code>. Tests the effective values (saved, else the server environment) with non-empty <code>values</code> in their place, never saving them: one read-only request to the provider&#39;s API (<code>healthCheck</code>), or omp&#39;s model listing when the method can only be checked through omp (AWS profile) or omp itself is signed in. The result is stored as <code>lastTest</code> only when no unsaved values were given. 400 <code>{ error, fields }</code> for invalid values, 400 <code>Nothing to test: enter credentials first</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/settings/ai-providers/oauth</code></td>
+<td><code>AiOAuthStartInput</code> <code>{ loginId }</code> → 201 <code>AiOAuthSession</code> <code>{ id, loginId, label, status: &quot;running&quot;|&quot;succeeded&quot;|&quot;failed&quot;|&quot;cancelled&quot;, url, userCode, prompt, output, account, error, startedAt, finishedAt }</code>. Runs <code>omp login &lt;loginId&gt;</code> on the server for an OAuth sign-in the catalog offers (a provider&#39;s <code>oauthLogins</code>: <code>anthropic</code>, <code>openai-codex</code>, <code>openai-codex-device</code>, <code>google-gemini-cli</code>, <code>google-antigravity</code>, <code>openrouter</code>; or <code>AI_OTHER_OAUTH_LOGINS</code>: <code>github-copilot</code>, <code>cursor</code>, <code>kimi-code</code>, <code>gitlab-duo</code>, <code>devin</code>); any other id is 400 and never reaches omp. A running sign-in with the same id is cancelled first (they share omp&#39;s callback port). <code>url</code> is the https page to authorize at, <code>userCode</code> the device code to enter there, <code>prompt</code> the question omp waits on (a pasted redirect URL or code when the browser cannot reach the server&#39;s localhost callback, a GitHub Enterprise domain, a risk confirmation), <code>output</code> omp&#39;s other messages (at most 40 lines; answers, server-local links and file paths left out)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/settings/ai-providers/oauth/{id}</code></td>
+<td>The <code>AiOAuthSession</code>, polled until <code>status</code> is no longer <code>running</code>; <code>account</code> is the account omp signed in as. 404 once unknown or expired (finished sessions are kept 15 minutes; a sign-in still running after 10 minutes fails as timed out)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/settings/ai-providers/oauth/{id}</code></td>
+<td><code>AiOAuthInput</code> <code>{ input }</code> → <code>AiOAuthSession</code>: answers <code>prompt</code> (one line, at most 8 KiB, <code>&quot;&quot;</code> allowed). The answer is written to omp&#39;s stdin and never echoed back. 409 when the sign-in ended or omp is not asking anything, 400 for a non-string or multi-line answer</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/settings/ai-providers/oauth/{id}</code></td>
+<td>Cancels a running sign-in (stops <code>omp login</code>) → <code>AiOAuthSession</code> with <code>status: &quot;cancelled&quot;</code>; a finished one is returned unchanged</td>
+</tr>
+</tbody></table></div>
+<p>Orchestration settings (<strong>Settings → Orchestration</strong>, all off by default; see docs/ADVANCED.md &quot;Orchestration guardrails&quot;): switches <code>runTimeLimit</code>, <code>stallWatchdog</code>, <code>runBudget</code>, <code>wrapUpNudge</code>, <code>loopDetection</code>, <code>gitCheckpoints</code>, <code>subagentLimits</code>, <code>contextCompaction</code>, <code>telemetryExport</code>, <code>loadGuard</code> must be booleans; <code>runTimeLimitMinutes</code> (integer 5–1440, default 120), <code>stallTimeoutMinutes</code> (integer 2–240, default 20), <code>runBudgetUsd</code> (number 0–10000, default 5; 0 = no dollar cap), <code>runBudgetTokens</code> (integer 0–1000000000, default 0 = no token cap), <code>wrapUpPercent</code> (integer 50–95, default 80), <code>subagentMaxConcurrency</code> (integer 1–32, default 8), <code>subagentMaxDepth</code> (integer 1–3, default 1 = subagents cannot delegate further), <code>subagentTimeoutMinutes</code> (integer 0–480, default 30; 0 = no limit), <code>contextCompactPercent</code> (integer 20–95, default 50) and <code>loadGuardPercent</code> (integer 10–1000, default 150) are validated against <code>ORCHESTRATION_LIMITS</code> (else 400 <code>&lt;field&gt; must be … between &lt;min&gt; and &lt;max&gt;</code>); <code>telemetryEndpoint</code> is <code>&quot;&quot;</code> or an http(s) URL of at most 2048 characters. Out-of-range stored values are clamped on read.</p>
+<p><code>wrapUpNudge</code> needs <code>runTimeLimit</code> or <code>runBudget</code>: once a run has used <code>wrapUpPercent</code> % of whichever is further along (time, USD or tokens; below 100 %), the agent is steered once to stop starting new work, finish or pause the current step, verify and write its summary with its Report, and the run log gets <code>Wrap-up nudge: &lt;P&gt;% of the run time limit|run budget used (&lt;detail&gt;); asked the agent to finish up</code>. <code>subagentLimits</code> and <code>contextCompaction</code> apply to runs started after saving, through the run&#39;s omp <code>--config</code> overlay: <code>task.maxConcurrency</code> (the run&#39;s fair share of this machine: 2 subagents per core and one per 192 MB of free memory beyond the 10% reserve, divided by the card agents running here, capped at <code>subagentMaxConcurrency</code>, at least 1; runs on cluster nodes get <code>subagentMaxConcurrency</code>), <code>task.maxRecursionDepth</code> (<code>subagentMaxDepth</code>), <code>task.maxRuntimeMs</code> (<code>subagentTimeoutMinutes</code>, left out at 0) and <code>compaction.thresholdPercent</code> (<code>contextCompactPercent</code>). The run log shows <code>Subagents: up to N at once, depth D, M min each</code> and <code>Context compaction at P %</code>.</p>
+<p>AI provider values (<code>/settings/ai-providers</code>) live in the settings table under <code>ai_providers</code>, each sealed with the credentials encryption key (AES-256-GCM, <code>CREDENTIALS_KEY</code> or <code>DATA_DIR/credentials.key</code>, see <a href="#credentials">Credentials</a>); plaintext is never stored or logged and secret values are only returned masked. A saved value overrides the same environment variable inherited from the server&#39;s environment for every omp child process, applied at boot and on every save, so new keys work for the next agent without a restart. A value that can no longer be decrypted (the key changed) is reported as <code>broken</code> and the provider as <code>error</code> until it is entered again.</p>
+<p>OAuth sign-ins (<code>/settings/ai-providers/oauth</code>) keep nothing in OMP-UI: <code>omp login</code> stores and refreshes the tokens in omp&#39;s own credential store (<code>~/.omp</code>, mounted read-write in Docker), which every omp child reads, so a sign-in applies to the next agent run. It shows up as the provider&#39;s <code>ompSignIn</code> (reported by <code>omp usage</code>) and its models: a catalog provider&#39;s <code>modelProviders</code> include the omp providers its sign-ins add (<code>openai-codex</code> for OpenAI; <code>google-gemini-cli</code> and <code>google-antigravity</code> for Google). Signing out is omp&#39;s <code>/logout</code>.</p>
+<p>Scheduled data cleanup runs the OMP-UI-data cleanups of <a href="#stats"><code>/stats/maintenance</code></a> (<code>orphan-card-files</code>, <code>orphan-board-files</code>, <code>orphan-workspaces</code>, <code>run-configs</code>, <code>drafts</code>, <code>diff-cache</code>, <code>rotated-logs</code>, <code>database</code>; Docker prunes stay manual) on the server: about a minute after start and then hourly it checks whether one period (7 days weekly, 30 days monthly) has passed since the later of the last run (manual or scheduled) and the moment the schedule was chosen, so enabling a schedule never cleans right away. The last outcome is kept in the settings table under <code>cleanup_state</code>.</p>
+<h3 id="data-transfer"><a class="anchor" href="#data-transfer" aria-label="Link to section">#</a>Data transfer</h3>
+<p><strong>Settings → Data transfer</strong> (admin only) moves a server to another machine. An export is a <code>.tar.gz</code> holding <code>manifest.json</code> (<code>{ format: &quot;omp-ui-data&quot;, version: 1, appVersion, createdAt, driver, counts, credentialsKey: &quot;file&quot;|&quot;env&quot;|&quot;none&quot; }</code>), <code>db/&lt;table&gt;.jsonl</code> for every table (<code>settings</code>, <code>users</code> with password hashes, <code>boards</code>, <code>tasks</code>, <code>comments</code>, <code>runs</code>, <code>run_events</code>, <code>schedulers</code>, <code>scheduler_runs</code>) as driver-independent domain records (the same shapes the API returns; an export from one database driver imports into another), <code>files/</code> (<code>DATA_DIR/files</code>) and <code>credentials.key</code> (left out when <code>CREDENTIALS_KEY</code> sets the key). Project folders and omp&#39;s <code>~/.omp</code> are not included.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/data-transfer</code></td>
+<td><code>DataTransferStatus</code>: <code>{ driver, users, projects, cards, schedulers, filesBytes, credentialsKey: &quot;env&quot;|&quot;file&quot;, activeAgents, importing, backups: { name, size, createdAt }[] }</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/data-transfer/export</code></td>
+<td>The export as <code>application/gzip</code> (<code>omp-ui-data-&lt;yyyymmdd-hhmmss&gt;.tar.gz</code>), built before the response starts. Logged as a security event</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/data-transfer/import?confirm=replace</code></td>
+<td>Raw <code>.tar.gz</code> body → <code>DataImportResult</code> <code>{ source: { appVersion, createdAt, driver }, counts, skipped, files, credentialsKey: &quot;restored&quot;|&quot;ignored&quot;|&quot;set-env&quot;|&quot;none&quot;, interrupted, backup, signedOut }</code>. Replaces <strong>all</strong> data: saves the current data to <code>DATA_DIR/backups/before-import-&lt;stamp&gt;.tar.gz</code> (newest 3 kept), replaces every table (one transaction on SQLite and PostgreSQL; MongoDB restores the backup when it fails midway), then <code>DATA_DIR/files</code> and <code>credentials.key</code>, and reloads the token secret, AI provider keys, MCP env and chat bots without a restart. Cards whose agent was running in the source fail with a note (Resume continues them), queued ones go idle, running runs end <code>aborted</code>; rows whose project, card, run or scheduler is missing are left out (<code>skipped</code>). <code>signedOut</code>: the caller&#39;s token no longer works (the import replaced the accounts or the token secret). 400 without <code>confirm=replace</code>, for anything but a valid export (wrong format, newer <code>version</code>, row counts not matching the manifest, links or special files in it, no active admin account) — nothing changes then; 409 while agents run or queue, or during another import</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/data-transfer/backups/{name}</code></td>
+<td>Download a pre-import backup (an export; importing it restores that state). 404 for unknown names</td>
+</tr>
+</tbody></table></div>
+<h2 id="stats"><a class="anchor" href="#stats" aria-label="Link to section">#</a>Stats</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/stats/system</code></td>
+<td><code>SystemStats</code>: host (hostname, OS, uptime, Node), CPU (model, cores, load average, usage % sampled over ~200 ms), memory, disk of the <code>DATA_DIR</code> filesystem (<code>null</code> if unavailable), server process (pid, uptime, RSS, heap), app counts (boards, tasks per status, agents running/queued), and <code>resourceGuard</code> (`ResourcePressure</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/stats/ai?refresh=1</code></td>
+<td>NDJSON stream of <code>AiStatsEvent</code>s, one per line, each sent as soon as its source answers (the three run side by side): <code>{ type: &quot;providers&quot;, activeProviders }</code> at once, then <code>{ type: &quot;quota&quot;, at, quota }</code> (<code>omp usage --json</code>), <code>{ type: &quot;balances&quot;, at, balances }</code> and <code>{ type: &quot;usage&quot;, at, usage }</code> (<code>omp stats --json</code>) in whatever order they finish; <code>at</code> is when that part was read. A failure of the whole request ends the stream with <code>{ type: &quot;error&quot;, message }</code>. Each part is cached 60 s server-side; <code>refresh=1</code> bypasses the cache</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/stats/maintenance</code></td>
+<td><code>MaintenanceReport</code> (~1 s): top CPU/memory processes plus every agent-related one, each tagged (<code>server</code>, <code>card-agent</code>, <code>helper</code>, <code>orphan-agent</code> for untracked omp agents of this <code>DATA_DIR</code> whose parent died, <code>agent-spawned</code>, <code>omp</code>, <code>user</code>, <code>system</code>) with <code>killable</code>; memory (available, swap, server heap, idle helper agents); storage cleanup items with estimated bytes and <code>risk</code> (<code>safe</code>/<code>review</code>), other large folders (read-only) and recommendations</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/stats/maintenance</code></td>
+<td><code>{ kind: &quot;cleanup&quot;, ids }</code> (ids from <code>CLEANUP_IDS</code>: leftovers of deleted cards/projects, old run configs, drafts and change summaries, rotated logs, SQLite compaction, Docker prunes) · <code>{ kind: &quot;kill&quot;, pids }</code> (SIGTERM, SIGKILL after 3 s, with killable children; never the server or its ancestors, never a running card&#39;s agent) · <code>{ kind: &quot;release-memory&quot; }</code> (close idle helper agents, full GC) · <code>{ kind: &quot;stop-card&quot;, taskId }</code> → <code>MaintenanceResult { results: { id, ok, message, freedBytes }[], freedBytes }</code></td>
+</tr>
+</tbody></table></div>
+<p>The <code>quota</code> and <code>usage</code> parts each carry <code>available: boolean</code> and a plain-language <code>error</code> (e.g. <code>&quot;omp is not installed&quot;</code>, <code>&quot;omp usage took too long to respond&quot;</code>); a failing <code>omp</code> command never fails the request. Each quota limit has <code>usedFraction</code> (0–1), <code>windowLabel</code> (e.g. <code>&quot;5 Hour&quot;</code>) and <code>resetsAt</code> (ISO). <code>usage</code> has <code>totals</code> (requests, failures, tokens, cache read/write, <code>cacheRate</code>, <code>cacheSavings</code>, <code>avgTokensPerSecond</code>, <code>avgTtftMs</code>, <code>costUsd</code>), <code>byModel</code>, <code>byAgent</code> (per omp agent kind) and <code>series</code> (hourly requests, tokens and cost). Timestamps are ISO strings.</p>
+<p>The <code>balances</code> part carries prepaid balances the server reads directly from provider APIs because <code>omp usage</code> cannot read them (currently DeepSeek, via <code>GET /user/balance</code> with <code>DEEPSEEK_API_KEY</code>): one <code>AiProviderBalance</code> per provider with <code>provider</code>, <code>currency</code> (ISO code, e.g. <code>&quot;CNY&quot;</code>/<code>&quot;USD&quot;</code>), <code>total</code>, <code>granted</code>, <code>toppedUp</code> (amounts, <code>null</code> when unreported) and <code>available</code> (whether the balance is enough for API calls). A missing key or a failed request simply omits the entry — it never fails the request.</p>
+<h2 id="cluster"><a class="anchor" href="#cluster" aria-label="Link to section">#</a>Cluster</h2>
+<p>Cluster mode (<a href="../cluster/">docs/CLUSTER.md</a>). Types (<code>ClusterStatus</code>, <code>ClusterNodeStatus</code>, <code>ClusterJoinInfo</code>, <code>ClusterTestResult</code>, <code>ClusterInfo</code>, <code>ClusterNotice</code>) are in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/types.ts"><code>lib/types.ts</code></a>.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/cluster</code></td>
+<td>–</td>
+<td><code>ClusterStatus</code>: <code>role</code> (<code>standalone</code>|<code>primary</code>|<code>replica</code>), this node&#39;s <code>nodeId</code>/<code>nodeName</code>, the election <code>term</code>, <code>preferredPrimaryId</code> (the home primary that takes control back after a failover), cluster <code>port</code>, <code>primary</code> and <code>connection</code> (replicas), <code>runLocal</code>, every known node (<code>nodes</code>: role, online, address, resources, slots, running cards, omp readiness, replication lag, latency), <code>totals</code> and the latest <code>notices</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/cluster/enable</code></td>
+<td>–</td>
+<td>Admin. Makes this server the primary (new join token, term 1) → <code>ClusterStatus</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/cluster/disable</code></td>
+<td>–</td>
+<td>Admin. Back to standalone (a primary disconnects its nodes, a replica leaves) → <code>ClusterStatus</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/cluster/token</code></td>
+<td>–</td>
+<td>Admin, primary only (else 409). <code>ClusterJoinInfo</code> <code>{ token, url, joinCommand }</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/cluster/token</code></td>
+<td>–</td>
+<td>Admin. Rotates the token (connected nodes receive the new one) → <code>ClusterJoinInfo</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/cluster/test</code></td>
+<td><code>{ url, token }</code></td>
+<td>Admin. <code>ClusterTestResult</code> <code>{ ok, latencyMs, node, error }</code>: fetches <code>&lt;url&gt;/api/v1/cluster/info</code>, then authenticates on the cluster port. <code>token: &quot;&quot;</code> uses this node&#39;s stored token</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/cluster/join</code></td>
+<td><code>{ url, token }</code></td>
+<td>Admin. Joins the primary at <code>url</code> as a replica after a successful test: the local database is backed up to <code>DATA_DIR/cluster/backups/</code>, then the server restarts as a replica (its data is replaced by the primary&#39;s) → <code>ClusterStatus</code>. 400 when the test fails or <code>url</code> is not a primary</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/cluster/leave</code></td>
+<td>–</td>
+<td>Admin. A replica leaves and becomes standalone, keeping the replicated data → <code>ClusterStatus</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/cluster/restore</code></td>
+<td><code>{ restart? }</code></td>
+<td>Admin, replica only (else 409 <code>This node is not a replica</code>). Restores the link to the primary: <code>restart: false</code> (default) reconnects now with the retry backoff reset; <code>restart: true</code> restarts the server through <code>bin/supervisor.mjs</code> (409 when it runs without the supervisor) → <code>ClusterStatus</code>. 400 when <code>restart</code> is not a boolean</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/cluster/nodes/{id}</code></td>
+<td>–</td>
+<td>Admin, primary. Disconnects and forgets the node (it becomes standalone) → <code>{ ok: true }</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/cluster/info</code></td>
+<td>–</td>
+<td>Public. <code>ClusterInfo</code> <code>{ version, protocol, role, port, platform, arch, nodeVersion, omp: { available, version, sha256 }, connection }</code> (<code>sha256</code> of the primary&#39;s omp binary, <code>null</code> without one; <code>connection</code>: a replica&#39;s link state to the primary, <code>connected</code> | <code>connecting</code> | <code>electing</code>, <code>null</code> on other roles)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/cluster/join</code></td>
+<td>–</td>
+<td>Public. The POSIX shell join script (<code>curl -fsSL &lt;url&gt;/api/v1/cluster/join | sh -s -- &lt;token&gt; [--service|--foreground]</code>): checks the machine, installs missing packages (root or <code>sudo -n</code>), Node.js with npm, the primary&#39;s omp and the app, starts the node in the background (default) and waits until it is a replica connected to the primary, else stops it and exits 1</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/cluster/bundle</code></td>
+<td>–</td>
+<td>Public. <code>application/gzip</code> tar of the running build (<code>dist/standalone</code>, <code>bin/supervisor.mjs</code>; never <code>.env</code> or <code>data/</code>)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/cluster/runtime/node?platform=&amp;arch=</code></td>
+<td>–</td>
+<td>Public. gzip of the server&#39;s Node binary when <code>platform</code>/<code>arch</code> match it, else 404</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/cluster/runtime/omp</code></td>
+<td>–</td>
+<td>Public. gzip of the primary&#39;s omp binary, 404 when omp is not installed</td>
+</tr>
+</tbody></table></div>
+<p><code>PATCH /settings</code> also takes <code>clusterRunLocal</code> (boolean, default <code>true</code>: the primary runs cards itself too, but only when no node has a free slot), <code>clusterFailoverSeconds</code> (integer 5–600, default 20: how long replicas wait for a lost primary before they elect a new one), <code>clusterAutoRestart</code> (boolean, default <code>true</code>: a replica restarts itself through <code>bin/supervisor.mjs</code> when it stays cut off from its primary; env default <code>OMP_UI_CLUSTER_AUTO_RESTART</code>) and <code>clusterRestartAfterSeconds</code> (integer 60–86400, default 300: seconds without a session with the primary before that restart, at least <code>clusterFailoverSeconds</code> + 60, doubled for every restart in a row up to 1 hour unless the setting is longer; env default <code>OMP_UI_CLUSTER_RESTART_AFTER_SEC</code>). On a replica every non-GET request except <code>/auth/login</code>, <code>/auth/logout</code> and <code>/cluster/*</code> answers 409 naming the primary (changes are made there). Live updates: <code>cluster.updated</code> (<code>{ status: ClusterStatus }</code>; for regular users <code>nodes[].runningTaskIds</code> lists only their own cards, as in <code>GET /cluster</code>) and <code>cluster.notice</code> (<code>{ notice: ClusterNotice }</code>) on <code>/events</code> for every signed-in user. <code>Run.nodeId</code>/<code>Run.nodeName</code> name the node that executed a run (null outside cluster mode); running <code>QueueEntry</code>s carry <code>node</code> (<code>{ id, name }</code>) and <code>queue.updated</code> carries <code>nodes</code> (running task id → <code>{ id, name }</code>; <code>{}</code> outside cluster mode, narrowed to their own cards for regular users), and <code>concurrency.cluster</code> (<code>{ localLimit, nodes, remoteSlots }</code>: <code>nodes</code>/<code>remoteSlots</code> count the nodes that take new cards; a node that does not — stale status, failing health checks, a resource or load guard holding — adds only the cards it runs to the limit) explains the cluster-wide limit. A run whose node stays offline longer than 30 s fails with <code>&lt;reason&gt;; rescheduled</code> and its card is queued again without using an automatic retry.</p>
+<h2 id="logs"><a class="anchor" href="#logs" aria-label="Link to section">#</a>Logs</h2>
+<p>Backs the <strong>Logs</strong> page. Sources (<code>LogSource</code>, <code>lib/log-types.ts</code>): <code>system</code> (<code>DATA_DIR/omp-ui.log</code>), <code>security</code>, <code>access</code> and <code>database</code> (JSON-line event logs <code>DATA_DIR/&lt;source&gt;.log</code> written by the server), <code>agent</code> (agent runs of every card, from the database), <code>restart</code> (<code>restart.log</code>) and <code>tunnel</code> (<code>tunnel.log</code>). Rotated copies (<code>&lt;name&gt;.1</code>, <code>&lt;name&gt;.2</code>, …) are read as archives; event logs rotate past 5 MB.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/logs</code></td>
+<td><code>LogSourcesResponse { sources: LogSourceInfo[] }</code>: id, label, description, <code>kind</code> (<code>file</code>/<code>events</code>/<code>runs</code>) and its files (<code>LogFileInfo { name, size, modifiedAt, archived }</code>)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/logs/:source?limit=&amp;offset=&amp;level=&amp;since=&amp;until=&amp;q=&amp;file=</code></td>
+<td><code>LogPage { source, entries, total, offset, limit, nextOffset, files }</code>, newest first. <code>limit</code> 1–500 (default 100); <code>level</code> comma list of <code>debug</code>,<code>info</code>,<code>warn</code>,<code>error</code>; <code>since</code>/<code>until</code> ISO-8601 (inclusive); <code>q</code> case-insensitive text search; <code>file</code> <code>all</code> (default) or one file name. <code>LogEntry { id, time, approximateTime?, level, source, category, message, details, meta?, file }</code>. Unknown source → 404, bad filter → 400</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/logs/:source/export?format=json|ndjson|txt&amp;&lt;filters&gt;</code></td>
+<td>Download (<code>content-disposition: attachment</code>) of every matching entry (max 50 000), newest first</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/logs/access</code></td>
+<td><code>{ path }</code> → 204. Records a page view in the access log</td>
+</tr>
+</tbody></table></div>
+<p>Security events: logins (succeeded, failed, rate-limited, with the login name), logout, password setup/change (including <code>omp-ui passwd</code>), user account changes (create, update, delete, password set; <code>meta.targetId</code>, <code>meta.targetUsername</code>), credential changes and unauthorized or admin-only API requests. Access events: every authenticated API request (method, path without query string, status, duration, client IP) except reads of <code>/logs</code>, plus page views. Events of a signed-in request carry <code>meta.user</code> (username) and <code>meta.userId</code>. Database events: connection, migrations, failed and slow (≥ 500 ms) queries. Secrets, query strings and request bodies are never logged.</p>
+<h2 id="omp-config"><a class="anchor" href="#omp-config" aria-label="Link to section">#</a>OMP config</h2>
+<p>omp&#39;s own user config file: <code>config.yml</code> in the agent folder that <code>omp config path</code> reports (the <strong>Settings → OMP</strong> page). Saves are checked with the omp CLI on a temporary copy, the previous file is kept at <code>backupPath</code> (<code>config.yml.bak</code>), and the file is replaced atomically (temp file + rename). OMP-UI&#39;s <code>approvalMode</code>, board/default model override the matching omp keys for its own runs.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/omp-config</code></td>
+<td>–</td>
+<td><code>OmpConfigSnapshot</code>: <code>{ path, backupPath, format: &quot;yaml&quot;, exists, version, raw, values, defaults, schema, settings, secretsSet }</code>. <code>version</code>: content hash of <code>raw</code>. <code>values</code>: schema key → value set in the file (<code>null</code> = unset); <code>defaults</code>: what omp uses when unset. <code>schema</code>: <code>OmpConfigField[]</code> (<code>{ key, label, type: &quot;model&quot;|&quot;enum&quot;|&quot;boolean&quot;|&quot;number&quot;|&quot;string&quot;, group: &quot;models&quot;|&quot;behavior&quot;|&quot;tools&quot;, help, options?, min?, max?, placeholder? }</code>; model roles are <code>modelRoles.&lt;role&gt;</code>). <code>settings</code>: every dotted key the file sets → its value (lists and mappings included), secrets left out; <code>secretsSet</code>: the secret keys the file sets. 503 when omp is missing or not executable; 500 when the file is not valid YAML</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/omp-config</code></td>
+<td><code>{ values, version? }</code> (schema key or any key of <code>/omp-config/settings</code> → value; lists and mappings as JSON values; <code>null</code> unsets it) or <code>{ raw, version? }</code> (the whole file, at most 1 MB)</td>
+<td><code>OmpConfigSnapshot</code> after saving. 400 when both or neither of <code>values</code>/<code>raw</code> are sent, for an unknown key or invalid value, when <code>modelRoles</code> and a <code>modelRoles.&lt;role&gt;</code> key are sent together, or when omp rejects the config; 409 when <code>version</code> no longer matches the file on disk</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/omp-config/models?refresh=1</code></td>
+<td>–</td>
+<td><code>{ models: OmpModel[] }</code>, each <code>{ selector: &quot;provider/model-id&quot;, name, provider, thinking: string[] }</code> (chat models from <code>omp models --json</code>; <code>thinking</code> is empty for models that do not reason). Cached 5 min; <code>refresh=1</code> bypasses the cache</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/omp-config/settings?refresh=1</code></td>
+<td>–</td>
+<td><code>{ settings: OmpSettingInfo[] }</code>, each <code>{ key, type: &quot;boolean&quot;|&quot;number&quot;|&quot;string&quot;|&quot;enum&quot;|&quot;array&quot;|&quot;record&quot;, description, options, default, secret }</code>: every setting omp knows (<code>omp config list</code> on an empty config). <code>options</code>: enum choices as <code>omp config set</code> validates them; <code>default</code>: omp&#39;s built-in value (<code>null</code> for secrets); <code>secret</code>: omp redacts the value. Takes a few seconds; cached 10 min, <code>refresh=1</code> bypasses the cache</td>
+</tr>
+</tbody></table></div>
+<h2 id="dashboard"><a class="anchor" href="#dashboard" aria-label="Link to section">#</a>Dashboard</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/dashboard</code></td>
+<td><code>Dashboard</code>: everything the home page shows in one request (fields below)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/artifacts?from=&amp;to=</code></td>
+<td><code>ArtifactProject[]</code>: every project with <code>resultCount</code> (cards whose final result ended in the period), <code>attachmentCount</code> (their final attachments) and <code>latestAt</code> (<code>null</code> when none); projects with results first (newest first), then pinned, then by name. A card&#39;s final result is its latest succeeded run with a non-empty summary; it counts when that run&#39;s <code>endedAt</code> is ≥ <code>from</code> and &lt; <code>to</code> (ISO dates, each optional). An invalid date is 400</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/artifacts/:boardId?from=&amp;to=</code></td>
+<td><code>ArtifactProjectResults</code>: <code>{ board: { id, name, workdir }, results }</code>, each result <code>{ taskId, boardId, title, status, runId, summary, finishedAt, attachments }</code>, newest <code>finishedAt</code> first. <code>attachments</code> (<code>ArtifactFile[]</code>: <code>{ name, url, size, modifiedAt }</code>, <code>size</code>/<code>modifiedAt</code> <code>null</code> when the file is gone) are only the card&#39;s own shared files (<code>/api/v1/tasks/:id/files/…</code>) linked or embedded in the final summary, in order of first mention; other files in the card&#39;s folder are not listed. 400 for an invalid date, 404 for an unknown project</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><code>generatedAt</code>; <code>totals</code> (cards per column across all projects).</li>
+<li><code>boards</code>: each <code>BoardWithCounts</code> plus <code>lastActivityAt</code>, <code>attentionCount</code>, <code>needsYouCount</code>, <code>runs30d: { succeeded, failed }</code> (runs that ended in the last 30 days; stopped runs are not counted) and <code>git</code> (<code>GitStatus[]</code>, one per project folder, cached a few seconds); most recently active first.</li>
+<li><code>attention</code>: cards that need you (<code>reason: &quot;failed&quot;</code> when the agent errored, <code>&quot;stalled&quot;</code> when a card sits In progress with no agent working on it; failed first, at most 12). <code>finished</code>: Done cards an agent worked on, newest first, at most 6.</li>
+<li><code>needsYou</code>: <code>NeedsYouCard[]</code>, most urgent first, at most 50 (<code>needsYouTotal</code> is the full count). Each is a dashboard card plus <code>reasons</code> (every one that applies, most urgent first: <code>&quot;question&quot;</code>, <code>&quot;failed&quot;</code>, <code>&quot;retrying&quot;</code>, <code>&quot;feedback&quot;</code>, <code>&quot;stalled&quot;</code>, <code>&quot;unpushed&quot;</code>), <code>question</code> (the agent&#39;s question, truncated; <code>null</code> unless <code>reasons</code> has <code>&quot;question&quot;</code>), <code>retryAt</code> and <code>pushedAt</code>. A <code>&quot;retrying&quot;</code> card whose <code>agentError</code> is a quota error (<code>isQuotaError</code> in <code>lib/quota.ts</code>) is shown as <strong>Waiting for quota</strong>.</li>
+<li><code>queue</code> (<code>QueueSnapshot</code>) and <code>live</code>: one <code>{ taskId, startedAt, model, activity, activityAt }</code> per running or queued entry (<code>startedAt</code> is <code>null</code> while queued; <code>activity</code> is the agent&#39;s latest tool call, status or first line of text).</li>
+<li><code>stats</code>: <code>day</code> (last 24 h) and <code>week</code> (last 7 days), each <code>{ runs, succeeded, failed, avgDurationMs, shipped, created }</code>; <code>daily</code>: the same 7 days as rolling 24-hour buckets <code>{ runs, succeeded, failed, shipped }</code>, oldest first.</li>
+<li><code>activity</code>: newest first, at most 12, each <code>{ kind: &quot;created&quot;|&quot;succeeded&quot;|&quot;failed&quot;|&quot;stopped&quot;|&quot;pushed&quot;, at, taskId, boardId, boardName, title, durationMs, detail }</code>.</li>
+<li><code>setup: { hasCard, hasRun, hasDone, hasPush, settingsSaved, dockerAvailable }</code> for the getting-started checklist (<code>dockerAvailable</code>: the docker CLI reaches a daemon, cached a few minutes).</li>
+</ul>
+<h2 id="boards-projects"><a class="anchor" href="#boards-projects" aria-label="Link to section">#</a>Boards (projects)</h2>
+<p>A board is one project. <code>workdir</code> is the main folder (omp runs there); <code>extraFolders</code> are additional folders that belong to the same project (e.g. separate frontend/backend repos), passed to omp as <code>--add-dir</code>. <code>pushBranch</code> (default <code>&quot;main&quot;</code>; boards created before it existed read <code>&quot;main&quot;</code>) is the branch <strong>Push to main</strong> and the header quick push land on in every project repo; it is created on <code>origin</code> if missing. <strong>Create PR</strong> and <strong>Push to current branch</strong> ignore it: they target each repo&#39;s default branch and current branch respectively. <code>defaultBranches</code> (default <code>{}</code>) names that default branch per repo, keyed by folder (<code>workdir</code> or an <code>extraFolders</code> entry, absolute): it is the branch <strong>Create PR</strong> targets. A repo with no entry uses its own <code>origin/HEAD</code>, then a local or remote <code>main</code>/<code>master</code>, then its checked-out branch, then <code>main</code>.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/boards</code></td>
+<td>–</td>
+<td><code>BoardWithCounts[]</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/boards</code></td>
+<td><code>{ name, workdir, extraFolders?, model?, autoRun?, pushBranch?, defaultBranches? }</code></td>
+<td><code>Board</code> (201)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/boards/:id</code></td>
+<td>–</td>
+<td><code>Board</code></td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/boards/:id</code></td>
+<td><code>Partial&lt;{ name, workdir, extraFolders, model, autoRun, pushBranch, defaultBranches, pinned }&gt;</code></td>
+<td><code>Board</code>. <code>pinned</code> (default <code>false</code>) puts the project on the home dashboard; a patch that only changes <code>pinned</code> leaves <code>updatedAt</code> as it was. <code>pushBranch</code> (POST and PATCH) is trimmed and must be a git branch name (≤200 characters; no leading <code>-</code>, whitespace, control or invisible characters, <code>~^:?*[\</code>, <code>..</code>, <code>@{</code>, <code>//</code>, leading/trailing <code>/</code>, components starting with <code>.</code> or ending in <code>.lock</code>, trailing <code>.</code>, <code>@</code> or <code>HEAD</code>): 400 <code>pushBranch must be a string</code>, <code>pushBranch is required</code> (empty), or <code>pushBranch must be a valid git branch name</code>. <code>defaultBranches</code> (POST and PATCH) replaces the whole map: each key must be one of the project&#39;s folders and each value a git branch name (same rules; trimmed, ≤200 characters) — 400 <code>defaultBranches must be an object of folder → branch.</code>, <code>defaultBranches can only name the project&#39;s folders…</code>, <code>The default branch of &lt;folder&gt; must be a string.</code> or <code>“&lt;branch&gt;” isn&#39;t a valid git branch name (default branch of &lt;folder&gt;).</code>; an empty value clears that repo. A patch that changes <code>workdir</code>/<code>extraFolders</code> without <code>defaultBranches</code> drops the entries of folders that left the project</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/boards/:id</code></td>
+<td>–</td>
+<td><code>{ ok: true }</code> (stops its agents, cascades, removes its shared files and every card&#39;s files, workspace and marked Docker resources)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/boards/:id/access</code></td>
+<td>–</td>
+<td><code>Board</code> with <code>lastAccessedAt</code> set to now; <code>updatedAt</code> stays as it was. The board page calls it on open; the sidebar&#39;s <strong>Your projects</strong> lists the 10 most recently opened projects, in list order (never-opened ones only fill leftover spots). 404 for a project you can&#39;t see</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/boards/:id/tasks</code></td>
+<td>–</td>
+<td><code>Task[]</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/boards/:id/tasks</code></td>
+<td><code>{ title, description?, status?, position? }</code> or <code>{ text, position? }</code></td>
+<td><code>Task</code> (201). Creating directly in <code>in_progress</code> with autoRun starts the agent. <code>text</code>: a card from free text, see <a href="#new-cards-from-text">New cards from text</a></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/boards/:id/files</code></td>
+<td>–</td>
+<td><code>SharedFiles</code> of the board (shared with every card&#39;s agent)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/boards/:id/files?name=&lt;file&gt;</code></td>
+<td>raw file bytes</td>
+<td><code>SharedFiles</code> (201); replaces a file of the same name; max 100 MB</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/boards/:id/files/&lt;name&gt;</code></td>
+<td>–</td>
+<td>the file, served like <code>/tasks/:id/files/&lt;name&gt;</code> (<code>?download=1</code> forces a download)</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/boards/:id/files/&lt;name&gt;</code></td>
+<td>–</td>
+<td><code>SharedFiles</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/boards/:id/project-files?q=&lt;query&gt;&amp;limit=&lt;n&gt;</code></td>
+<td>–</td>
+<td><code>{ files: ProjectFileHit[] }</code> for the composer&#39;s <code>@</code> mentions and the Files tree (card Review tab, Files page): fuzzy matches over the project folders&#39; files and directories (git-tracked plus untracked, gitignored excluded; non-git folders are walked). Empty <code>q</code> lists the workdir&#39;s top level; <code>q</code> ending in <code>/</code> lists that directory&#39;s children (an absolute <code>q</code> inside an extra folder lists there). Workdir hits insert a relative path, extra-folder hits an absolute one. <code>limit</code> defaults to 30 (1–1000)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/boards/:id/project-files/content?path=&lt;id&gt;</code></td>
+<td>–</td>
+<td><code>ProjectFileContent</code> <code>{ path, content, size, mtimeMs }</code> of one project file for the file editor (card Review tab, Files page). <code>path</code> is a <code>ProjectFileHit.insert</code> (relative to the workdir, or absolute inside an extra folder). 403 outside the project folders (symlinks included) or inside <code>.git</code>, 404 missing or not a regular file, 413 over 2 MB, 415 binary</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/boards/:id/project-files/content</code></td>
+<td><code>{ path, content, baseMtimeMs }</code></td>
+<td><code>ProjectFileContent</code> after atomically overwriting an existing file (mode kept). 409 when its <code>mtimeMs</code> on disk is no longer <code>baseMtimeMs</code>; same path rules and limits as GET; never creates files</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/boards/:id/project-files/ops</code></td>
+<td><code>FileOp</code>: <code>{ op: &quot;create-file&quot;|&quot;create-dir&quot;, path }</code>, <code>{ op: &quot;rename&quot;|&quot;copy&quot;, from, to }</code> or <code>{ op: &quot;delete&quot;, path }</code></td>
+<td><code>FileOpResult</code> <code>{ path, kind }</code> (directories end with <code>/</code>). Files tree actions; paths as in <code>ProjectFileHit.insert</code>. Missing parents of a new path are created; <code>rename</code> moves (also between the project&#39;s folders); <code>copy</code> and <code>delete</code> are recursive (delete is permanent). 409 when the target exists, 404 missing source, 400 bad op or a folder moved/copied into itself, 403 outside the project folders (symlinks included), inside <code>.git</code>, or on a project folder itself. Listings reflect the change right away</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/boards/:id/git</code></td>
+<td>–</td>
+<td><code>GitStatus[]</code>, one per project folder (<code>workdir</code> first, then <code>extraFolders</code>). <code>defaultBranch</code> is the project&#39;s configured branch for that folder (<code>Board.defaultBranches</code>), else the repo&#39;s own: <code>origin/HEAD</code>, then a local/remote <code>main</code>/<code>master</code>, then its checked-out branch, then <code>main</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/boards/:id/git/branches?folder=&lt;abs&gt;</code></td>
+<td>–</td>
+<td><code>GitBranches</code>: <code>current</code> (null when detached) and <code>branches</code> – local ones newest first, then <code>origin</code> branches without a local copy (<code>remoteOnly: true</code>). No fetch; reflects the last fetch. 400 if <code>folder</code> is not a project folder or not a git repository</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/boards/:id/git/branches</code></td>
+<td><code>{ folder, branch }</code></td>
+<td><code>GitSwitchResult</code> of <code>folder</code> after checking out <code>branch</code> (a <code>remoteOnly</code> branch becomes a local branch tracking <code>origin</code>) and pulling its upstream with <code>git pull --ff-only</code> (also when <code>branch</code> is already checked out): the <code>GitStatus</code> fields plus <code>pulled</code> (commits fast-forwarded) and <code>pullError</code> (plain-language reason the pull failed, e.g. offline or diverged; the switch still stands; <code>null</code> when it succeeded or the branch has no upstream). Uncommitted changes carry over; if they would be overwritten by the checkout git refuses and the 400 says so. 400 if the branch doesn&#39;t exist; 409 while any agent on the board is queued or running</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/boards/:id/git/push</code></td>
+<td>–</td>
+<td><code>{ results: GitRepoActionResult[] }</code>, one per project git repo – the header&#39;s quick push (tap the “N changes” chip). Commits each repo&#39;s changes as “Update from OMP-UI (N files)” and pushes to the board&#39;s <code>pushBranch</code>, like “Push to main” but not tied to a card (no comment, no <code>pushedAt</code>). 400 if no project folder is a git repository; 409 while any agent on the board is queued or running (boards without dedicated workspaces)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/boards/:id/git/discard</code></td>
+<td>–</td>
+<td><code>{ results: GitDiscardFolderResult[] }</code>, one per project git repo – the header&#39;s “Discard all changes” button. Discards each repo&#39;s uncommitted changes (<code>git reset --hard HEAD</code> + <code>git clean -fd</code>: tracked, staged and untracked files; ignored files, unpushed commits and checkpoints are left alone). <code>discardedFiles</code> is the count reset per folder (<code>0</code> when it was clean or failed), <code>error</code> the plain-language failure for that folder. 400 if no project folder is a git repository; 409 while any agent on the board is queued or running (boards without dedicated workspaces)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/boards/:id/trajectories?status=&amp;compress=1&amp;maxTokens=</code></td>
+<td>–</td>
+<td>NDJSON stream <code>trajectories-&lt;boardId&gt;.jsonl</code>: one ShareGPT trajectory per card with a readable agent session, optionally only cards in <code>status</code> (<code>todo</code>, <code>in_progress</code>, <code>done</code>). See <a href="#trajectories">Trajectories</a></td>
+</tr>
+</tbody></table></div>
+<p>Folder rules: <code>workdir</code> and every <code>extraFolders</code> entry must be an absolute path to an existing directory (400 names the bad folder). <code>extraFolders</code> holds at most 20 entries; entries are trimmed and de-duplicated, and any entry equal to <code>workdir</code> is dropped. Changing <code>workdir</code> to a folder that is listed in <code>extraFolders</code> removes it from <code>extraFolders</code>.</p>
+<h2 id="folders-cloning"><a class="anchor" href="#folders-cloning" aria-label="Link to section">#</a>Folders &amp; cloning</h2>
+<p><code>WORKSPACE_DIR</code> (env, default <code>~/omp-workspace</code>, created if missing) is where the folder picker starts and where repositories are cloned.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/fs/browse?path=&lt;abs&gt;</code></td>
+<td>–</td>
+<td><code>FsBrowseResult</code>: sub-folders of <code>path</code> (default <code>WORKSPACE_DIR</code>); hidden and unreadable folders skipped, sorted by name, max 500. 400 if <code>path</code> is not absolute or not an existing folder</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/fs/mkdir</code></td>
+<td><code>{ parent, name }</code></td>
+<td><code>FsEntry</code> (201) for the new folder <code>parent/name</code> (<code>isGitRepo: false</code>); only that one folder is created. <code>name</code> is trimmed. 409 if something named <code>name</code> already exists in <code>parent</code>; 400 if <code>parent</code> is missing, not absolute or not an existing folder, if <code>name</code> is empty, contains <code>/</code>, is <code>.</code>/<code>..</code>, starts with <code>.</code> (hidden) or is longer than 255 bytes, or with a plain-language reason if the folder can&#39;t be created (e.g. no write permission)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/fs/files?root=&lt;abs&gt;&amp;q=&lt;query&gt;&amp;limit=&lt;n&gt;</code></td>
+<td>–</td>
+<td><code>{ files: ProjectFileHit[] }</code> like <code>/boards/:id/project-files</code>, for one folder (the Files page&#39;s <strong>Folder…</strong> source); ids are relative to <code>root</code>. 400 if <code>root</code> is not absolute, 404 if it is not an existing folder, 403 inside <code>.git</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/fs/file?root=&lt;abs&gt;&amp;path=&lt;id&gt;</code></td>
+<td>–</td>
+<td><code>ProjectFileContent</code> of one file under <code>root</code>, with the same rules and limits as <code>/boards/:id/project-files/content</code></td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/fs/file</code></td>
+<td><code>{ root, path, content, baseMtimeMs }</code></td>
+<td><code>ProjectFileContent</code> after overwriting an existing file under <code>root</code>; 409 when it changed on disk since <code>baseMtimeMs</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/fs/ops</code></td>
+<td><code>{ root, ...FileOp }</code></td>
+<td><code>FileOpResult</code>, like <code>/boards/:id/project-files/ops</code> for one folder (paths relative to <code>root</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/git/clone</code></td>
+<td><code>{ url, name?, branch? }</code></td>
+<td><code>{ path, output }</code> (201). <code>url</code>: <code>https://…</code>, <code>ssh://…</code>, <code>git@host:owner/repo.git</code>, or an absolute path ending in <code>.git</code>. Clones into <code>WORKSPACE_DIR/&lt;name&gt;</code> (default: repo name; characters outside <code>A-Za-z0-9._-</code> replaced). 409 if that folder exists; 400 with a plain-language reason if the clone fails (10 min timeout)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/git/repo?path=&lt;abs&gt;</code></td>
+<td>–</td>
+<td><code>{ path, isGitRepo }</code>: <code>path</code> resolved; <code>isGitRepo</code> true when the folder is inside a git work tree (a sub-folder of a repository counts). 400 if <code>path</code> is missing, not absolute, or not an existing folder</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/git/init</code></td>
+<td><code>{ path }</code></td>
+<td><code>{ path, output }</code> (201). Runs <code>git init</code> in the existing absolute folder <code>path</code> (server&#39;s git config applies, e.g. <code>init.defaultBranch</code>). 409 if the folder is already inside a git repository; 400 if <code>path</code> is missing, not absolute or not an existing folder, or with a plain-language reason if <code>git init</code> fails (e.g. no write permission)</td>
+</tr>
+</tbody></table></div>
+<p>Git never prompts: commands run without a terminal (<code>GIT_TERMINAL_PROMPT=0</code>, SSH in batch mode), so the server user needs working SSH keys or saved credentials for private remotes.</p>
+<h2 id="tasks-cards"><a class="anchor" href="#tasks-cards" aria-label="Link to section">#</a>Tasks (cards)</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/tasks/:id</code></td>
+<td>–</td>
+<td><code>{ task: Task, comments: Comment[], runs: Run[] }</code></td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/tasks/:id</code></td>
+<td><code>Partial&lt;{ title, description, status, position, question }&gt;</code></td>
+<td><code>Task</code>. Status change triggers agent rules below. <code>question</code> accepts only <code>null</code> (dismiss the agent&#39;s question; the agent sets it)</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/tasks/:id</code></td>
+<td>–</td>
+<td><code>{ ok: true }</code> (also removes the card&#39;s files, workspace and marked Docker resources; Docker in the background)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/run</code></td>
+<td>–</td>
+<td><code>Task</code> (starts/queues agent, moves to In progress)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/stop</code></td>
+<td>–</td>
+<td><code>Task</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/tasks/:id/comments</code></td>
+<td>–</td>
+<td><code>Comment[]</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/comments</code></td>
+<td><code>{ body }</code></td>
+<td><code>Comment</code> (201, author <code>user</code>) – feedback for the agent</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/comments/:id</code></td>
+<td><code>{ resolved: boolean }</code></td>
+<td><code>Comment</code></td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/comments/:id</code></td>
+<td>–</td>
+<td><code>{ ok: true }</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/tasks/:id/runs</code></td>
+<td>–</td>
+<td><code>Run[]</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/runs/:id/events?after=&lt;seq&gt;&amp;limit=&lt;n&gt;</code></td>
+<td>–</td>
+<td><code>RunEvent[]</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/git/push</code></td>
+<td><code>{ message?, folders? }</code></td>
+<td><code>GitActionResult</code> – “Push to main”</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/git/push-current</code></td>
+<td><code>{ message?, folders? }</code></td>
+<td><code>GitActionResult</code> – “Push to current branch”</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/git/pr</code></td>
+<td><code>{ title?, body?, folders? }</code></td>
+<td><code>GitActionResult</code> – “Create PR/MR”</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/git/discard</code></td>
+<td>–</td>
+<td><code>{ results: GitDiscardFolderResult[] }</code> – “Discard all changes” in the card&#39;s Ship panel. Acts on the project folders, discarding uncommitted changes (<code>git reset --hard HEAD</code> + <code>git clean -fd</code>) in each git repo; <code>discardedFiles</code> per folder, <code>error</code> on failure. 409 while the card&#39;s agent is queued or running; 400 if none of the folders is a git repository</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/tasks/:id/files</code></td>
+<td>–</td>
+<td><code>SharedFiles</code> of the card</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/files?name=&lt;file&gt;</code></td>
+<td>raw file bytes</td>
+<td><code>SharedFiles</code> (201); replaces a file of the same name; max 100 MB</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/tasks/:id/files/&lt;name&gt;</code></td>
+<td>–</td>
+<td>the file. Images (<code>.png</code>, <code>.jpg</code>, <code>.gif</code>, <code>.webp</code>, <code>.avif</code>, <code>.bmp</code>, <code>.ico</code>), video (<code>.mp4</code>, <code>.webm</code>, <code>.mov</code>, <code>.m4v</code>, <code>.ogv</code>), audio (<code>.mp3</code>, <code>.wav</code>, <code>.ogg</code>, <code>.oga</code>, <code>.opus</code>, <code>.m4a</code>, <code>.flac</code>, <code>.aac</code>), PDF and plain text (<code>.txt</code>, <code>.md</code>, <code>.log</code>, <code>.json</code>, <code>.jsonl</code>, <code>.ndjson</code>, <code>.csv</code>, <code>.tsv</code>, <code>.yaml</code>, <code>.yml</code>, <code>.toml</code>, <code>.ini</code>, <code>.diff</code>, <code>.patch</code>, <code>.ipynb</code>, as <code>text/plain</code>) open inline; anything else (HTML, SVG, XML, Office files, archives, …) is always a download. <code>?download=1</code> forces a download. A single <code>Range: bytes=…</code> request answers <code>206</code> with <code>content-range</code> (<code>416</code> when unsatisfiable; several ranges get the full <code>200</code>); every response sends <code>accept-ranges: bytes</code></td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/tasks/:id/files/&lt;name&gt;</code></td>
+<td>–</td>
+<td><code>SharedFiles</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/tasks/:id/diff</code></td>
+<td>–</td>
+<td><code>TaskDiff</code>: the card&#39;s code changes. See <a href="#code-changes">Code changes</a></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/tasks/:id/diff/summary</code></td>
+<td>–</td>
+<td><code>DiffSummary</code>: the cached one- or two-sentence summary of the changes, else the file-count line; never starts the summary agent. See <a href="#code-changes">Code changes</a></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/diff/summary</code></td>
+<td>–</td>
+<td><code>DiffSummary</code>, written by the summary agent (drops the cached one)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/tasks/:id/review</code></td>
+<td><code>{ decision: &quot;approve&quot;|&quot;request_changes&quot;, note?, hash? }</code></td>
+<td><code>{ task: Task, comment: Comment | null }</code> – code review decision. See <a href="#code-review">Code review</a></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/tasks/:id/trajectory?runId=&amp;compress=1&amp;maxTokens=</code></td>
+<td>–</td>
+<td>One-line NDJSON download <code>trajectory-&lt;taskId&gt;.jsonl</code>: the card&#39;s agent session (or run <code>runId</code>) as a ShareGPT trajectory. See <a href="#trajectories">Trajectories</a></td>
+</tr>
+</tbody></table></div>
+<h3 id="new-cards-from-text"><a class="anchor" href="#new-cards-from-text" aria-label="Link to section">#</a>New cards from text</h3>
+<ul>
+<li><code>POST /boards/:id/tasks</code> with <code>{ text, position? }</code> (<code>text</code>: 1–2,000,000 characters) → <code>Task</code> (201) in <code>in_progress</code> with its agent started right away (whatever the board&#39;s <code>autoRun</code>); no agent rewrites the text.</li>
+<li>A single line of up to 100 characters is the title as typed, with an empty description. Otherwise the title is the first line (Markdown list and heading markers stripped; its first sentence when over 80 characters; clipped to 80) and the description is the text verbatim.</li>
+<li>Text over 20,000 characters is also saved word for word as the card file <code>brief.md</code>; the description is clipped and gets a line pointing the agent to it.</li>
+</ul>
+<h3 id="code-changes"><a class="anchor" href="#code-changes" aria-label="Link to section">#</a>Code changes</h3>
+<p><code>GET /tasks/:id/diff</code> → <code>TaskDiff</code>: <code>{ taskId, repos, stats: { files, additions, deletions }, truncated, hash, generatedAt }</code>. One <code>RepoDiff</code> per project folder: <code>{ folder, name, isRepo, branch, baseRef, commitsAhead, files, truncated, command, error }</code>. <code>baseRef</code> is the ref committed changes are compared against (e.g. <code>origin/main</code>; <code>null</code> = uncommitted changes only), <code>commitsAhead</code> the commits on HEAD not on it, <code>command</code> a shell command that shows the full diff, <code>error</code> a plain-language git failure (<code>null</code> when fine). Each <code>DiffFile</code> is <code>{ path, oldPath, status: &quot;A&quot;|&quot;M&quot;|&quot;D&quot;|&quot;R&quot;, additions, deletions, binary, untracked, patch, truncated }</code>; <code>patch</code> holds the unified diff hunks without the file header. Caps: 400 KB of patch text in total and 160 KB per file; untracked files over 256 KB and binary files are listed without content (<code>patch: null</code>, <code>truncated</code> or <code>binary</code> set). <code>hash</code> is a content hash of the changes.</p>
+<p><code>GET /tasks/:id/diff/summary</code> → <code>DiffSummary</code>: <code>{ text, source: &quot;model&quot;|&quot;fallback&quot;, pending, error, hash }</code>. A cached summary (by <code>hash</code>, <code>DATA_DIR/runtime/diff-summaries/&lt;hash&gt;.json</code>) is answered as <code>source: &quot;model&quot;</code>; otherwise <code>text</code> is the deterministic file-count line (<code>source: &quot;fallback&quot;</code>, <code>pending: false</code>) and no agent runs, so opening the Review tab spends no tokens. <code>POST</code> the same path to have a helper agent write the summary (the <strong>Summarize</strong> / <strong>Regenerate</strong> button): it waits up to 15 s for it and answers the fallback with <code>pending: true</code> until it is done (or, when the agent fails, with the reason in <code>error</code>); <code>GET</code> again to read it.</p>
+<h3 id="code-review"><a class="anchor" href="#code-review" aria-label="Link to section">#</a>Code review</h3>
+<p><code>Task.review</code> is the card&#39;s latest review decision, <code>TaskReview | null</code> (<code>null</code> until reviewed): <code>{ decision: &quot;approved&quot;|&quot;changes_requested&quot;, hash, note, at }</code>. <code>hash</code> is the <code>TaskDiff.hash</code> the reviewer saw (<code>null</code> when unknown); runs never clear the review, so a current diff <code>hash</code> that differs from it means the review is stale. <code>note</code> is the reviewer&#39;s note (<code>null</code> when none); <code>at</code> the ISO time of the decision.</p>
+<p><code>POST /tasks/:id/review</code> with <code>{ decision, note?, hash? }</code> (<code>decision</code>: <code>&quot;approve&quot;</code> or <code>&quot;request_changes&quot;</code>, 400 otherwise; <code>note</code>: trimmed, at most 10,000 characters; <code>hash</code>: at most 128 characters, empty/absent = <code>null</code>):</p>
+<ul>
+<li><code>approve</code>: 409 <code>The agent is still working; stop it or wait before approving</code> while the card&#39;s agent is queued or running. Stores <code>{ decision: &quot;approved&quot;, hash, note, at }</code> (a blank or absent <code>note</code> is <code>null</code>) and moves the card to <strong>Done</strong> unless it is already there (the same agent rules as a PATCH <code>status</code> change). Answers <code>{ task, comment: null }</code>.</li>
+<li><code>request_changes</code>: <code>note</code> is required (400 when absent or blank). Stores <code>{ decision: &quot;changes_requested&quot;, hash, note, at }</code>, then posts a <code>user</code> comment <code>**Changes requested**\n\n&lt;note&gt;</code> exactly like <code>POST /tasks/:id/comments</code> (<code>comment.added</code> is published and the feedback steers the live run, or reopens and resumes the agent). Answers <code>{ task, comment }</code> (200; <code>task</code> re-read after the agent hook).</li>
+</ul>
+<p>Either way <code>task.updated</code> is published with the final card.</p>
+<h3 id="trajectories"><a class="anchor" href="#trajectories" aria-label="Link to section">#</a>Trajectories</h3>
+<p><code>GET /tasks/:id/trajectory</code> and <code>GET /boards/:id/trajectories</code> export card agent sessions in the ShareGPT JSONL format Hermes writes for debugging and training datasets, as <code>application/x-ndjson</code> downloads. Same access as the card (its owner or an admin).</p>
+<ul>
+<li>Each line: <code>{ conversations: [{ from: &quot;system&quot;|&quot;human&quot;|&quot;gpt&quot;|&quot;tool&quot;, value }], timestamp, model, completed, taskId, runId, metrics? }</code>. A <code>gpt</code> turn holds the agent&#39;s text followed by each tool call as <code>&lt;tool_call&gt;\n{&quot;name&quot;,&quot;arguments&quot;}\n&lt;/tool_call&gt;</code>; each result is a <code>tool</code> turn <code>&lt;tool_response&gt;\n{&quot;name&quot;,&quot;content&quot;,&quot;is_error&quot;}\n&lt;/tool_response&gt;</code>. Thinking is dropped, images read <code>[image]</code>. <code>model</code> is <code>provider/model</code> when the session names one, else <code>null</code>; <code>completed</code> is whether the run succeeded (whole session: the agent is idle and its last run succeeded); <code>timestamp</code> is the run&#39;s end, else the export time; <code>runId</code> is <code>null</code> for the whole session.</li>
+<li>Single card: the whole omp session, or with <code>runId</code> only that run&#39;s time window (404 <code>Run not found</code> when it is not the card&#39;s run). 404 <code>No agent session for this card</code>; 413 for a session over 64 MB.</li>
+<li>Board: every card, or only those in <code>status</code> (400 for anything but <code>todo</code>, <code>in_progress</code>, <code>done</code>); cards without a readable session are left out. Sessions are read one at a time as the client takes each line; sessions over 64 MB are skipped, and cards beyond 256 MB of session input in total are left out.</li>
+<li><code>compress=1</code> (or <code>true</code>) compresses each trajectory to <code>maxTokens</code> (integer 1,000–1,000,000, else 400; default 15,250), counting 4 characters per token, and adds <code>metrics</code> = <code>{ originalTokens, compressedTokens, tokensSaved, compressionRatio, turnsRemoved, toolResultsPruned }</code>. Under the target nothing changes. Over it, tool outputs over 2,000 characters outside the last 4 turns are cut to their first and last 200 characters (<code>… [N chars pruned] …</code>); if still over, middle turns are replaced by one <code>human</code> turn <code>[CONTEXT SUMMARY]: N turns compressed (tools used: …; E errors)</code>, keeping the leading turn group and the last 4 turns and never splitting a tool call from its responses.</li>
+<li>Secrets: known secret values (MCP credentials, AI provider keys, git host and npm tokens, OMP-UI&#39;s own secrets; 8+ characters, also as JSON-escaped) and common token shapes (<code>sk-…</code>, <code>ghp_…</code>, <code>github_pat_…</code>, <code>xoxa-</code>/<code>xoxb-</code>/<code>xoxp-…</code>, <code>AKIA…</code>) are replaced with <code>[REDACTED]</code>, before compression.</li>
+<li>At most 2 exports run at once across both routes; more answer 429.</li>
+</ul>
+<h2 id="agent-queue"><a class="anchor" href="#agent-queue" aria-label="Link to section">#</a>Agent queue</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/queue</code></td>
+<td>–</td>
+<td><code>QueueSnapshot</code>: <code>limit</code> (the effective limit, <code>concurrency.limit</code>), <code>concurrency</code> (see below), <code>running</code> and <code>queued</code> (start order) <code>QueueEntry</code>s, each with <code>createdByTaskId</code> (the card whose agent created it, or <code>null</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/queue</code></td>
+<td><code>{ taskId, position }</code></td>
+<td><code>QueueSnapshot</code> after moving a queued card (<code>position</code> 0 starts next); 409 if the card is not queued</td>
+</tr>
+</tbody></table></div>
+<p>Queued cards start in queue order as slots free up.</p>
+<p><code>concurrency</code> = <code>{ mode: &quot;auto&quot;|&quot;manual&quot;, limit, boundBy: &quot;cpu&quot;|&quot;memory&quot;|&quot;max&quot;|&quot;resources&quot;|null, cpus, freeMemoryBytes, totalMemoryBytes, reason, pressure, agentMemoryBytes?, committedMemoryBytes? }</code>. With <code>maxConcurrentAgents: &quot;auto&quot;</code> (the default; <code>MAX_AGENTS=auto</code>), <code>limit</code> = min(logical cores, running agents + (free memory − 10% of RAM (at most 2 GB) − <code>committedMemoryBytes</code>) ÷ <code>agentMemoryBytes</code>, 32), re-checked every 30 s; <code>boundBy</code> names the bound that applied. <code>agentMemoryBytes</code> (auto mode) is learned: the 75th percentile of the peak memory of the last 20 runs that lived at least 2 min (at boot, seeded from cards whose stored <code>resources</code> show at least 30 CPU-seconds), clamped to 256 MB–4 GB, and 600 MB until 3 runs are known. <code>committedMemoryBytes</code> (auto mode) is memory still promised to running agents: Σ max(0, <code>agentMemoryBytes</code> − its current memory), an agent not sampled yet counting in full for its first 90 s. With a number, <code>mode</code> is <code>manual</code> and <code>boundBy</code> is <code>null</code>. <code>reason</code> is one line for the UI, e.g. <code>&quot;Auto: 12 parallel (16 cores, 28 GB free, ~0.8 GB per agent)&quot;</code>. <code>pressure</code> (<code>ResourcePressure | null</code>; <code>null</code> where the guard does not run) is the resource guard&#39;s latest sample, also while it holds nothing; <code>boundBy</code> is <code>&quot;resources&quot;</code> (and <code>limit</code> the agents running) while it holds queued cards: <code>{ memoryPercent, cpuPercent, cpuWindowSec, memoryHoldPct, memoryResumePct, cpuHoldPct, cpuResumePct, cpuSustainSec, holding, heldSince, restartAfterMin, restartPending, sampledAt }</code> where <code>holding</code> is an array of held resources (<code>&quot;memory&quot;</code>, <code>&quot;cpu&quot;</code>), <code>heldSince</code> is an ISO string or <code>null</code>, <code>cpuPercent</code> is <code>number | null</code>, <code>restartPending</code> is true when memory held for at least <code>restartAfterMin</code> (graceful restart happens once no agent runs and cards are queued), and <code>restartAfterMin</code> is <code>0</code> when the restart is off or the server is not supervised.</p>
+<h3 id="git-buttons-push-to-main-push-to-current-branch-create-pr"><a class="anchor" href="#git-buttons-push-to-main-push-to-current-branch-create-pr" aria-label="Link to section">#</a>Git buttons (Push to main / Push to current branch / Create PR)</h3>
+<p>All act on every project folder (<code>workdir</code> + <code>extraFolders</code>), or only on <code>folders</code> (each must be one of the project folders), one folder at a time. A failure in one folder doesn&#39;t stop the others; each folder gets a <code>GitRepoActionResult</code>.</p>
+<ul>
+<li>409 while the task&#39;s agent is queued or running (“Wait for the agent to finish first.”). 400 if none of the folders is a git repository.</li>
+<li>Folders that are not git repositories, or have nothing to commit or push, are returned with <code>skipped: true</code>.</li>
+<li><strong>Push to main</strong>: fetches <code>origin/&lt;pushBranch&gt;</code>, commits uncommitted changes if any (<code>git add -A</code>, message = <code>message</code> or the task title), merges <code>origin/&lt;pushBranch&gt;</code> into HEAD (<code>git merge --no-edit</code>; the pull that keeps a remote which moved on from rejecting the push), then <code>git push origin HEAD:refs/heads/&lt;pushBranch&gt;</code> with the board&#39;s <code>pushBranch</code> (default <code>main</code>), creating that branch on <code>origin</code> if it doesn&#39;t exist; the result&#39;s <code>branch</code> and the comment name it. <code>url</code> links to the pushed commit on GitHub/GitLab, otherwise to the repository page. A conflicting merge is aborted (the folder is left as it was) and that folder&#39;s <code>error</code> explains it and suggests Create PR; a protected branch likewise. When at least one folder was pushed and none failed, the task&#39;s <code>pushedAt</code> is set to now (the UI strikes through the card&#39;s title).</li>
+<li><strong>Push to current branch</strong>: same as Push to main, but each folder targets the branch it is currently on (<code>git push origin HEAD:refs/heads/&lt;that branch&gt;</code>), created on <code>origin</code> if missing (before the push, that same branch&#39;s <code>origin</code> counterpart is merged in); a folder on a detached HEAD has no current branch and reports an <code>error</code>. <code>pushedAt</code> is set only when every folder landed on the board&#39;s <code>pushBranch</code>.</li>
+<li><strong>Create PR</strong>: builds the PR branch <code>omp/&lt;task-slug&gt;-&lt;random&gt;</code> without touching the folder&#39;s checked-out branch, index or working tree: it fetches the repo&#39;s default branch (the project&#39;s <code>Board.defaultBranches</code> entry for that folder, else <code>origin/HEAD</code>, falling back to <code>main</code>/<code>master</code>, then <code>main</code>; the board&#39;s <code>pushBranch</code> is not used; it must exist on <code>origin</code> or locally, else the folder&#39;s result carries an error), replays only the card&#39;s own changes on top of it as one commit (message = PR title), pushes that commit as <code>refs/heads/&lt;branch&gt;</code>, then opens a PR with <code>gh</code> (GitHub) or an MR with <code>glab</code> (GitLab) against that default branch. The card&#39;s own changes are the start→end differences of its runs in that folder: each run stores a tree snapshot of every git project folder when it starts and when it ends as commits under <code>refs/omp-ui/task-runs/&lt;taskId&gt;/&lt;runKey&gt;/{start,end}</code> (a run without a recorded end lasts until the next run starts, or until now); they are removed with the card. Changes made by the user or other cards outside the card&#39;s runs stay out. A folder where the card has no recorded run reports an error (“no record of what this card changed here”); one whose changes don&#39;t apply on the default branch (they depend on commits that aren&#39;t there) or leave the default branch&#39;s tree unchanged is reported as an error or skipped respectively. PR title defaults to the task title; body defaults to a compact description (<code>lib/pr-body.ts</code>): the latest agent summary&#39;s prose (without its <code>## Report</code> section and OMP-UI-relative images/links, clipped to 1500 chars), its <code>Outcome</code>/<code>Tests</code>/<code>Changes</code> lines as bullets, the task description collapsed in <code>&lt;details&gt;</code> (clipped to 2000 chars; shown plainly when there is no summary), then “Created from OMP-UI”. Without the CLI (or if it fails, e.g. not signed in), the branch is still pushed and <code>url</code> is the provider&#39;s “new pull request” page, so the user can open it with one tap.</li>
+<li>If no identity is configured for git on the server, commits are made as <code>OMP-UI &lt;omp-ui@localhost&gt;</code>.</li>
+<li>Afterwards one resolved <code>agent</code> comment summarising the result in plain language (with links) is posted on the task and returned as <code>comment</code>; <code>comment.added</code> and <code>task.updated</code> are published.</li>
+</ul>
+<h3 id="agent-rules"><a class="anchor" href="#agent-rules" aria-label="Link to section">#</a>Agent rules</h3>
+<ul>
+<li>Move a card to <strong>In progress</strong> (PATCH <code>status</code>) → omp agent starts in the board <code>workdir</code> (when the board has <code>autoRun</code>; otherwise call <code>POST /tasks/:id/run</code>).</li>
+<li>The web UI creates new cards on <code>autoRun</code> boards with <code>status: &quot;in_progress&quot;</code>, so they start right away (unless the user opts out). API clients choose <code>status</code> themselves; the default is still <code>todo</code>.</li>
+<li>Agent finishes successfully → its final message is posted as an <code>agent</code> comment, every open feedback comment included in the run is <strong>auto-resolved</strong>, and the card moves to <strong>Done</strong>. If that message asks the user something, the question is stored on <code>task.question</code> (cleared when the next run starts or via PATCH <code>question: null</code>); the web UI shows it on the card and lets the user answer with one click.</li>
+<li>Agent fails → card stays in <strong>In progress</strong> with <code>agentState: &quot;error&quot;</code> and an agent comment explaining the error. With <code>autoRetry</code> on, the run is retried automatically in the same omp session. Quota errors (<code>agentError</code> matching quota, usage limit, rate limit, 429, too many requests, resource exhausted, insufficient_quota, credit balance or out of credits) wait 5, 10, 15, 30 min, then 60 min for every later retry; other errors wait 15 s, 30 s, 1 min, 2 min, 4 min … (at most 10 min apart). With <code>persistentRetry</code> on (default) a failed run is always retried, whatever <code>maxAutoRetries</code> is, until the card is Done or stopped; with it off, retries stop once <code>task.autoRetries</code> (retries used) reaches <code>maxAutoRetries</code>. <code>task.autoRetries</code> counts retries either way; <code>task.retryAt</code> is when the next one starts (null when none is scheduled). A success, <code>POST /tasks/:id/run</code> or a feedback comment resets <code>autoRetries</code> to 0; Stop or moving the card out of In progress cancels a pending retry. The UI shows such a card as <strong>Waiting for quota</strong> when its <code>agentError</code> is a quota error, else <strong>Retrying</strong>.</li>
+<li>Server restart (boot recovery, on the first API call — the supervisor&#39;s health probe makes that immediate): runs left <code>running</code> are marked <code>aborted</code>; queued cards are queued again; with <code>autoRetry</code> on, cards that were running and failed In progress cards resume (each using one retry, bounded by <code>maxAutoRetries</code> even with <code>persistentRetry</code> on, so a card whose run keeps taking the server down stops once its budget is used up) and pending retries keep their <code>retryAt</code>. With <code>autoRetry</code> off, cards that were running end with <code>agentError: &quot;Interrupted by server restart&quot;</code>.</li>
+<li>Agent updates its todo list (omp <code>todo</code> tool) → <code>task.todos</code> (<code>TodoPhase[]</code>: <code>{ name, tasks: { content, status: &quot;pending&quot; | &quot;in_progress&quot; | &quot;completed&quot; | &quot;abandoned&quot;, startedAt?, completedAt? }[] }</code>) is replaced with the latest list and <code>task.updated</code> is published. The server stamps <code>startedAt</code> (first seen in progress during the current run; an item completed without being seen in progress gets the run&#39;s previous list update) and <code>completedAt</code> (first seen completed), carried across updates by item content; while the agent runs, cards show the remaining-time estimate these give (completed items&#39; working time per item × items left); the list stays after the run ends and is <code>[]</code> until the agent keeps one. Read-only: PATCH ignores it. The todo phases are whatever omp names them; OMP-UI imposes no workflow on them.</li>
+<li>Comment on a <strong>Done</strong> card (or an idle In-progress card) → card reopens to <strong>In progress</strong> and the agent resumes the same omp session with the feedback.</li>
+<li>Comment while the agent is <strong>running</strong> → feedback is steered into the live session right away as an RPC <code>prompt</code> with <code>streamingBehavior: &quot;steer&quot;</code>, exactly like typing into omp mid-run: the user&#39;s text goes in word for word (so magic keywords such as <code>orchestrate</code> apply; a message from another card&#39;s agent is introduced with its sender and its keywords are neutralized). The live, not persisted SSE event <code>comment.steer</code> <code>{ commentId, taskId, boardId, state }</code> reports what became of it: <code>sent</code> (omp took it; it reaches the agent at its next step), <code>delivered</code> (it left omp&#39;s steering queue, or the turn it joined ended), <code>deferred</code> (the run was wrapping up or omp declined it; the next run picks it up). The card&#39;s Activity chat shows it under the comment.</li>
+<li>Move to <strong>To do</strong>/<strong>Done</strong> manually while running → agent is stopped.</li>
+<li>The web UI never sets an arbitrary status: cards move by themselves as their agent works, and the only status-affecting controls are its quick actions — <strong>Start</strong>/<strong>Resume</strong>/<strong>Retry</strong> = <code>POST /tasks/:id/run</code>, <strong>Stop</strong> = <code>POST /tasks/:id/stop</code>, <strong>Revert to To do</strong> = <code>PATCH /tasks/:id</code> with <code>{ status: &quot;todo&quot; }</code>. Done cards not pushed yet also get <strong>Push to main</strong> = <code>POST /tasks/:id/git/push</code> (no status change). Dragging in the UI only reorders within a column (PATCH <code>position</code>). API clients can still PATCH any <code>status</code>.</li>
+<li><strong>Task artifact cleanup</strong>: a convention of the repo&#39;s <code>AGENTS.md</code>, not a prompt: OMP-UI adds nothing to the agent&#39;s prompt. The server deletes no files itself; Docker resources marked for the card (label <code>omp-ui.task=&lt;taskId&gt;</code> or compose project <code>task-&lt;taskId&gt;</code>; containers inherit the labels of a marked image they start from) are removed by <code>removeTaskDockerResources</code> (<code>lib/docker.ts</code>) when a run moves the card to Done and, in the background (<code>queueTaskDockerCleanup</code>), when the card or its project is deleted. Policy: <a href="../task-cleanup/">TASK-CLEANUP.md</a>.</li>
+</ul>
+<h3 id="workspaces-files-browser-and-collaboration"><a class="anchor" href="#workspaces-files-browser-and-collaboration" aria-label="Link to section">#</a>Workspaces, files, browser and collaboration</h3>
+<ul>
+<li><strong>Shared project folders</strong>: every card&#39;s agent runs in the project&#39;s folders (<code>workdir</code> + <code>extraFolders</code>) on the branch checked out there. Before the agent starts and after each run, a tree snapshot of every git folder is recorded (<code>lib/server/task-changes.ts</code>) to tell the card&#39;s changes from the user&#39;s and other cards&#39;; the agent is told to stay on the checked-out branch.</li>
+<li><strong>Files</strong>: every run gets the card&#39;s folder (<code>DATA_DIR/files/tasks/&lt;taskId&gt;</code>) and the board&#39;s (<code>DATA_DIR/files/boards/&lt;boardId&gt;</code>) as <code>--add-dir</code>. <code>files.updated</code> is published on upload/delete and when a run ends.</li>
+<li><strong>Browser control</strong> (<code>AppSettings.browser</code>: <code>off</code> · <code>headless</code> · <code>visible</code> · <code>relay</code>): written to a per-run omp config overlay (<code>--config</code>); screenshots go to the card&#39;s <code>screenshots/</code> folder.</li>
+</ul>
+<h2 id="docker"><a class="anchor" href="#docker" aria-label="Link to section">#</a>Docker</h2>
+<p>Long jobs stream <code>200 application/x-ndjson</code>, one <code>DockerJobEvent</code> per line: <code>{ &quot;type&quot;: &quot;log&quot;, &quot;line&quot; }</code> while the command works, then one <code>{ &quot;type&quot;: &quot;done&quot;, ok, message, id? }</code>.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/docker/running</code></td>
+<td>–</td>
+<td><code>RunningSummary</code>: <code>{ available, error, containers: DockerContainer[], composeProjects: ComposeProject[] }</code>, running only (the sidebar badge and its popover). When Docker is unavailable, <code>available</code> is <code>false</code> and <code>error</code> says why; the request does not fail</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/docker/quick-run</code></td>
+<td><code>QuickRunSpec</code>: <code>RunContainerSpec</code> fields (<code>image</code>, <code>name?</code>, <code>env?</code>, <code>volumes?</code>, <code>restart?</code>, <code>command?</code>, <code>network?</code>, <code>interactive?</code>, <code>privileged?</code>) plus <code>autoPorts?</code> (publish every port the image EXPOSEs; ignored when <code>ports</code> is given) and <code>ports?: { container, host?, protocol? }[]</code></td>
+<td>NDJSON job; <code>done.id</code> is the container id. Pulls the image when missing; busy host ports move to the next free one (default host port = container port, 8000+port below 1024); a taken name gets a <code>-2</code> suffix</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/docker/quick-compose</code></td>
+<td><code>QuickComposeSpec</code>: exactly one of <code>template</code> (template id), <code>yaml</code> or <code>url</code>, plus <code>name?</code> and <code>env?</code></td>
+<td>NDJSON job; <code>done.id</code> is the project name. Runs compose <code>up</code> as a new project (a taken name gets a <code>-2</code> suffix); busy host ports move to free ones</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/docker/compose-url?url=&lt;url&gt;</code></td>
+<td>–</td>
+<td><code>{ yaml, url }</code>: downloads a compose file (at most 512 KB, with a timeout). GitHub/GitLab blob links and gists become raw links; 400 when the link returns a web page or the file is too large</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/docker/registry/search?q=&amp;registry=dockerhub|quay</code></td>
+<td>–</td>
+<td><code>HubRepository[]</code>: <code>{ name, description, stars, pulls, official, verified? }</code> (<code>verified</code>: Docker Hub Verified Publisher)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/docker/registry/tags?repo=&lt;postgres|owner/name|quay.io/ns/name&gt;</code></td>
+<td>–</td>
+<td>recent <code>HubTag[]</code>: <code>{ name, size, updatedAt }</code></td>
+</tr>
+</tbody></table></div>
+<p>Registry search and tag results are cached for 2 min; each registry request times out after 6 s.</p>
+<h2 id="terminal"><a class="anchor" href="#terminal" aria-label="Link to section">#</a>Terminal</h2>
+<p>One persistent, server-wide shell session for the <code>/terminal</code> page, with tmux-like semantics: commands keep running when the browser leaves <code>/terminal</code> and even across an app restart; revisiting re-attaches and replays every block with its output. Types and limits are in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/terminal-types.ts"><code>lib/terminal-types.ts</code></a>; the session manager is <a href="https://github.com/quangpl/omp-ui/blob/main/lib/server/terminal.ts"><code>lib/server/terminal.ts</code></a>.</p>
+<p>Each command is its own <code>/bin/bash -c</code> process (<code>/bin/sh</code> without bash), detached in its own process group, run <strong>as the server user</strong> with the server&#39;s environment minus OMP-UI&#39;s secrets (<code>ADMIN_PASSWORD</code>, <code>AUTH_SECRET</code>, database URLs, <code>OMP_UI_*</code>), plus <code>TERM=xterm-256color</code>, <code>COLUMNS=120</code>, <code>PAGER=cat</code> and <code>GIT_PAGER=cat</code>. stdin is empty, so interactive programs see end of input. stdout and stderr go to one log file, interleaved as written.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/terminal/stream</code></td>
+<td>–</td>
+<td><code>200 text/event-stream</code> (below)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/terminal/execute</code></td>
+<td><code>TerminalExecuteRequest</code>: <code>{ command, cwd? }</code>. <code>command</code>: non-empty, at most 16384 chars; <code>cwd</code>: an absolute path to an existing directory (default: the session cwd)</td>
+<td><code>201 TerminalBlock</code> (<code>status: &quot;running&quot;</code>). 400 for an empty or too long command, or <code>&quot;Directory not found: &lt;cwd&gt;&quot;</code> for a relative or missing <code>cwd</code>; 429 when 8 commands are already running</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/terminal/cancel</code></td>
+<td><code>{ id }</code></td>
+<td><code>{ ok: true }</code>. Kills the block&#39;s process group: SIGTERM, then SIGKILL 2 s later. 404 for an unknown id; a finished block is a no-op</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/terminal/session</code></td>
+<td>–</td>
+<td><code>{ ok: true }</code>. Removes finished blocks and their logs; running blocks stay. Every stream receives a fresh <code>snapshot</code></td>
+</tr>
+</tbody></table></div>
+<p>The stream&#39;s unnamed messages are <code>data: &lt;TerminalStreamEvent JSON&gt;\n\n</code>:</p>
+<ul>
+<li><code>snapshot</code> (first frame of every connection, and after a clear): <code>{ cwd, home, blocks, output, skipped }</code>. <code>blocks</code> oldest first; <code>output[id]</code> is each block&#39;s output so far, at most its last 512 KiB (<code>skipped[id]</code> = bytes dropped from the start). Live events continue exactly where the snapshot ends, so a client replaces its state with every snapshot and never refetches.</li>
+<li><code>block</code> (<code>{ block, cwd }</code>): a block was added or changed (started, cancelled, timed out, truncated, finished); upsert by <code>id</code>. <code>cwd</code> is the session cwd.</li>
+<li><code>output</code> (<code>{ id, data }</code>): new UTF-8 output of a running block, in order.</li>
+<li>A named <code>ping</code> event (empty data) every 15 s, so clients can detect a silent connection and reconnect.</li>
+</ul>
+<p><code>TerminalBlock</code>: <code>{ id, command, cwd, startedAt, pid, status, exitCode, signal, durationMs, timedOut, truncated, cancelled, outputBytes, endCwd, error? }</code>. <code>exitCode</code> is <code>null</code> when the command was killed by a signal (<code>signal</code>, e.g. <code>&quot;SIGTERM&quot;</code>), never started (<code>error</code> says why) or vanished without reporting (<code>error: &quot;lost&quot;</code>, e.g. killed with SIGKILL while the server was down).</p>
+<ul>
+<li><strong><code>cd</code> persists</strong>: a block&#39;s <code>endCwd</code> is the directory it ended in (also after <code>exit N</code>); the most recently finished block&#39;s <code>endCwd</code> becomes the session cwd, where the next command without <code>cwd</code> starts.</li>
+<li><strong>Persistence</strong>: everything lives in <code>DATA_DIR/terminal/</code> (mode 0700): <code>session.json</code> (session cwd and blocks, replaced atomically on every change) and per block <code>&lt;id&gt;.log</code> (output), <code>&lt;id&gt;.cwd</code> and <code>&lt;id&gt;.exit</code> (written by the shell when it ends). A restarted server reloads the session, resumes streaming the commands that are still running and finalizes those that ended meanwhile. Stopping the server does not stop the commands.</li>
+<li><strong>Limits</strong>: a command is killed after 6 hours (<code>timedOut: true</code>); a log is served up to 8 MiB, past that the command is killed and the rest is not served (<code>truncated: true</code>). The 100 most recent finished blocks are kept, older ones are deleted with their files.</li>
+<li><strong>Background jobs</strong> (<code>cmd &amp;</code>) keep running after the command ends, but their later output is not served once the block is done.</li>
+</ul>
+<h2 id="environment-variables"><a class="anchor" href="#environment-variables" aria-label="Link to section">#</a>Environment variables</h2>
+<p>Custom variables every agent child process gets (the <code>/env</code> page). Admin only (403 otherwise). Stored in the settings table under <code>env_vars</code>, values sealed like credentials (see <a href="#credentials">Credentials</a>) and applied at boot and on every change.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body → Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/env</code></td>
+<td><code>EnvVarsResponse</code>: <code>{ vars: { key, value, updatedAt }[] }</code>, sorted by key</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/env</code></td>
+<td><code>{ vars: { KEY: &quot;value&quot; } }</code> adds or overwrites → the new <code>EnvVarsResponse</code>. 400 when a key does not match <code>^[A-Za-z_][A-Za-z0-9_]*$</code>, is an OMP-UI secret (<code>AUTH_SECRET</code>, <code>OMP_UI_*</code>, …), or a value is not a string or longer than 16 KiB</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/env/:key</code></td>
+<td>the new <code>EnvVarsResponse</code>; 404 when unknown</td>
+</tr>
+</tbody></table></div>
+<h2 id="credentials"><a class="anchor" href="#credentials" aria-label="Link to section">#</a>Credentials</h2>
+<p>Keys and tokens for MCP servers and connector services, saved through the MCP connect dialog (there is no separate page). Types are in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/credential-types.ts"><code>lib/credential-types.ts</code></a>; provider templates (fields, validation patterns, MCP launch config, health check) in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/credential-providers.ts"><code>lib/credential-providers.ts</code></a>. Records live in the database settings (<code>credentials</code>, plus read/dismissed notification ids in <code>credential_notifications</code>). Secret fields are encrypted with AES-256-GCM under <code>CREDENTIALS_KEY</code> (any non-empty string, hashed with SHA-256) or else a generated <code>DATA_DIR/credentials.key</code>, and are only ever returned masked (<code>abcd••••wxyz</code>, or <code>••••••••</code> under 12 characters). With a different key, stored secrets cannot be decrypted: those credentials turn <code>failing</code> (&quot;Cannot decrypt: the encryption key changed&quot;) until their secrets are entered again.</p>
+<p>Credentials belong to the user who created them (<code>CredentialSummary.userId</code>; credentials from before the multi-user upgrade belong to the first admin). Regular users list, read, change, test and get notifications for their own only; another user&#39;s id answers 404 <code>Credential not found</code>. Admins see every credential. Background health checks and the MCP environment of every agent use all credentials regardless of owner.</p>
+<p>Errors: invalid fields answer <code>400 { error, fields: CredentialValidationErrors }</code> (<code>error</code> is the first message; <code>fields</code> maps field keys, <code>name</code> and <code>expiresAt</code> to messages); an unknown provider or notification action <code>400 { error }</code>; an unknown id <code>404 { error }</code>; a conflicting concurrent edit <code>409 { error }</code>.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/credentials</code></td>
+<td>–</td>
+<td><code>CredentialsResponse</code>: <code>{ credentials: CredentialSummary[], checkIntervalMs, keySource: &quot;env&quot;|&quot;file&quot; }</code>. <code>keySource</code> says whether the encryption key comes from <code>CREDENTIALS_KEY</code> or <code>DATA_DIR/credentials.key</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/credentials</code></td>
+<td><code>CredentialInput</code> (<code>{ providerId, name, fields, expiresAt?, autoCheck? }</code>; <code>autoCheck</code> defaults to <code>true</code>) plus <code>test?: boolean</code></td>
+<td><code>201 CredentialSummary</code>. Fields are validated against the provider template (required fields, <code>pattern</code>, http(s) URLs, <code>select</code> options, no unknown keys; <code>name</code> ≤ 80 chars; <code>expiresAt</code> a date or <code>null</code>). With <code>test: true</code> the health check runs first, so the credential starts <code>healthy</code> or <code>failing</code> instead of <code>untested</code></td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/credentials/:id</code></td>
+<td><code>CredentialUpdate</code> (<code>{ name?, fields?, clear?, expiresAt?, autoCheck? }</code>) plus <code>test?: boolean</code></td>
+<td><code>CredentialSummary</code>. <code>providerId</code> cannot change. A secret field omitted or sent as <code>&quot;&quot;</code> keeps its stored value; <code>clear: [&quot;key&quot;]</code> removes an optional secret (a required one is a 400). Changing any field resets <code>health</code> to <code>untested</code> unless <code>test</code> is set, which checks it right away; editing only <code>name</code>, <code>expiresAt</code> or <code>autoCheck</code> keeps it</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/credentials/:id</code></td>
+<td>–</td>
+<td><code>{ ok: true }</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/credentials/:id/test</code></td>
+<td>–</td>
+<td><code>{ credential: CredentialSummary, result: CredentialTestResult }</code>: health-checks the saved credential now and stores the outcome</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/credentials/test</code></td>
+<td><code>CredentialInput</code> plus <code>id?</code></td>
+<td><code>CredentialTestResult</code>: tests unsaved form values without storing anything; with <code>id</code>, secret fields left empty use that credential&#39;s stored values</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/credentials/check-all</code></td>
+<td>–</td>
+<td><code>CredentialsResponse</code> after health-checking every credential the caller can see (also those with <code>autoCheck</code> off)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/credentials/notifications</code></td>
+<td>–</td>
+<td><code>CredentialNotificationsResponse</code>: <code>{ notifications: CredentialNotification[], unread }</code>, not dismissed, newest first</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/credentials/notifications</code></td>
+<td><code>{ action: &quot;read&quot;|&quot;dismiss&quot;|&quot;read-all&quot;|&quot;dismiss-all&quot;, ids?: string[] }</code> (<code>ids</code> for <code>read</code>/<code>dismiss</code>)</td>
+<td><code>CredentialNotificationsResponse</code> after the change</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><code>CredentialSummary</code> = <code>{ id, providerId, name, fields, secretsSet, expiresAt, autoCheck, health: &quot;healthy&quot;\|&quot;failing&quot;\|&quot;untested&quot;, lastCheckedAt, lastOkAt, lastLatencyMs, lastMessage, failingSince, consecutiveFailures, userId, createdAt, updatedAt }</code>. <code>fields</code> holds non-secret values verbatim and secret ones masked; <code>secretsSet</code> lists the secret fields that hold a value; <code>userId</code> is the owner&#39;s id.</li>
+<li><code>CredentialTestResult</code> = <code>{ ok, message, latencyMs, checkedAt }</code>. Each provider&#39;s check is one authenticated request (e.g. <code>GET {host}/user</code> for GitHub, an MCP <code>initialize</code> call for a custom MCP server) with a 10 s timeout; <code>message</code> is short and never contains the secret (&quot;Authenticated as octocat&quot;, &quot;401 Unauthorized: Bad credentials&quot;, &quot;Timed out after 10 s&quot;).</li>
+<li>Credentials with <code>autoCheck</code> are re-checked in the background every 10 minutes (<code>checkIntervalMs</code>, <code>CREDENTIAL_CHECK_INTERVAL_MS</code>), first about 30 s after the server starts.</li>
+<li><code>CredentialNotification</code> = <code>{ id, credentialId, credentialName, providerId, kind: &quot;failing&quot;\|&quot;expired&quot;\|&quot;expiring&quot;\|&quot;untested&quot;, severity: &quot;error&quot;\|&quot;warning&quot;\|&quot;info&quot;, title, message, createdAt, read }</code>. Notifications are derived from the credentials on every read: <code>failing</code> and <code>expired</code> are errors, <code>expiring</code> (within 7 days of <code>expiresAt</code>) a warning, <code>untested</code> (never checked, created over an hour ago) info. <code>id</code> is <code>${credentialId}:${kind}:${since}</code>, so a new occurrence of a problem (failing again after recovering) is a new, unread notification even if the old one was dismissed.</li>
+</ul>
+<h2 id="mcp-servers"><a class="anchor" href="#mcp-servers" aria-label="Link to section">#</a>MCP servers</h2>
+<p>MCP servers OMP-UI connects to every agent it starts (the <code>/mcp</code> page). Types are in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/mcp-types.ts"><code>lib/mcp-types.ts</code></a>, the curated catalog in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/mcp-catalog.ts"><code>lib/mcp-catalog.ts</code></a>; logic in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/server/mcp.ts"><code>lib/server/mcp.ts</code></a>. Each connected server is a catalog <a href="#credentials">credential provider</a> with an MCP launch spec plus a saved credential of that provider, written as one entry under <code>mcpServers</code> in omp&#39;s user MCP config: <code>&lt;omp agent dir&gt;/mcp.json</code> (the agent dir <code>omp config path</code> reports, see <a href="#omp-config">OMP config</a>). OMP-UI&#39;s own record of each server (name, provider, credential, enabled, last probe) lives in the database settings (<code>mcp_servers</code>). Every write keeps the file&#39;s other entries and top-level keys verbatim (servers added by hand, <code>/mcp add</code>, other tools), adds <code>$schema</code> when missing, and replaces the file atomically; an unparsable file is never overwritten. Entries OMP-UI did not write are listed under <code>external</code>, read-only.</p>
+<p>Secrets never reach mcp.json: an entry references them as <code>${OMPUI_MCP_&lt;SERVER&gt;_&lt;FIELD&gt;}</code> placeholders (server name upper-cased with every other character as <code>_</code>, field key in UPPER_SNAKE_CASE: server <code>my-server</code>, field <code>token</code> → <code>${OMPUI_MCP_MY_SERVER_TOKEN}</code>), which omp expands from its environment when it loads the file; non-secret values (URLs, regions, …) are inlined. OMP-UI decrypts the values into the environment of every omp process it starts (card runs, chat, helpers, the in-app terminal), so its agents get the server&#39;s tools as <code>mcp__&lt;server&gt;_&lt;tool&gt;</code> (omp turns other characters of the server name into <code>_</code>: server <code>my-server</code> → <code>mcp__my_server_&lt;tool&gt;</code>). omp sessions started outside OMP-UI read the same file but do not get these variables, so the servers&#39; secrets are missing there. Editing or deleting a credential (<code>PATCH</code>/<code>DELETE /credentials/:id</code>) re-syncs mcp.json and the agents&#39; environment: a server whose credential is deleted stays in the file with <code>enabled: false</code>.</p>
+<p>Errors: invalid fields of a new credential answer <code>400 { error, fields }</code> as for <a href="#credentials"><code>POST /credentials</code></a>; an invalid body, server name or provider without an MCP launch spec <code>400 { error }</code>; an unknown server or <code>credentialId</code> <code>404 { error }</code>; a server name already used in mcp.json (by OMP-UI or not) <code>409 { error }</code>; mcp.json that cannot be read, parsed or written (omp not found, invalid JSON) <code>502 { error }</code>, leaving the file untouched and saving no new credential.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/mcp</code></td>
+<td>–</td>
+<td><code>McpServersResponse</code>: <code>{ servers: McpServerSummary[], configPath, configError, external: McpExternalServer[] }</code>. <code>servers</code> sorted by name; <code>configPath</code> is mcp.json (<code>null</code> when omp&#39;s agent dir cannot be resolved); <code>configError</code> says why the file cannot be read or written, else <code>null</code>; <code>external</code> = <code>{ name, transport: &quot;stdio&quot;|&quot;http&quot;|&quot;sse&quot;|&quot;unknown&quot;, enabled }</code> for entries OMP-UI does not manage</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/mcp</code></td>
+<td><code>McpConnectInput</code>: <code>{ providerId, name?, credentialId?, credential?: { name, fields, expiresAt? }, test? }</code>, exactly one of <code>credentialId</code> (a saved credential of the same provider) or <code>credential</code> (saved as a new one, health-checked first)</td>
+<td><code>201 { server: McpServerSummary }</code>. <code>name</code> must match <code>^[a-z0-9][a-z0-9_-]{0,47}$</code> and defaults to the provider id, or <code>&lt;id&gt;-2</code>, <code>&lt;id&gt;-3</code>, … when taken. <code>test</code> (default <code>true</code>) probes the server before answering</td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/mcp/:name</code></td>
+<td><code>McpServerUpdate</code>: <code>{ enabled?, credentialId? }</code></td>
+<td><code>McpServerSummary</code>. <code>enabled: false</code> keeps the entry with <code>enabled: false</code>; <code>credentialId</code> switches to another saved credential of the same provider</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/mcp/:name?deleteCredential=1</code></td>
+<td>–</td>
+<td><code>{ ok: true }</code>: removes the entry from mcp.json; with <code>deleteCredential=1</code> its credential is deleted too</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/mcp/:name/test</code></td>
+<td>–</td>
+<td><code>McpServerSummary</code> after health-checking its credential and probing the server now; both outcomes are stored</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/mcp/sync</code></td>
+<td>–</td>
+<td><code>McpServersResponse</code> after rewriting every managed entry in mcp.json and reloading the agents&#39; MCP environment. File problems are reported in <code>configError</code> instead of failing</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/mcp/directory?q=&amp;featured=1&amp;offset=&amp;limit=&amp;refresh=1</code></td>
+<td>–</td>
+<td><code>McpDirectoryResponse</code>: <code>{ entries: McpDirectoryEntry[], total, size, featured, offset, limit, fetchedAt, refreshError }</code>, one page of every MCP server listed on <a href="https://mcpservers.org">mcpservers.org</a>. <code>q</code> keeps entries whose name or slug (publisher included) contains every whitespace-separated term; <code>featured=1</code> only the site&#39;s featured servers; <code>limit</code> defaults to 50, at most 200. <code>total</code> counts the matches, <code>size</code>/<code>featured</code> the whole list. The list is read from the site&#39;s sitemaps (its pages are behind a Cloudflare browser challenge and it has no public API) and cached in memory for 12 h; <code>refresh=1</code> re-reads it now. A failed refresh keeps the previous list and reports why in <code>refreshError</code> (retried after 5 min); with no list yet it answers <code>502 { error }</code>. A malformed <code>offset</code>/<code>limit</code> is <code>400 { error }</code></td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><code>McpServerSummary</code> = <code>{ name, providerId, credentialId, credential: CredentialSummary\|null, enabled, status, statusMessage, transport: &quot;stdio&quot;\|&quot;http&quot;, config: McpServerConfig, synced, probe: McpProbeResult\|null, createdAt, updatedAt }</code>. <code>config</code> is the entry exactly as written (secrets as placeholders, safe to show and copy): <code>{ type: &quot;stdio&quot;, command, args, env? }</code> or <code>{ type: &quot;http&quot;, url, headers? }</code>, plus <code>enabled: false</code> when switched off. <code>synced</code> says mcp.json currently holds exactly <code>config</code> under <code>name</code>; <code>credential</code> is <code>null</code> once the credential is deleted.</li>
+<li><code>status</code>: <code>disabled</code> when switched off; <code>error</code> when its credential was deleted or cannot be decrypted (<code>statusMessage</code> says which); otherwise from the latest check, credential health check or MCP probe, whichever ran last: <code>connected</code> (passed), <code>failing</code> (failed; <code>statusMessage</code> is the error) or <code>untested</code> (never checked). Catalog entries without a server are shown as &quot;not configured&quot; by the page.</li>
+<li><code>McpProbeResult</code> = <code>{ ok, message, serverName, serverVersion, tools: { name, description? }[], latencyMs, checkedAt }</code>. The probe starts the server as omp would (stdio: the command with its environment; http: a JSON-RPC POST with its headers), sends <code>initialize</code> and <code>tools/list</code>, and gives up after 20 s for http and 90 s for stdio (first <code>npx</code>/<code>uvx</code> runs download the package). <code>message</code> (e.g. &quot;Connected to github-mcp-server 0.9.1 · 51 tools&quot;) never contains a secret.</li>
+<li><code>McpDirectoryEntry</code> = <code>{ path, name, owner, featured, url, updatedAt }</code>: <code>path</code> is the page on mcpservers.org (<code>/servers/github-mcp-server</code>, <code>/servers/&lt;owner&gt;/&lt;repo&gt;</code>), <code>url</code> the full link, <code>name</code> derived from the slug (&quot;Github MCP Server&quot;), <code>owner</code> the publisher of <code>/servers/&lt;owner&gt;/&lt;repo&gt;</code> pages (else <code>null</code>), <code>updatedAt</code> the sitemap&#39;s <code>lastmod</code> (or <code>null</code>). Featured servers come first in the site&#39;s order, then the newest. The page itself has the description and setup steps.</li>
+</ul>
+<h2 id="schedulers"><a class="anchor" href="#schedulers" aria-label="Link to section">#</a>Schedulers</h2>
+<p>Recurring cards (the <code>/schedulers</code> page). On every match of its cron expression, evaluated in its IANA time zone, a scheduler creates a regular card on its project from its <code>prompt</code>, through the same <a href="#new-cards-from-text">free-text flow</a> as <code>POST /boards/:id/tasks</code> with <code>text</code>. The card starts its agent even when the project has <code>autoRun</code> off, and carries <code>Task.schedulerId</code> (the scheduler&#39;s id; <code>null</code> for cards a person or an agent created, and once the scheduler is deleted). Logic in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/scheduler.ts"><code>lib/scheduler.ts</code></a>, cron parsing in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/cron.ts"><code>lib/cron.ts</code></a>.</p>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Body</th>
+<th>Response</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/schedulers?boardId=&lt;id&gt;</code></td>
+<td>–</td>
+<td><code>Scheduler[]</code>, newest first; <code>boardId</code> (optional) limits them to one project, 404 if it doesn&#39;t exist</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/schedulers</code></td>
+<td><code>{ boardId, prompt, cron, timezone?, name?, enabled?, maxRuns?, model? }</code></td>
+<td><code>Scheduler</code> (201). <code>name</code> (≤ 100 chars) defaults to the prompt&#39;s first non-empty line (cut to 100 chars), <code>timezone</code> to <code>&quot;UTC&quot;</code>, <code>enabled</code> to <code>true</code>, <code>maxRuns</code> to <code>null</code> (forever; else 1–100000), <code>model</code> to <code>null</code> (an omp selector such as <code>&quot;anthropic/claude-sonnet-4-5&quot;</code>: every card the scheduler creates runs on it, over the project&#39;s model; <code>null</code> = the project&#39;s model, else the usual selection). <code>nextRunAt</code> is computed right away. 400 for a bad cron expression, time zone or field; 404 for an unknown project</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/schedulers/:id</code></td>
+<td>–</td>
+<td><code>Scheduler</code></td>
+</tr>
+<tr>
+<td>PATCH</td>
+<td><code>/schedulers/:id</code></td>
+<td><code>Partial&lt;{ boardId, name, prompt, cron, timezone, enabled, maxRuns, model }&gt;</code></td>
+<td><code>Scheduler</code>. <code>nextRunAt</code> is recomputed from now when <code>cron</code>, <code>timezone</code>, <code>enabled</code> or <code>maxRuns</code> change (<code>null</code> while disabled). 400 <code>&quot;Run limit reached: raise or clear maxRuns to enable&quot;</code> when the result would be enabled with <code>runCount ≥ maxRuns</code>; 404 for an unknown <code>boardId</code></td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/schedulers/:id</code></td>
+<td>–</td>
+<td><code>{ ok: true }</code>. Deletes its run history; the cards it created stay, with <code>schedulerId</code> set to <code>null</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/schedulers/:id/run</code></td>
+<td>–</td>
+<td><code>SchedulerRunView</code> (201): fires it now, also while disabled (<code>trigger: &quot;manual&quot;</code>). Counts toward <code>maxRuns</code>; a failure to create the card is a run with <code>status: &quot;failed&quot;</code>, not an HTTP error</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/schedulers/:id/runs</code></td>
+<td>–</td>
+<td><code>SchedulerRunView[]</code>, newest first (latest 200)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/schedulers/:id/logs</code></td>
+<td>–</td>
+<td><code>SchedulerLogEntry[]</code>, oldest first: for its latest 20 runs, one <code>scheduler</code> line per run plus the <code>status</code>, <code>text</code>, <code>tool</code> and <code>error</code> events of every agent run of the card it created (while the card exists). At most the newest 2000 entries</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/schedulers/chat</code></td>
+<td><code>SchedulerChatRequest</code></td>
+<td>NDJSON stream of <code>SchedulerChatEvent</code> (<code>application/x-ndjson</code>): one turn of <strong>Create with Agent</strong>. Saves nothing; 400 for a malformed body or when the user has no project. Closing the request cancels the assistant</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li><code>Scheduler</code> = <code>{ id, boardId, name, prompt, cron, timezone, enabled, maxRuns, runCount, lastRunAt, nextRunAt, lastStatus: &quot;created&quot;\|&quot;failed&quot;\|null, lastTaskId, lastError, model, createdAt, updatedAt }</code>. <code>runCount</code> counts every run (scheduled and manual, successful or not); <code>lastTaskId</code> is the card of the last successful run (kept when a later run fails); <code>lastError</code> is the last run&#39;s error, <code>null</code> when it succeeded. <code>nextRunAt</code> is <code>null</code> when disabled, when <code>maxRuns</code> is reached, or when the expression matches nothing in the next 5 years.</li>
+<li><code>SchedulerRun</code> = <code>{ id, schedulerId, taskId, trigger: &quot;scheduled&quot;\|&quot;manual&quot;, scheduledFor, status: &quot;created&quot;\|&quot;failed&quot;, error, createdAt }</code>. <code>scheduledFor</code> is the cron slot the run was for (scheduled) or the click time (manual); <code>taskId</code> is <code>null</code> when it failed. A run stays in the history when its card is deleted.</li>
+<li><code>SchedulerRunView</code> = <code>SchedulerRun</code> plus <code>task</code> (live snapshot of its card: <code>{ id, title, status, agentState, agentError, lastRunId }</code>, <code>null</code> once the card is deleted or when the run failed) and <code>runStatus</code> (status of the card&#39;s latest agent run, else <code>null</code>).</li>
+<li><code>SchedulerChatRequest</code> = <code>{ messages: { role: &quot;user&quot;\|&quot;assistant&quot;, text }[], timezone, boardId?, draft? }</code>: the whole conversation so far (the last message the user&#39;s, at most 20,000 characters; the newest 30 are used), the user&#39;s IANA time zone (used when they name none), the project to default to (else the first) and the draft currently shown (so follow-ups revise it). A scheduler assistant (an omp helper agent on the default model, with no built-in tools; only the signed-in user&#39;s projects and schedulers) answers through two host tools: <code>omp_ui_propose_scheduler</code> validates a complete scheduler like <code>POST /schedulers</code> (plus &quot;the cron must match a future date&quot;) and returns the problem to the agent when it is invalid, <code>omp_ui_list_schedulers</code> lists the existing ones.</li>
+<li><code>SchedulerChatEvent</code> = <code>{ type: &quot;activity&quot;, text }</code> (progress lines) … then exactly one <code>{ type: &quot;done&quot;, reply, draft }</code> or <code>{ type: &quot;error&quot;, error }</code>. <code>draft</code> is the last <code>SchedulerDraft</code> proposed this turn, <code>null</code> when the assistant only answered (e.g. asked a question). <code>SchedulerDraft</code> = <code>{ boardId, name, prompt, cron, timezone, enabled, maxRuns, model }</code>, the exact <code>POST /schedulers</code> body to create it.</li>
+<li><code>SchedulerLogEntry</code> = <code>{ at, kind: &quot;scheduler&quot;\|&quot;status&quot;\|&quot;text&quot;\|&quot;tool&quot;\|&quot;error&quot;, text, schedulerRunId, taskId, runId }</code>. <code>runId</code> is the card&#39;s agent run (<code>null</code> on <code>scheduler</code> lines).</li>
+<li><strong>Cron syntax</strong>: exactly 5 space-separated fields: minute <code>0-59</code>, hour <code>0-23</code>, day of month <code>1-31</code>, month <code>1-12</code> or <code>JAN</code>–<code>DEC</code>, day of week <code>0-7</code> (0 and 7 are Sunday) or <code>SUN</code>–<code>SAT</code>; names are case-insensitive. Each field takes <code>*</code>, <code>n</code>, ranges <code>a-b</code>, steps <code>*/n</code>, <code>a-b/n</code> and <code>a/n</code> (from <code>a</code> to the field&#39;s maximum), and comma lists of these. Macros: <code>@yearly</code> (= <code>@annually</code>), <code>@monthly</code>, <code>@weekly</code>, <code>@daily</code> (= <code>@midnight</code>), <code>@hourly</code>. <code>?</code>, <code>L</code>, <code>W</code>, <code>#</code> and <code>@reboot</code> are rejected (400). As in Vixie cron, when both day of month and day of week are restricted (neither starts with <code>*</code>), a day matches when <strong>either</strong> matches (<code>0 9 1 * MON</code> = the 1st of the month and every Monday).</li>
+<li><strong>Time zone</strong>: the expression is evaluated in the scheduler&#39;s wall-clock time (<code>timezone</code>, e.g. <code>&quot;Europe/Berlin&quot;</code>), so <code>0 9 * * *</code> fires at 09:00 local time all year round. Across DST changes: a wall-clock time skipped by the spring-forward jump does not fire that day (it is not moved to another instant); a time repeated by the fall-back hour fires once, at its first occurrence. Each wall-clock minute fires at most once.</li>
+<li><strong>Due check</strong>: the server checks every 30 s (first about 10 s after it starts) and fires each enabled scheduler whose <code>nextRunAt</code> has passed. Before creating the card it saves the next fire time after now, so a slot never fires twice, even across overlapping checks or a crash. Slots missed while the server was down fire <strong>once</strong> on catch-up (<code>scheduledFor</code> = the first missed slot), then the schedule continues from now.</li>
+<li><strong>Run limit</strong>: after the run that makes <code>runCount</code> reach <code>maxRuns</code> (scheduled or manual), the scheduler disables itself (<code>enabled: false</code>, <code>nextRunAt: null</code>). Re-enabling it needs a higher <code>maxRuns</code> or <code>maxRuns: null</code>.</li>
+<li><strong>Failures</strong>: a missing project (&quot;Project not found&quot;) or an error while creating the card records a <code>failed</code> run with its <code>error</code> and sets <code>lastStatus</code>/<code>lastError</code>; the schedule continues.</li>
+<li><strong>Events</strong>: every create, edit and run publishes <code>scheduler.updated</code> (<code>{ scheduler }</code>); deleting publishes <code>scheduler.deleted</code> (<code>{ schedulerId, boardId }</code>). The cards it creates publish the usual <code>task.updated</code> events.</li>
+</ul>
+<h2 id="chat-integrations"><a class="anchor" href="#chat-integrations" aria-label="Link to section">#</a>Chat integrations</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/chat/status</code></td>
+<td><code>ChatStatusResponse</code>: <code>{ telegram, discord }</code>, each a <code>ChatPlatformStatus</code> <code>{ platform, configured, state: &quot;disconnected&quot;|&quot;connecting&quot;|&quot;connected&quot;|&quot;error&quot;, error, bot: { id, name, username }|null, botUrl, mode: &quot;polling&quot;|&quot;webhook&quot;|&quot;gateway&quot;|null, webhookUrl, tokenHint, authorizedUsers }</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/chat/telegram/connect</code></td>
+<td><code>{ token, webhookUrl? }</code> → <code>ChatPlatformStatus</code>. Checks the token with Telegram (<code>getMe</code>), stores it sealed in <code>AppSettings.telegramBotToken</code> and starts the bot: long polling, or a webhook at <code>&lt;webhookUrl&gt;/api/v1/chat/telegram/webhook</code> when <code>webhookUrl</code> (https) is given. 400 with a readable message for a malformed or rejected token</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/chat/discord/connect</code></td>
+<td><code>{ token }</code> → <code>ChatPlatformStatus</code>. Checks the token (<code>/users/@me</code>, <code>/oauth2/applications/@me</code>), stores it sealed in <code>AppSettings.discordBotToken</code>, registers the slash commands and connects to the gateway; the application owner gets a DM. 400 for a rejected token</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/chat/{telegram,discord}/disconnect</code></td>
+<td>Stops the bot and deletes its token (chat logins are kept) → <code>ChatPlatformStatus</code>. Connect and disconnect are admin only</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/chat/telegram/webhook</code></td>
+<td><strong>No auth</strong>: Telegram updates, accepted only with the <code>X-Telegram-Bot-Api-Secret-Token</code> set at connect (else 401); 404 when the bot is not connected</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/chat/discord/webhook</code></td>
+<td><strong>No auth</strong>: Discord interactions (set it as the application&#39;s Interactions Endpoint URL), accepted only with a valid Ed25519 signature (else 401)</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>GET and PATCH <code>/settings</code> answer the token fields as <code>&quot;********&quot;</code> when set, <code>&quot;&quot;</code> otherwise; PATCH ignores them.</li>
+<li>Chat users must send <code>/login [username] &lt;password&gt;</code> before anything else; <code>username</code> is a username or an email, and with one argument it is the password of the <code>admin</code> account. The login message is deleted from the chat right away. 5 failed attempts per chat user, 20 in total, per 10 min. A chat login stays valid while its account exists, is active and keeps the same password and role (and the global epoch is unchanged).</li>
+<li>Each chat acts as its account: a regular user&#39;s assistant reaches only their own projects and cards, and run results are relayed only to chat logins whose account owns the card&#39;s project or is an admin.</li>
+<li>The only chat commands are <code>/login [username] &lt;password&gt;</code>, <code>/logout</code> and <code>/stop [cardId]</code> (stops a card&#39;s agent; without an id it cancels the assistant&#39;s current request). Every other message from a logged-in user, plain text or any other <code>/command</code>, goes to the chat assistant: an omp helper (default model from Settings → Agent, omp&#39;s default when empty) with OMP-UI host tools to list boards and cards, read a card, create cards (optionally starting them), run/stop cards, message a card&#39;s agent, move cards and pick the chat&#39;s default board. Requests run one at a time per chat; the reply edits a &quot;Working on it…&quot; placeholder. Cards started from chat stream their output into it.</li>
+</ul>
+<h2 id="live-updates"><a class="anchor" href="#live-updates" aria-label="Link to section">#</a>Live updates</h2>
+<p><code>GET /events?boardId=&lt;id&gt;</code> – Server-Sent Events. Each message: <code>data: &lt;ServerEvent JSON&gt;\n\n</code>. Omit <code>boardId</code> to receive everything the caller can see (regular users: events of their own projects only); <code>queue.updated</code> is sent on every stream (for regular users, reduced to their own cards). A named <code>ping</code> event (<code>event: ping\ndata:\n\n</code>, not delivered to <code>onmessage</code>) is sent every 20 s so clients can detect a silent connection and reconnect. The stream closes within one heartbeat when the session is revoked or the user is deactivated, deleted or changes role.</p>
+<p>Run events of kind <code>agent</code> hold a JSON <code>SubagentSnapshot</code> (one subagent of an orchestrated run); the latest per <code>id</code> is its state. They are written when a subagent appears, changes status or reports, and when the run ends (subagents still working are marked <code>aborted</code>). Progress in between is sent only live as <code>run.agent</code>.</p>
+<p><code>Task.resources</code> (<code>AgentResources | null</code>) is the memory and CPU of the card&#39;s latest agent run: its omp process plus every process it started, as <code>{ memoryBytes, peakMemoryBytes, cpuPercent, cpuSeconds, sampledAt }</code> (<code>cpuPercent</code> is percent of one core since the previous sample; <code>cpuSeconds</code> the CPU time since the run started). While a run is going it is sampled every 5 s and sent only live as <code>run.resources</code> (<code>{ runId, taskId, boardId, resources }</code>); the last sample is stored on the card when the run ends (with a <code>task.updated</code>), and the field is cleared when the next run starts. <code>null</code> when the card never ran or sampling is unsupported (Windows). Read-only: PATCH ignores it.</p>
+<p><code>Task.usage</code> (<code>TaskUsage | null</code>) is the estimated model spend of the card&#39;s omp session over all its runs: <code>{ costUsd, totalTokens, inputTokens, outputTokens, cacheReadTokens, cacheWriteTokens, requests, updatedAt }</code>. It is summed from the <code>usage</code> omp records on every model response in the session files (<code>lib/agent/session-usage.ts</code>): the card&#39;s session JSONL (assistant messages and <code>model_usage</code> side requests) plus every subagent&#39;s JSONL in the session&#39;s artifact directory, so context compaction and async subagents don&#39;t lose spend. <code>costUsd</code> is omp&#39;s estimate at the models&#39; list prices; <code>totalTokens</code> is omp&#39;s <code>totalTokens</code> (input + output + cache read + cache write). While a run goes it is rescanned at most every 15 s (incrementally) and stored when it changed, then once more when the run ends, each time with a <code>task.updated</code>; a patch that only sets <code>usage</code> leaves <code>updatedAt</code> unchanged. When a run starts a new omp session, the earlier session&#39;s stored spend carries over. At boot, finished cards with a session but no stored usage are tallied once in the background. <code>null</code> until the card&#39;s session made a model request. Read-only: PATCH ignores it.</p>
+<p>Types (<code>User</code>, <code>AuthStatus</code>, <code>CreateUserRequest</code>, <code>UpdateUserRequest</code>, <code>DeleteUserResult</code>, <code>Board</code>, <code>Task</code>, <code>Comment</code>, <code>Run</code>, <code>RunEvent</code>, <code>AppSettings</code>, <code>ServerEvent</code>, <code>FsBrowseResult</code>, <code>GitStatus</code>, <code>GitRepoActionResult</code>, <code>GitActionResult</code>, <code>SharedFiles</code>, <code>QueueSnapshot</code>, <code>ConcurrencyInfo</code>, <code>Dashboard</code>, <code>OmpConfigSnapshot</code>, <code>OmpModel</code>, <code>Scheduler</code>, <code>SchedulerRun</code>, <code>SchedulerRunView</code>, <code>SchedulerLogEntry</code>) are defined in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/types.ts"><code>lib/types.ts</code></a>; <code>TaskDiff</code> and <code>DiffSummary</code> in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/diff-types.ts"><code>lib/diff-types.ts</code></a>; <code>RunningSummary</code>, <code>QuickRunSpec</code>, <code>QuickComposeSpec</code>, <code>DockerJobEvent</code> and <code>HubRepository</code> in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/docker-types.ts"><code>lib/docker-types.ts</code></a>; the <code>/credentials/*</code> shapes in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/credential-types.ts"><code>lib/credential-types.ts</code></a>; the <code>/mcp/*</code> shapes in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/mcp-types.ts"><code>lib/mcp-types.ts</code></a>; the <code>/terminal/execute</code> events in <a href="https://github.com/quangpl/omp-ui/blob/main/lib/terminal-types.ts"><code>lib/terminal-types.ts</code></a>.</p>
+
+          <footer class="doc-foot"><a class="doc-pn doc-pn-prev" href="../task-cleanup/"><span>Previous</span>← Task cleanup</a><a class="doc-pn doc-pn-next" href="../changelog/"><span>Next</span>Changelog →</a></footer>
+        </article>
+        <nav class="doc-toc" aria-label="On this page"><p class="doc-label">On this page</p><ul><li><a href="#authentication">Authentication</a></li><li><a href="#users">Users</a></li><li><a href="#system">System</a></li><li><a href="#stats">Stats</a></li><li><a href="#cluster">Cluster</a></li><li><a href="#logs">Logs</a></li><li><a href="#omp-config">OMP config</a></li><li><a href="#dashboard">Dashboard</a></li><li><a href="#boards-projects">Boards (projects)</a></li><li><a href="#folders-cloning">Folders &amp; cloning</a></li><li><a href="#tasks-cards">Tasks (cards)</a></li><li><a href="#agent-queue">Agent queue</a></li><li><a href="#docker">Docker</a></li><li><a href="#terminal">Terminal</a></li><li><a href="#environment-variables">Environment variables</a></li><li><a href="#credentials">Credentials</a></li><li><a href="#mcp-servers">MCP servers</a></li><li><a href="#schedulers">Schedulers</a></li><li><a href="#chat-integrations">Chat integrations</a></li><li><a href="#live-updates">Live updates</a></li></ul></nav>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
