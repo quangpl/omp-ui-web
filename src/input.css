@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @source "../index.html";
 @source "../assets/main.js";
+@source "../docs";
+@import "./docs.css";
 
 @font-face {
   font-family: "Geist";

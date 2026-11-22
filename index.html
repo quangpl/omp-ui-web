@@ -29,8 +29,17 @@
   {"@context":"https://schema.org","@type":"SoftwareApplication","name":"OMP-UI","applicationCategory":"DeveloperApplication","operatingSystem":"macOS, Linux, Windows (Node.js 22.13+)","description":"Self-hosted kanban web UI for the omp AI coding agent.","license":"https://opensource.org/licenses/MIT","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"url":"https://github.com/quangpl/omp-ui"}
   </script>
 </head>
-<body class="bg-bg font-sans text-fg antialiased selection:bg-acc selection:text-acc-ink">
-  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-acc focus:px-4 focus:py-2 focus:text-acc-ink">Skip to content</a>
+<body class="bg-bg font-sans text-fg antialiased selection:bg-acc selection:text-acc-ink lg:pl-11">
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-sm focus:bg-acc focus:px-4 focus:py-2 focus:text-acc-ink">Skip to content</a>
+
+  <nav aria-label="Sections" class="rail fixed inset-y-0 left-0 z-40 hidden w-11 flex-col justify-center border-r border-line bg-bg lg:flex">
+    <a href="#top" title="Overview" aria-label="01 Overview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>01</a>
+    <a href="#how" title="How it works" aria-label="02 How it works"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>02</a>
+    <a href="#features" title="Features" aria-label="03 Features"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg>03</a>
+    <a href="#cli" title="CLI" aria-label="04 CLI"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19h8"/><path d="m4 17 6-6-6-6"/></svg>04</a>
+    <a href="#self-host" title="Self-host" aria-label="05 Self-host"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01"/><path d="M6 18h.01"/></svg>05</a>
+    <a href="#faq" title="FAQ" aria-label="06 FAQ"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>06</a>
+  </nav>
 
   <header class="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur">
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -38,38 +47,52 @@
         <img src="assets/logo.svg" alt="" width="28" height="28" class="size-7">
         OMP-UI
       </a>
-      <nav aria-label="Primary" class="hidden items-center gap-7 text-sm text-mute md:flex">
-        <a class="transition-colors hover:text-fg" href="#how">How it works</a>
-        <a class="transition-colors hover:text-fg" href="#features">Features</a>
-        <a class="transition-colors hover:text-fg" href="#cli">CLI</a>
-        <a class="transition-colors hover:text-fg" href="#self-host">Self-host</a>
-        <a class="transition-colors hover:text-fg" href="#faq">FAQ</a>
+      <nav aria-label="Primary" class="hidden items-center gap-6 md:flex lg:hidden">
+        <a class="nl" href="#how">How</a>
+        <a class="nl" href="#features">Features</a>
+        <a class="nl" href="#cli">CLI</a>
+        <a class="nl" href="#self-host">Self-host</a>
+        <a class="nl" href="#faq">FAQ</a>
       </nav>
-      <div class="flex items-center gap-2">
-        <a href="https://www.npmjs.com/package/omp-ui" class="btn btn-sec !hidden !py-2 sm:!inline-flex" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.837 4.537a2 2 0 0 0 2 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>npm</a>
-        <a href="https://github.com/quangpl/omp-ui/issues/new?labels=enhancement&title=Feature%20request%3A%20&body=%23%23%20Problem%0A%0A%23%23%20Proposed%20solution%0A" class="btn btn-sec !hidden !py-2 sm:!inline-flex" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Request feature</a>
-        <a href="https://github.com/quangpl/omp-ui" class="btn btn-pri !py-2" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>GitHub</a>
+      <div class="flex items-center gap-4 sm:gap-6">
+        <a href="docs/" class="nl">Docs</a>
+        <a href="https://github.com/quangpl/omp-ui/issues/new?labels=enhancement&title=Feature%20request%3A%20&body=%23%23%20Problem%0A%0A%23%23%20Proposed%20solution%0A" class="nl !hidden xl:!inline-flex" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>Request feature</a>
+        <a href="https://www.npmjs.com/package/omp-ui" class="nl !hidden sm:!inline-flex" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.837 4.537a2 2 0 0 0 2 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>npm ↗</a>
+        <a href="https://github.com/quangpl/omp-ui" class="nl" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>GitHub ↗</a>
       </div>
     </div>
   </header>
 
   <main id="main">
     <section id="top" class="hero relative isolate overflow-hidden">
-      <div class="hero-bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="hero-grid"></span></div>
+      <div class="hero-bg" aria-hidden="true"><span class="arc"></span><span class="arc"></span></div>
       <div class="mx-auto grid max-w-7xl items-center gap-14 px-4 pb-20 pt-14 sm:px-6 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-10 lg:py-16">
       <div>
-      <p class="rise pill"><span class="dot" aria-hidden="true"></span>OMP UI · OMP web · OMP kanban</p>
-      <h1 class="mt-6 text-4xl font-semibold leading-[1.02] tracking-tighter md:text-6xl">
+      <div class="sec !mb-8"><b>§ 01</b><span>OMP-UI</span><i></i></div>
+      <p class="rise eyebrow"><span class="dot" aria-hidden="true"></span>OMP UI · OMP web · OMP kanban</p>
+      <h1 class="mt-6 text-4xl leading-[1.02] tracking-[-0.03em] md:text-6xl">
         <span class="line"><span style="--d:60ms">OMP UI: a great</span></span>
         <span class="line"><span style="--d:140ms">interface for OMP.</span></span>
         <span class="line text-mute"><span style="--d:220ms">Turn kanban cards</span></span>
-        <span class="line"><span style="--d:300ms"><span class="text-mute">into</span> <span class="ink">pull requests.</span></span></span>
+        <span class="line"><span style="--d:300ms"><span class="text-mute">into</span> <span class="ink">pull requests</span>.</span></span>
       </h1>
       <p class="rise mt-6 max-w-[52ch] text-base leading-relaxed text-mute md:text-lg" style="--d:380ms">
         A self-hosted OMP kanban board. Write a card and auto OMP starts an agent on it. Review the work, then ship it.
       </p>
-      <div class="rise mt-8 flex max-w-md flex-col gap-4" style="--d:460ms">
-        <button type="button" class="cmd " data-copy="npx omp-ui" aria-label="Copy command: npx omp-ui"><span><span class="p" aria-hidden="true">$</span>npx omp-ui</span><span class="hint" data-hint><svg class="copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg><svg class="done" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span data-label>Copy</span></span></button>
+      <div class="rise mt-8 flex max-w-md flex-col gap-5" style="--d:460ms">
+        <div>
+          <div class="inst-tabs" aria-label="Install method">
+            <button type="button" data-cmd="npx omp-ui" aria-pressed="true">NPX</button>
+            <button type="button" data-cmd="npm i -g omp-ui" aria-pressed="false">NPM</button>
+            <button type="button" data-cmd="docker compose up -d" aria-pressed="false">DOCKER</button>
+          </div>
+          <div class="inst-row">
+            <span class="inst-d" aria-hidden="true">$</span>
+            <code id="inst-cmd">npx omp-ui</code>
+            <button type="button" id="inst-copy" class="inst-copy" data-copy="npx omp-ui" aria-label="Copy command: npx omp-ui"><span data-label>Copy</span></button>
+          </div>
+          <p class="micro mt-3">MACOS · LINUX · WINDOWS</p>
+        </div>
         <div class="flex flex-wrap gap-3">
           <a href="https://github.com/quangpl/omp-ui" class="btn btn-pri" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>Star on GitHub</a>
           <a href="https://www.npmjs.com/package/omp-ui" class="btn btn-sec" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.837 4.537a2 2 0 0 0 2 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>View on npm</a>
@@ -92,6 +115,7 @@
     </section>
 
     <section id="how" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
+      <div class="sec"><b>§ 02</b><span>HOW IT WORKS</span><i></i></div>
       <div class="reveal max-w-2xl">
         <h2 class="text-3xl font-semibold tracking-tighter md:text-4xl">Auto OMP: agents start from cards.</h2>
         <p class="mt-4 max-w-[65ch] text-mute">Plan, build, review, ship. One card goes from idea to pull request.</p>
@@ -150,6 +174,7 @@
     </section>
 
     <section id="features" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
+      <div class="sec"><b>§ 03</b><span>FEATURES</span><i></i></div>
       <div class="reveal max-w-2xl">
         <h2 class="text-3xl font-semibold tracking-tighter md:text-4xl">An OMP kanban board with everything around it</h2>
         <p class="mt-4 max-w-[65ch] text-mute">A board for the work, a live feed for each run, and tooling to run it your way.</p>
@@ -184,6 +209,7 @@
     </section>
 
     <section id="cli" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
+      <div class="sec"><b>§ 04</b><span>CLI</span><i></i></div>
       <div class="reveal max-w-2xl">
         <h2 class="text-3xl font-semibold tracking-tighter md:text-4xl">One command to start.</h2>
         <p class="mt-4 max-w-[65ch] text-mute">pm2 and SQLite by default, so there is nothing to set up first. Needs Node.js 22.13 or newer.</p>
@@ -226,6 +252,7 @@
     </section>
 
     <section id="self-host" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
+      <div class="sec"><b>§ 05</b><span>SELF-HOST</span><i></i></div>
       <div class="grid items-center gap-12 lg:grid-cols-12">
         <div class="lg:col-span-8">
           <div class="reveal max-w-2xl">
@@ -252,14 +279,15 @@
           </div>
         </div>
         <div class="reveal flex justify-center lg:col-span-4 lg:justify-end">
-          <div class="w-60 overflow-hidden rounded-[1.75rem] border-[6px] border-raise bg-raise sm:w-64">
-            <img src="assets/mobile.png" width="780" height="1688" loading="lazy" decoding="async" alt="OMP web UI kanban board on a phone" class="block h-auto w-full rounded-[1.25rem]">
+          <div class="w-60 overflow-hidden rounded-lg border-[6px] border-raise bg-raise sm:w-64">
+            <img src="assets/mobile.png" width="780" height="1688" loading="lazy" decoding="async" alt="OMP web UI kanban board on a phone" class="block h-auto w-full rounded-sm">
           </div>
         </div>
       </div>
     </section>
 
     <section id="faq" class="mx-auto max-w-3xl px-4 py-20 sm:px-6 md:py-24">
+      <div class="sec"><b>§ 06</b><span>FAQ</span><i></i></div>
       <h2 class="reveal text-3xl font-semibold tracking-tighter md:text-4xl">OMP UI FAQ</h2>
       <div class="reveal mt-10 border-b border-line" style="--d:80ms">
         <details class="border-t border-line py-5">
@@ -294,7 +322,7 @@
         <a class="hover:text-fg" href="https://www.npmjs.com/package/omp-ui" rel="noopener">npm</a>
         <a class="hover:text-fg" href="https://github.com/quangpl/omp-ui/releases" rel="noopener">Releases</a>
         <a class="hover:text-fg" href="https://github.com/quangpl/omp-ui/blob/main/CHANGELOG.md" rel="noopener">Changelog</a>
-        <a class="hover:text-fg" href="https://github.com/quangpl/omp-ui/blob/main/docs/ADVANCED.md" rel="noopener">Docs</a>
+        <a class="hover:text-fg" href="docs/">Docs</a>
         <a class="hover:text-fg" href="https://omp.sh" rel="noopener">omp.sh</a>
       </nav>
     </div>

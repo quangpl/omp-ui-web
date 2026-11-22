@@ -45,6 +45,24 @@
     });
   });
 
+  // Install tabs: swap the shown command and what COPY copies
+  const instCmd = $('#inst-cmd'), instCopy = $('#inst-copy');
+  const tabs = $$('.inst-tabs [data-cmd]');
+  tabs.forEach((tab) => tab.addEventListener('click', () => {
+    tabs.forEach((o) => o.setAttribute('aria-pressed', String(o === tab)));
+    instCmd.textContent = instCopy.dataset.copy = tab.dataset.cmd;
+    instCopy.setAttribute('aria-label', `Copy command: ${tab.dataset.cmd}`);
+  }));
+
+  // Section rail: mark the section under the viewport middle
+  const railLinks = $$('.rail a');
+  const railIO = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) {
+      railLinks.forEach((a) => a.setAttribute('aria-current', String(a.hash === `#${e.target.id}`)));
+    }
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  railLinks.forEach((a) => { const s = $(a.hash); if (s) railIO.observe(s); });
+
   // Kanban demo: one card walks plan -> build -> review -> ship
   const board = $('#kb');
   if (board) {
