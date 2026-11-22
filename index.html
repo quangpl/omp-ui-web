@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>OMP-UI: the self-hosted OMP kanban web UI for the omp AI coding agent</title>
-  <meta name="description" content="OMP-UI is a free, open-source OMP web UI. Write a kanban card, an omp agent builds it in your repo, you review with comments and ship a PR. Self-hosted omp with one command: npx omp-ui.">
-  <meta name="keywords" content="OMP UI, OMP kanban, OMP web UI, self-hosted omp, oh-my-pi, omp agent, AI coding agent kanban">
-  <meta name="theme-color" content="#080a09">
+  <title>OMP UI: a great interface for OMP, with an OMP kanban board and auto OMP agents</title>
+  <meta name="description" content="OMP UI is a free, self-hosted OMP web interface. Write a card on the OMP kanban board and auto OMP starts an agent on it. Review, then ship a PR. Start with npx omp-ui.">
+  <meta name="keywords" content="OMP UI, OMP web, OMP kanban, auto OMP, interface for OMP, self-hosted omp, oh-my-pi">
+  <meta name="theme-color" content="#09090b">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="OMP-UI">
-  <meta property="og:title" content="OMP-UI: turn kanban cards into pull requests with the omp agent">
-  <meta property="og:description" content="A self-hosted OMP kanban web UI. Write a card, an omp agent builds it in your repo, you review and ship. Start with npx omp-ui.">
+  <meta property="og:title" content="OMP UI: a great interface for OMP, with an OMP kanban board">
+  <meta property="og:description" content="The OMP web UI that runs omp agents from kanban cards. Auto OMP: write a card, review the work, ship a PR. Self-hosted and free.">
   <meta property="og:image" content="https://quangpl.github.io/omp-ui-web/assets/board.png">
   <meta property="og:image:alt" content="OMP-UI kanban board with cards in To do, In progress and Done">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="OMP-UI: turn kanban cards into pull requests with the omp agent">
-  <meta name="twitter:description" content="A self-hosted OMP kanban web UI. Write a card, an omp agent builds it in your repo, you review and ship.">
+  <meta name="twitter:title" content="OMP UI: a great interface for OMP, with an OMP kanban board">
+  <meta name="twitter:description" content="The OMP web UI that runs omp agents from kanban cards. Auto OMP: write a card, review the work, ship a PR. Self-hosted and free.">
   <meta name="twitter:image" content="https://quangpl.github.io/omp-ui-web/assets/board.png">
   <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="apple-touch-icon" href="assets/icon.png">
@@ -28,11 +28,9 @@
   </script>
 </head>
 <body class="bg-bg font-sans text-fg antialiased selection:bg-acc selection:text-acc-ink">
-  <div class="atmos" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
   <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-acc focus:px-4 focus:py-2 focus:text-acc-ink">Skip to content</a>
 
-  <header class="sticky top-0 z-50 border-b border-line bg-bg/75 backdrop-blur-md">
+  <header class="sticky top-0 z-50 border-b border-line bg-bg/90 backdrop-blur">
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
       <a href="#top" class="flex items-center gap-2.5 font-semibold tracking-tight">
         <img src="assets/icon.png" alt="" width="28" height="28" class="size-7 rounded-md">
@@ -53,70 +51,56 @@
   </header>
 
   <main id="main">
-    <!-- Hero -->
-    <div class="overflow-x-clip">
-    <section id="top" class="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-16 pt-14 sm:px-6 md:pt-20 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-10">
-      <div>
-        <h1 class="rise text-[2.6rem] font-semibold leading-[1.02] tracking-tighter sm:text-6xl">
-          Turn kanban cards into <span class="text-acc">pull requests.</span>
-        </h1>
-        <p class="rise mt-6 max-w-xl text-lg leading-relaxed text-mute" style="--d:90ms">
-          OMP-UI is a self-hosted kanban board for the omp coding agent. Write a card, review the work, ship it.
-        </p>
-        <div class="rise mt-8 flex max-w-xl flex-col gap-4" style="--d:180ms">
-          <button type="button" class="cmd" data-copy="npx omp-ui" aria-label="Copy command: npx omp-ui">
-            <span><span class="p" aria-hidden="true">$</span>npx omp-ui</span>
-            <span class="hint" data-hint>Click to copy</span>
-          </button>
-          <div class="flex flex-wrap gap-3">
-            <a href="https://github.com/quangpl/omp-ui" class="btn btn-pri" rel="noopener">Star on GitHub</a>
-            <a href="https://www.npmjs.com/package/omp-ui" class="btn btn-sec" rel="noopener">View on npm</a>
-          </div>
+    <section id="top" class="mx-auto max-w-7xl px-4 pb-20 pt-16 sm:px-6 md:pt-24">
+      <p class="rise mb-5 text-sm font-medium text-acc">OMP UI · OMP web · OMP kanban</p>
+      <h1 class="rise max-w-3xl text-4xl font-semibold leading-none tracking-tighter md:text-6xl" style="--d:60ms">
+        OMP UI: a great interface for OMP. <span class="text-mute">Turn kanban cards into pull requests.</span>
+      </h1>
+      <p class="rise mt-6 max-w-[65ch] text-base leading-relaxed text-mute md:text-lg" style="--d:120ms">
+        A self-hosted OMP kanban board. Write a card and auto OMP starts an agent on it. Review the work, then ship it.
+      </p>
+      <div class="rise mt-8 flex max-w-md flex-col gap-4" style="--d:160ms">
+        <button type="button" class="cmd " data-copy="npx omp-ui" aria-label="Copy command: npx omp-ui"><span><span class="p" aria-hidden="true">$</span>npx omp-ui</span><span class="hint" data-hint><svg class="copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg><svg class="done" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span data-label>Copy</span></span></button>
+        <div class="flex flex-wrap gap-3">
+          <a href="https://github.com/quangpl/omp-ui" class="btn btn-pri" rel="noopener">Star on GitHub</a>
+          <a href="https://www.npmjs.com/package/omp-ui" class="btn btn-sec" rel="noopener">View on npm</a>
         </div>
       </div>
-
-      <div class="rise relative lg:w-[125%]" style="--d:300ms">
-        <div class="win" data-tilt>
-          <div class="win-bar">
-            <span class="win-url">localhost:3000 / acme-shop</span>
-          </div>
-          <img src="assets/board.png" width="1440" height="900" fetchpriority="high" decoding="async"
-               alt="OMP-UI kanban board for the project acme-shop, with cards in To do, In progress and Done" class="block h-auto w-full">
+      <div class="rise mt-14 md:mt-16" style="--d:240ms">
+        <div class="win">
+          <div class="win-bar"><span class="win-url">localhost:3000</span></div>
+          <img src="assets/board.png" width="1440" height="900" fetchpriority="high" decoding="async" alt="OMP UI, the OMP kanban board, with cards in To do, In progress and Done" class="block h-auto w-full">
         </div>
       </div>
     </section>
-    </div>
 
-    <!-- How it works -->
-    <section id="how" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28">
+    <section id="how" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
       <div class="reveal max-w-2xl">
-        <h2 class="text-3xl font-semibold tracking-tighter sm:text-5xl">Plan, build, review, ship.</h2>
-        <p class="mt-4 text-lg text-mute">Four steps from an idea to a pull request. Watch one card make the trip.</p>
+        <h2 class="text-3xl font-semibold tracking-tighter md:text-4xl">Auto OMP: agents start from cards.</h2>
+        <p class="mt-4 max-w-[65ch] text-mute">Plan, build, review, ship. One card goes from idea to pull request.</p>
       </div>
-
       <div class="mt-12 grid items-start gap-10 lg:grid-cols-12">
-        <ol class="reveal flex flex-col gap-2 lg:col-span-5" id="steps" style="--d:80ms">
+        <ol class="reveal flex flex-col gap-1 lg:col-span-5" style="--d:80ms">
           <li><button type="button" class="step on" data-step="0" aria-pressed="true">
-            <h3 class="text-lg font-semibold"><span class="n mr-2 font-mono text-sm">1</span>Plan</h3>
-            <p class="mt-1 text-sm leading-relaxed">Pick a project, then describe the task in your own words. It lands in the To do column as a card.</p>
+            <h3 class="font-semibold"><span class="n mr-2 font-mono text-sm">1</span>Plan</h3>
+            <p class="mt-1 text-sm leading-relaxed">Pick a project and describe the task in your own words. It becomes a card in To do.</p>
           </button></li>
           <li><button type="button" class="step" data-step="1" aria-pressed="false">
-            <h3 class="text-lg font-semibold"><span class="n mr-2 font-mono text-sm">2</span>Build</h3>
-            <p class="mt-1 text-sm leading-relaxed">An omp agent starts working in your repository. The card moves to In progress and you follow the run live.</p>
+            <h3 class="font-semibold"><span class="n mr-2 font-mono text-sm">2</span>Build</h3>
+            <p class="mt-1 text-sm leading-relaxed">An omp agent works in your repository. The card moves to In progress and you follow the run live.</p>
           </button></li>
           <li><button type="button" class="step" data-step="2" aria-pressed="false">
-            <h3 class="text-lg font-semibold"><span class="n mr-2 font-mono text-sm">3</span>Review</h3>
-            <p class="mt-1 text-sm leading-relaxed">Comment on the card. The agent reads your feedback and keeps going until it is right.</p>
+            <h3 class="font-semibold"><span class="n mr-2 font-mono text-sm">3</span>Review</h3>
+            <p class="mt-1 text-sm leading-relaxed">Comment on the card. The agent reads your feedback and keeps going.</p>
           </button></li>
           <li><button type="button" class="step" data-step="3" aria-pressed="false">
-            <h3 class="text-lg font-semibold"><span class="n mr-2 font-mono text-sm">4</span>Ship</h3>
+            <h3 class="font-semibold"><span class="n mr-2 font-mono text-sm">4</span>Ship</h3>
             <p class="mt-1 text-sm leading-relaxed">Create a PR or MR, or push to main or the current branch. Conflicts with the base branch are resolved by an agent.</p>
           </button></li>
         </ol>
-
         <div class="reveal lg:col-span-7" style="--d:160ms">
-          <div class="win" role="img" aria-label="Animated illustration: a card moves from To do to In progress, receives a review comment, then moves to Done with a pull request opened">
-            <div class="win-bar"><span class="win-url">acme-shop</span></div>
+          <div class="win" role="img" aria-label="Animated illustration: a card moves from To do to In progress, gets a review comment, then moves to Done with a pull request opened">
+            <div class="win-bar"><span class="win-url">localhost:3000</span></div>
             <div class="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-2 p-2.5 text-[#1b211d] sm:gap-3 sm:p-3" id="kb">
               <div class="kb-col" data-col="0">
                 <div class="mb-2 flex items-center justify-between gap-1 whitespace-nowrap px-1 text-xs font-semibold">To do <span class="font-normal text-[#667069]" data-count>2</span></div>
@@ -142,118 +126,71 @@
                 </div>
               </div>
             </div>
-            <div class="border-t border-[#dde1de] bg-[#1a1f1c] px-4 py-2.5 font-mono text-xs text-mute" aria-live="off">
-              <span class="text-acc">&gt;</span> <span id="kb-log">Write a card and the agent picks it up.</span>
-            </div>
+            <div class="border-t border-line bg-raise px-4 py-2.5 font-mono text-xs text-mute" aria-live="off"><span id="kb-log">Write a card and the agent picks it up.</span></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Features bento -->
-    <section id="features" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28">
+    <section id="features" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
       <div class="reveal max-w-2xl">
-        <h2 class="text-3xl font-semibold tracking-tighter sm:text-5xl">Everything around the agent, in the browser.</h2>
-        <p class="mt-4 text-lg text-mute">A board for the work, a feed for the run, and the plumbing to run it your way.</p>
+        <h2 class="text-3xl font-semibold tracking-tighter md:text-4xl">An OMP kanban board with everything around it</h2>
+        <p class="mt-4 max-w-[65ch] text-mute">A board for the work, a live feed for each run, and tooling to run it your way.</p>
       </div>
-
-      <div class="mt-12 grid gap-4 lg:grid-cols-12">
-        <article class="panel reveal overflow-hidden lg:col-span-8">
-          <div class="p-6 pb-0 sm:p-8 sm:pb-0">
-            <h3 class="text-xl font-semibold tracking-tight">Steer the agent with comments</h3>
-            <p class="mt-2 max-w-lg text-mute">Open a card to follow its run live and leave feedback. The agent reads it and keeps going.</p>
-          </div>
-          <div class="mt-6 px-6 sm:px-8">
-            <div class="win !rounded-b-none" data-tilt><img src="assets/card.png" width="1440" height="900" loading="lazy" decoding="async" alt="OMP-UI card detail with the agent run and feedback comments" class="block h-auto w-full"></div>
-          </div>
-        </article>
-
-        <article class="panel reveal relative overflow-hidden p-6 sm:p-8 lg:col-span-4" style="--d:80ms">
-          <h3 class="text-xl font-semibold tracking-tight">Merge conflicts, handled</h3>
-          <p class="mt-2 text-mute">When a PR conflicts with its base branch, an agent resolves it automatically.</p>
-          <pre class="mt-6 overflow-x-auto rounded-lg border border-line bg-bg p-4 font-mono text-[.78rem] leading-6" aria-hidden="true"><span class="text-mute">&lt;&lt;&lt;&lt;&lt;&lt;&lt; main</span>
-<span class="text-mute">=======</span>
-<span class="text-mute">&gt;&gt;&gt;&gt;&gt;&gt;&gt; your-card</span>
-<span class="text-acc">resolved by agent</span></pre>
-        </article>
-
-        <article class="panel reveal overflow-hidden lg:col-span-6">
-          <div class="p-6 pb-0 sm:p-8 sm:pb-0">
-            <h3 class="text-xl font-semibold tracking-tight">Usage and cost, streamed from omp</h3>
-            <p class="mt-2 text-mute">Running agents, AI spend, token usage and host health on one page.</p>
-          </div>
-          <div class="mt-6 px-6 sm:px-8"><div class="win !rounded-b-none" data-tilt><img src="assets/stats.png" width="1440" height="900" loading="lazy" decoding="async" alt="OMP-UI stats page with agents running, AI spend and token usage" class="block h-auto w-full"></div></div>
-        </article>
-
-        <article class="panel reveal overflow-hidden lg:col-span-6" style="--d:80ms">
-          <div class="p-6 pb-0 sm:p-8 sm:pb-0">
-            <h3 class="text-xl font-semibold tracking-tight">Free text in, agent running</h3>
-            <p class="mt-2 text-mute">Press <kbd>N</kbd> anywhere, describe the work, and the agent starts right away.</p>
-          </div>
-          <div class="mt-6 flex justify-center px-6 sm:px-8"><div class="win !rounded-b-none w-full max-w-[34rem]" data-tilt><img src="assets/new-task.png" width="680" height="430" loading="lazy" decoding="async" alt="OMP-UI new task dialog for creating a card from free text" class="block h-auto w-full"></div></div>
-        </article>
-
-        <article class="panel reveal p-6 sm:p-8 lg:col-span-4">
-          <h3 class="text-xl font-semibold tracking-tight">Schedulers</h3>
-          <p class="mt-2 text-mute">Cron cards that create recurring work for the agent.</p>
-          <p class="mt-6 inline-block rounded-lg border border-line bg-bg px-3 py-2 font-mono text-sm text-acc" aria-hidden="true">0 9 * * 1-5</p>
-        </article>
-        <article class="panel reveal p-6 sm:p-8 lg:col-span-4" style="--d:80ms">
-          <h3 class="text-xl font-semibold tracking-tight">Cluster mode</h3>
-          <p class="mt-2 text-mute">Spread agent runs across several machines.</p>
-          <a href="https://github.com/quangpl/omp-ui/blob/main/docs/CLUSTER.md" class="mt-6 inline-block text-sm font-medium text-acc underline-offset-4 hover:underline" rel="noopener">Read the cluster guide</a>
-        </article>
-        <article class="panel reveal p-6 sm:p-8 lg:col-span-4" style="--d:160ms">
-          <h3 class="text-xl font-semibold tracking-tight">REST API</h3>
-          <p class="mt-2 text-mute">Script your board and wire it into your own tooling.</p>
-          <a href="https://github.com/quangpl/omp-ui/blob/main/docs/API.md" class="mt-6 inline-block text-sm font-medium text-acc underline-offset-4 hover:underline" rel="noopener">API reference</a>
-        </article>
-
-        <article class="panel reveal p-6 sm:p-8 lg:col-span-6">
-          <h3 class="text-xl font-semibold tracking-tight">Keyboard first</h3>
-          <p class="mt-2 text-mute">Add cards, search and run actions without leaving the keys.</p>
-          <dl class="mt-6 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 text-sm text-mute">
-            <dt><kbd>N</kbd></dt><dd>New card</dd>
-            <dt><kbd>⌘ K</kbd></dt><dd>Command palette</dd>
-            <dt><kbd>?</kbd></dt><dd>Every shortcut</dd>
-          </dl>
-        </article>
-        <article class="panel reveal p-6 sm:p-8 lg:col-span-6" style="--d:80ms">
-          <h3 class="text-xl font-semibold tracking-tight">Environment variables for agents</h3>
-          <p class="mt-2 text-mute">Manage the variables your agents see from the Env vars page, no shell editing.</p>
-          <p class="mt-6 rounded-lg border border-line bg-bg px-4 py-3 font-mono text-sm leading-7 text-mute" aria-hidden="true">NAME=<span class="text-acc">value</span><br>ANOTHER_NAME=<span class="text-acc">value</span></p>
-        </article>
+      <div class="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-[2fr_1fr]">
+        <figure class="reveal" style="--d:0ms">
+          <div class="win"><img src="assets/card.png" width="1440" height="900" loading="lazy" decoding="async" alt="OMP UI card detail with the agent run and feedback comments" class="block h-auto w-full"></div>
+          <figcaption class="mt-4"><h3 class="font-semibold">Steer the agent with comments</h3><p class="mt-1 max-w-[65ch] text-sm leading-relaxed text-mute">Open a card to follow its run live and leave feedback. The agent picks it up and keeps going.</p></figcaption>
+        </figure>
+        <div class="reveal flex flex-col justify-end" style="--d:80ms">
+          <h3 class="font-semibold">Merge conflicts, resolved</h3>
+          <p class="mt-1 text-sm leading-relaxed text-mute">When a PR conflicts with its base branch, an agent resolves it for you.</p>
+        </div>
       </div>
+      <div class="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-[1fr_2fr]">
+        <figure class="reveal" style="--d:0ms">
+          <div class="win"><img src="assets/new-task.png" width="680" height="430" loading="lazy" decoding="async" alt="OMP UI new task dialog for creating a card from free text" class="block h-auto w-full"></div>
+          <figcaption class="mt-4"><h3 class="font-semibold">Plain text in, agent running</h3><p class="mt-1 max-w-[65ch] text-sm leading-relaxed text-mute">Press N anywhere, describe the work, and the agent starts right away.</p></figcaption>
+        </figure>
+        <figure class="reveal" style="--d:80ms">
+          <div class="win"><img src="assets/stats.png" width="1440" height="900" loading="lazy" decoding="async" alt="OMP UI stats page with agents running, AI spend and token usage" class="block h-auto w-full"></div>
+          <figcaption class="mt-4"><h3 class="font-semibold">Usage and cost, streamed from omp</h3><p class="mt-1 max-w-[65ch] text-sm leading-relaxed text-mute">Running agents, AI spend, token usage and host health on one page.</p></figcaption>
+        </figure>
+      </div>
+      <dl class="reveal mt-16 border-b border-line">
+          <div class="grid gap-1 border-t border-line py-5 md:grid-cols-[1fr_2fr] md:gap-8"><dt class="font-medium">Schedulers</dt><dd class="text-mute">Cron cards that create recurring work for the agent.</dd></div>
+          <div class="grid gap-1 border-t border-line py-5 md:grid-cols-[1fr_2fr] md:gap-8"><dt class="font-medium">Cluster mode</dt><dd class="text-mute">Spread agent runs across several machines. <a href="https://github.com/quangpl/omp-ui/blob/main/docs/CLUSTER.md" class="text-fg underline underline-offset-4 hover:text-acc" rel="noopener">Docs</a></dd></div>
+          <div class="grid gap-1 border-t border-line py-5 md:grid-cols-[1fr_2fr] md:gap-8"><dt class="font-medium">REST API</dt><dd class="text-mute">Script your board from your own tooling. <a href="https://github.com/quangpl/omp-ui/blob/main/docs/API.md" class="text-fg underline underline-offset-4 hover:text-acc" rel="noopener">Docs</a></dd></div>
+          <div class="grid gap-1 border-t border-line py-5 md:grid-cols-[1fr_2fr] md:gap-8"><dt class="font-medium">Keyboard shortcuts</dt><dd class="text-mute">N adds a card, Cmd or Ctrl K opens the command palette, ? lists every key.</dd></div>
+          <div class="grid gap-1 border-t border-line py-5 md:grid-cols-[1fr_2fr] md:gap-8"><dt class="font-medium">Environment variables</dt><dd class="text-mute">Set the variables your agents see from the Env vars page.</dd></div>
+      </dl>
     </section>
 
-    <!-- CLI terminal -->
-    <section id="cli" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28">
+    <section id="cli" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
       <div class="reveal max-w-2xl">
-        <h2 class="text-3xl font-semibold tracking-tighter sm:text-5xl">One command to start. A small CLI to run it.</h2>
-        <p class="mt-4 text-lg text-mute">pm2 and SQLite by default, so there is nothing to set up first. Needs Node.js 22.13 or newer.</p>
+        <h2 class="text-3xl font-semibold tracking-tighter md:text-4xl">One command to start.</h2>
+        <p class="mt-4 max-w-[65ch] text-mute">pm2 and SQLite by default, so there is nothing to set up first. Needs Node.js 22.13 or newer.</p>
       </div>
-
-      <div class="mt-12 grid items-start gap-8 lg:grid-cols-12">
+      <div class="mt-12 grid items-start gap-10 lg:grid-cols-12">
         <figure class="reveal lg:col-span-7">
-          <div class="overflow-hidden rounded-ui border border-white/12 bg-[#050706] shadow-[0_30px_100px_-40px_rgb(79_209_139/0.3)]">
-            <div class="flex items-center border-b border-line bg-raise px-4 py-2.5 font-mono text-xs text-mute">~ / terminal</div>
-            <div id="term" class="min-h-[22rem] overflow-x-auto p-5 font-mono text-[.82rem] leading-7 sm:text-sm sm:leading-7" aria-label="Terminal demo of the omp-ui CLI">
-              <p data-cmd><span class="text-acc">$ </span><span class="t">npx omp-ui</span></p>
+          <div class="overflow-hidden rounded-ui border border-line bg-surface">
+            <div class="border-b border-line bg-raise px-4 py-2.5 font-mono text-xs text-mute">terminal</div>
+            <div id="term" class="min-h-[22rem] overflow-x-auto p-5 font-mono text-[.82rem] leading-7 sm:text-sm" aria-label="Terminal demo of the omp-ui CLI">
+              <p data-cmd><span class="text-mute">$ </span><span class="t">npx omp-ui</span></p>
               <p class="o text-mute">Starting OMP-UI under pm2 (SQLite, data in ~/.omp-ui)</p>
               <p class="o">OMP-UI is running at <span class="text-acc">http://localhost:3000</span></p>
-              <p data-cmd class="pt-3"><span class="text-acc">$ </span><span class="t">omp-ui status</span></p>
+              <p data-cmd class="pt-3"><span class="text-mute">$ </span><span class="t">omp-ui status</span></p>
               <p class="o"><span class="text-acc">running</span> <span class="text-mute">http://localhost:3000</span></p>
-              <p data-cmd class="pt-3"><span class="text-acc">$ </span><span class="t">omp-ui doctor</span></p>
+              <p data-cmd class="pt-3"><span class="text-mute">$ </span><span class="t">omp-ui doctor</span></p>
               <p class="o"><span class="text-acc">ok</span> <span class="text-mute">Node.js</span></p>
               <p class="o"><span class="text-acc">ok</span> <span class="text-mute">omp</span></p>
               <p class="o"><span class="text-acc">ok</span> <span class="text-mute">git, gh, pm2</span></p>
-              <p data-cmd class="pt-3"><span class="text-acc">$ </span><span class="t">omp-ui logs -f</span><span class="caret ml-1" aria-hidden="true"></span></p>
+              <p data-cmd class="pt-3"><span class="text-mute">$ </span><span class="t">omp-ui logs -f</span><span class="caret ml-1" aria-hidden="true"></span></p>
             </div>
           </div>
-          <figcaption class="mt-3 text-sm text-mute">Output abridged. Run <code class="font-mono text-fg">omp-ui help</code> for every command.</figcaption>
+          <figcaption class="mt-3 text-sm text-mute">Output abridged.</figcaption>
         </figure>
-
-        <div class="reveal lg:col-span-5" style="--d:100ms">
+        <div class="reveal lg:col-span-5" style="--d:80ms">
           <dl class="grid grid-cols-[auto_1fr] gap-x-5 gap-y-3.5 text-sm">
             <dt class="font-mono text-fg">omp-ui</dt><dd class="text-mute">Set up and start</dd>
             <dt class="font-mono text-fg">status</dt><dd class="text-mute">Is it running, and where</dd>
@@ -266,92 +203,68 @@
             <dt class="font-mono text-fg">help</dt><dd class="text-mute">List every command</dd>
           </dl>
           <p class="mt-8 text-sm text-mute">Prefer a permanent install?</p>
-          <button type="button" class="cmd mt-2 !text-sm" data-copy="npm i -g omp-ui" aria-label="Copy command: npm i -g omp-ui">
-            <span><span class="p" aria-hidden="true">$</span>npm i -g omp-ui</span><span class="hint" data-hint>Copy</span>
-          </button>
+          <div class="mt-2"><button type="button" class="cmd " data-copy="npm i -g omp-ui" aria-label="Copy command: npm i -g omp-ui"><span><span class="p" aria-hidden="true">$</span>npm i -g omp-ui</span><span class="hint" data-hint><svg class="copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg><svg class="done" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span data-label>Copy</span></span></button></div>
         </div>
       </div>
     </section>
 
-    <!-- Self-host + mobile -->
-    <section id="self-host" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28">
+    <section id="self-host" class="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
       <div class="grid items-center gap-12 lg:grid-cols-12">
-        <div class="reveal flex justify-center lg:col-span-4 lg:order-2 lg:justify-end">
-          <div class="w-60 overflow-hidden rounded-[2rem] border-[6px] border-[#1c221e] bg-[#1c221e] shadow-[0_40px_80px_-30px_rgb(0_0_0/0.9),0_30px_100px_-40px_rgb(79_209_139/0.3)] sm:w-64" data-tilt>
-            <img src="assets/mobile.png" width="780" height="1688" loading="lazy" decoding="async" alt="OMP-UI kanban board on a phone" class="block h-auto w-full rounded-[1.5rem]">
-          </div>
-        </div>
-
         <div class="lg:col-span-8">
           <div class="reveal max-w-2xl">
-            <h2 class="text-3xl font-semibold tracking-tighter sm:text-5xl">Yours to host. Reachable from your phone.</h2>
-            <p class="mt-4 text-lg text-mute">OMP-UI runs on your machine or server, so your code and data stay with you. Follow and steer agents from any device.</p>
+            <h2 class="text-3xl font-semibold tracking-tighter md:text-4xl">OMP web on any device.</h2>
+            <p class="mt-4 max-w-[65ch] text-mute">Self-host the OMP web UI on your machine or server, so your code and data stay with you. Follow and steer agents from your phone.</p>
           </div>
-
-          <div class="mt-10 flex flex-col gap-8">
+          <div class="mt-10 flex max-w-xl flex-col gap-8">
             <div class="reveal">
-              <h3 class="font-semibold">Tailscale, private and over HTTPS</h3>
-              <p class="mt-1 text-sm text-mute">Open it only from your own devices. Use <code class="font-mono text-fg">tailscale funnel</code> to share it outside your tailnet.</p>
-              <button type="button" class="cmd mt-3 !text-sm" data-copy="tailscale serve --bg 3000" aria-label="Copy command: tailscale serve --bg 3000"><span><span class="p" aria-hidden="true">$</span>tailscale serve --bg 3000</span><span class="hint" data-hint>Copy</span></button>
+              <h3 class="font-semibold">Tailscale</h3>
+              <p class="mt-1 max-w-[65ch] text-sm text-mute">Private, over HTTPS, only from your own devices. Use tailscale funnel to share beyond your tailnet.</p>
+              <div class="mt-3"><button type="button" class="cmd " data-copy="tailscale serve --bg 3000" aria-label="Copy command: tailscale serve --bg 3000"><span><span class="p" aria-hidden="true">$</span>tailscale serve --bg 3000</span><span class="hint" data-hint><svg class="copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg><svg class="done" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span data-label>Copy</span></span></button></div>
             </div>
             <div class="reveal">
-              <h3 class="font-semibold">Cloudflare Tunnel, a link in seconds</h3>
-              <p class="mt-1 text-sm text-mute">Prints a temporary trycloudflare.com link. For a permanent address, point a named tunnel at localhost:3000.</p>
-              <button type="button" class="cmd mt-3 !text-sm" data-copy="omp-ui public" aria-label="Copy command: omp-ui public"><span><span class="p" aria-hidden="true">$</span>omp-ui public</span><span class="hint" data-hint>Copy</span></button>
+              <h3 class="font-semibold">Cloudflare Tunnel</h3>
+              <p class="mt-1 max-w-[65ch] text-sm text-mute">Prints a temporary trycloudflare.com link. For a permanent address, point a named tunnel at localhost:3000.</p>
+              <div class="mt-3"><button type="button" class="cmd " data-copy="omp-ui public" aria-label="Copy command: omp-ui public"><span><span class="p" aria-hidden="true">$</span>omp-ui public</span><span class="hint" data-hint><svg class="copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg><svg class="done" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span data-label>Copy</span></span></button></div>
             </div>
             <div class="reveal">
               <h3 class="font-semibold">Docker</h3>
-              <p class="mt-1 text-sm text-mute">Then open localhost:3000.</p>
-              <button type="button" class="cmd mt-3 !text-sm" data-copy="docker compose up -d" aria-label="Copy command: docker compose up -d"><span><span class="p" aria-hidden="true">$</span>docker compose up -d</span><span class="hint" data-hint>Copy</span></button>
+              <p class="mt-1 max-w-[65ch] text-sm text-mute">Then open localhost:3000.</p>
+              <div class="mt-3"><button type="button" class="cmd " data-copy="docker compose up -d" aria-label="Copy command: docker compose up -d"><span><span class="p" aria-hidden="true">$</span>docker compose up -d</span><span class="hint" data-hint><svg class="copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></svg><svg class="done" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg><span data-label>Copy</span></span></button></div>
             </div>
-            <p class="reveal text-sm text-mute">OMP-UI runs commands on your machine. Before exposing it, set a strong admin password with <code class="font-mono text-fg">omp-ui passwd</code>.</p>
+            <p class="reveal max-w-[65ch] text-sm text-mute">OMP-UI runs commands on your machine. Before exposing it, set a strong admin password with <code class="font-mono text-fg">omp-ui passwd</code>.</p>
+          </div>
+        </div>
+        <div class="reveal flex justify-center lg:col-span-4 lg:justify-end">
+          <div class="w-60 overflow-hidden rounded-[1.75rem] border-[6px] border-raise bg-raise sm:w-64">
+            <img src="assets/mobile.png" width="780" height="1688" loading="lazy" decoding="async" alt="OMP web UI kanban board on a phone" class="block h-auto w-full rounded-[1.25rem]">
           </div>
         </div>
       </div>
     </section>
 
-    <!-- FAQ -->
-    <section id="faq" class="mx-auto max-w-3xl px-4 py-20 sm:px-6 md:py-28">
-      <h2 class="reveal text-3xl font-semibold tracking-tighter sm:text-5xl">Questions</h2>
-      <div class="reveal mt-10 flex flex-col" style="--d:80ms">
-        <details class="group border-b border-line py-5">
-          <summary class="flex items-center justify-between gap-6 text-lg font-medium">What is OMP-UI?<span class="plus font-mono text-2xl text-acc" aria-hidden="true">+</span></summary>
-          <p class="mt-3 max-w-[65ch] leading-relaxed text-mute">A web UI for omp. It runs omp agents on cards from a kanban board and shows their work in the browser, from plan to pull request.</p>
+    <section id="faq" class="mx-auto max-w-3xl px-4 py-20 sm:px-6 md:py-24">
+      <h2 class="reveal text-3xl font-semibold tracking-tighter md:text-4xl">OMP UI FAQ</h2>
+      <div class="reveal mt-10 border-b border-line" style="--d:80ms">
+        <details class="border-t border-line py-5">
+          <summary class="flex items-center justify-between gap-6 font-medium">What is OMP UI?<span class="plus font-mono text-xl text-mute" aria-hidden="true">+</span></summary>
+          <p class="mt-3 max-w-[65ch] leading-relaxed text-mute">OMP UI is a web UI for omp. It runs omp agents on cards from a kanban board and shows their work in the browser, from plan to pull request.</p>
         </details>
-        <details class="group border-b border-line py-5">
-          <summary class="flex items-center justify-between gap-6 text-lg font-medium">Does it need omp?<span class="plus font-mono text-2xl text-acc" aria-hidden="true">+</span></summary>
-          <p class="mt-3 max-w-[65ch] leading-relaxed text-mute">Yes. OMP-UI sits on top of <a class="text-fg underline underline-offset-4 hover:text-acc" href="https://omp.sh" rel="noopener">omp (oh-my-pi)</a>, which must be installed and signed in to an AI provider. <code class="font-mono text-fg">omp-ui doctor</code> checks your setup.</p>
+        <details class="border-t border-line py-5">
+          <summary class="flex items-center justify-between gap-6 font-medium">Is there a web interface for OMP?<span class="plus font-mono text-xl text-mute" aria-hidden="true">+</span></summary>
+          <p class="mt-3 max-w-[65ch] leading-relaxed text-mute">Yes. omp itself is a terminal tool, and OMP UI is the web interface for it. It sits on top of <a class="text-fg underline underline-offset-4 hover:text-acc" href="https://omp.sh" rel="noopener">omp (oh-my-pi)</a>, which must be installed and signed in to an AI provider. <code class="font-mono text-fg">omp-ui doctor</code> checks your setup.</p>
         </details>
-        <details class="group border-b border-line py-5">
-          <summary class="flex items-center justify-between gap-6 text-lg font-medium">Is it free?<span class="plus font-mono text-2xl text-acc" aria-hidden="true">+</span></summary>
-          <p class="mt-3 max-w-[65ch] leading-relaxed text-mute">OMP-UI is free and open source under the MIT license. There is no hosted plan and nothing to pay for. Your omp AI provider has its own usage costs.</p>
+        <details class="border-t border-line py-5">
+          <summary class="flex items-center justify-between gap-6 font-medium">How does auto OMP work?<span class="plus font-mono text-xl text-mute" aria-hidden="true">+</span></summary>
+          <p class="mt-3 max-w-[65ch] leading-relaxed text-mute">Add a card and an omp agent starts on it automatically, in your repository. Comment to steer it, then create a PR. omp must be installed and signed in; <code class="font-mono text-fg">omp-ui doctor</code> checks it.</p>
         </details>
-        <details class="group border-b border-line py-5">
-          <summary class="flex items-center justify-between gap-6 text-lg font-medium">Can I self-host it?<span class="plus font-mono text-2xl text-acc" aria-hidden="true">+</span></summary>
-          <p class="mt-3 max-w-[65ch] leading-relaxed text-mute">That is the point. Run <code class="font-mono text-fg">npx omp-ui</code>, use pm2, or use Docker. Settings and data live in <code class="font-mono text-fg">~/.omp-ui</code> and SQLite is the default database.</p>
+        <details class="border-t border-line py-5">
+          <summary class="flex items-center justify-between gap-6 font-medium">Is OMP UI free and self-hosted?<span class="plus font-mono text-xl text-mute" aria-hidden="true">+</span></summary>
+          <p class="mt-3 max-w-[65ch] leading-relaxed text-mute">Yes. It is open source under the MIT license, with no hosted plan. Your omp AI provider has its own usage costs. Run <code class="font-mono text-fg">npx omp-ui</code>, use pm2, or use Docker. Settings and data live in <code class="font-mono text-fg">~/.omp-ui</code> and SQLite is the default database.</p>
         </details>
-        <details class="group border-b border-line py-5">
-          <summary class="flex items-center justify-between gap-6 text-lg font-medium">How do changes get shipped?<span class="plus font-mono text-2xl text-acc" aria-hidden="true">+</span></summary>
+        <details class="border-t border-line py-5">
+          <summary class="flex items-center justify-between gap-6 font-medium">How do changes get shipped?<span class="plus font-mono text-xl text-mute" aria-hidden="true">+</span></summary>
           <p class="mt-3 max-w-[65ch] leading-relaxed text-mute">From the card, create a GitHub pull request or GitLab merge request, or push to main or the current branch.</p>
         </details>
-      </div>
-    </section>
-
-    <!-- Final CTA -->
-    <section class="mx-auto max-w-7xl px-4 pb-24 sm:px-6">
-      <div class="reveal panel relative overflow-hidden px-6 py-14 sm:px-12 sm:py-20">
-        <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_100%_100%,rgb(79_209_139/0.16),transparent_70%)]" aria-hidden="true"></div>
-        <div class="relative max-w-2xl">
-          <h2 class="text-3xl font-semibold tracking-tighter sm:text-5xl">Write the card. Review the PR.</h2>
-          <p class="mt-4 text-lg text-mute">One command, then open the URL it prints.</p>
-          <div class="mt-8 flex max-w-xl flex-col gap-4">
-            <button type="button" class="cmd" data-copy="npx omp-ui" aria-label="Copy command: npx omp-ui"><span><span class="p" aria-hidden="true">$</span>npx omp-ui</span><span class="hint" data-hint>Click to copy</span></button>
-            <div class="flex flex-wrap gap-3">
-              <a href="https://github.com/quangpl/omp-ui" class="btn btn-pri" rel="noopener">Star on GitHub</a>
-              <a href="https://github.com/quangpl/omp-ui/releases" class="btn btn-sec" rel="noopener">Releases</a>
-            </div>
-          </div>
-        </div>
       </div>
     </section>
   </main>

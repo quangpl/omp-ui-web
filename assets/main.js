@@ -11,7 +11,7 @@
 
   // Copy to clipboard with feedback
   $$('[data-copy]').forEach((btn) => {
-    const hint = $('[data-hint]', btn);
+    const hint = $('[data-label]', btn);
     const idle = hint.textContent;
     hint.setAttribute('aria-live', 'polite');
     let t;
@@ -27,24 +27,6 @@
       t = setTimeout(() => { btn.classList.remove('ok'); hint.textContent = idle; }, 1600);
     });
   });
-
-  // Pointer tilt on screenshots (fine pointers only)
-  if (!reduced && matchMedia('(pointer: fine)').matches) {
-    $$('[data-tilt]').forEach((el) => {
-      el.addEventListener('pointermove', (e) => {
-        const r = el.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - 0.5;
-        const y = (e.clientY - r.top) / r.height - 0.5;
-        el.classList.add('live');
-        el.style.setProperty('--ry', `${(x * 3).toFixed(2)}deg`);
-        el.style.setProperty('--rx', `${(-y * 3).toFixed(2)}deg`);
-      });
-      el.addEventListener('pointerleave', () => {
-        el.classList.remove('live');
-        el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg');
-      });
-    });
-  }
 
   // Kanban demo: one card walks plan -> build -> review -> ship
   const board = $('#kb');
