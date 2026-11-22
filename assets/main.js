@@ -9,6 +9,23 @@
   }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
   $$('.reveal').forEach((el) => revealIO.observe(el));
 
+  // Hero tilt follows the pointer (transform via CSS vars only)
+  const stage = $('[data-tilt]');
+  if (stage && !reduced && matchMedia('(pointer: fine)').matches) {
+    const tilt = $('.tilt', stage);
+    let raf;
+    $('#top').addEventListener('pointermove', (e) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = stage.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        tilt.style.setProperty('--ry', `${-12 + x * 10}deg`);
+        tilt.style.setProperty('--rx', `${6 - y * 8}deg`);
+      });
+    });
+    $('#top').addEventListener('pointerleave', () => { tilt.style.removeProperty('--ry'); tilt.style.removeProperty('--rx'); });
+  }
+
   // Copy to clipboard with feedback
   $$('[data-copy]').forEach((btn) => {
     const hint = $('[data-label]', btn);
